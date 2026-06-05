@@ -7,6 +7,11 @@ require('dotenv').config();
 const Contact = require('./models/Contact');
 const Registration = require('./models/Registration');
 const Blog = require('./models/Blog');
+const Job = require('./models/Job');
+
+// Admin credentials (use env vars in production)
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'rancom@2026';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -185,6 +190,116 @@ app.post('/api/blogs', async (req, res) => {
     blogInMemoryDb.unshift(mockBlog);
     console.log('Demo Mode: Blog created', mockBlog);
     return res.status(201).json({ message: 'Blog post created successfully (Demo Mode)' });
+  }
+});
+
+// ===================== ADMIN ENDPOINTS =====================
+
+// 5. Admin Login
+app.post('/api/admin/login', (req, res) => {
+  const { username, password } = req.body;
+  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    return res.status(200).json({ message: 'Login successful', token: 'admin-session-active' });
+  }
+  return res.status(401).json({ error: 'Invalid credentials' });
+});
+
+// 6. Get all job applications (registrations)
+app.get('/api/admin/applications', async (req, res) => {
+  if (mongoose.connection.readyState === 1) {
+    try {
+      const applications = await Registration.find().sort({ createdAt: -1 });
+      return res.status(200).json(applications);
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Failed to fetch applications' });
+    }
+  } else {
+    return res.status(200).json(registrationInMemoryDb);
+  }
+});
+
+// 7. Get all contact messages
+app.get('/api/admin/contacts', async (req, res) => {
+  if (mongoose.connection.readyState === 1) {
+    try {
+      const contacts = await Contact.find().sort({ createdAt: -1 });
+      return res.status(200).json(contacts);
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Failed to fetch contacts' });
+    }
+  } else {
+    return res.status(200).json(contactInMemoryDb);
+  }
+});
+
+// 8. Create a Job posting
+app.post('/api/admin/jobs', async (req, res) => {
+  const { title, department, location, type, experience, salary, description, requirements } = req.body;
+  if (!title || !department || !location || !description) {
+    return res.status(400).json({ error: 'Title, department, location and description are required' });
+  }
+
+  if (mongoose.connection.readyState === 1) {
+    try {
+      const newJob = new Job({ title, department, location, type, experience, salary, description, requirements });
+      await newJob.save();
+      return res.status(201).json({ message: 'Job posting created successfully!' });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Failed to create job posting' });
+    }
+  } else {
+    return res.status(201).json({ message: 'Job created (Demo Mode)' });
+  }
+});
+
+// 9. Get all Job postings
+app.get('/api/jobs', async (req, res) => {
+  if (mongoose.connection.readyState === 1) {
+    try {
+      const jobs = await Job.find().sort({ createdAt: -1 });
+      return res.status(200).json(jobs);
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Failed to fetch jobs' });
+    }
+  } else {
+    return res.status(200).json([]);
+  }
+});
+
+// 10. Toggle job active status
+app.patch('/api/admin/jobs/:id', async (req, res) => {
+  if (mongoose.connection.readyState === 1) {
+    try {
+      const job = await Job.findById(req.params.id);
+      if (!job) return res.status(404).json({ error: 'Job not found' });
+      job.isActive = !job.isActive;
+      await job.save();
+      return res.status(200).json({ message: `Job ${job.isActive ? 'activated' : 'deactivated'}`, job });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Failed to update job' });
+    }
+  } else {
+    return res.status(200).json({ message: 'Updated (Demo Mode)' });
+  }
+});
+
+// 11. Delete a job
+app.delete('/api/admin/jobs/:id', async (req, res) => {
+  if (mongoose.connection.readyState === 1) {
+    try {
+      await Job.findByIdAndDelete(req.params.id);
+      return res.status(200).json({ message: 'Job deleted successfully' });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Failed to delete job' });
+    }
+  } else {
+    return res.status(200).json({ message: 'Deleted (Demo Mode)' });
   }
 });
 

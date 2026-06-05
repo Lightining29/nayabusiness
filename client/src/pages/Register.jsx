@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { UserCheck, AlertCircle, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { UserCheck, AlertCircle, CheckCircle, Briefcase, MapPin, Clock, DollarSign } from 'lucide-react';
 
 export default function Register() {
   const [firstName, setFirstName] = useState('');
@@ -12,6 +12,22 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
+
+  // Jobs state
+  const [jobs, setJobs] = useState([]);
+  const [jobsLoading, setJobsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const res = await fetch('/api/jobs');
+        const data = await res.json();
+        setJobs(data.filter(j => j.isActive));
+      } catch { setJobs([]); }
+      finally { setJobsLoading(false); }
+    };
+    fetchJobs();
+  }, []);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -65,10 +81,61 @@ export default function Register() {
       <div className="text-center">
         <h1 className="section-title">Career Opportunities</h1>
         <p className="section-subtitle">
-          Join a leading team of telecom engineers, RF analysts, and full-stack software developers. Register below for current openings.
+          Join a leading team of telecom engineers, RF analysts, and full-stack software developers. Browse open positions and register below.
         </p>
       </div>
 
+      {/* Available Jobs Section */}
+      {!jobsLoading && jobs.length > 0 && (
+        <div style={{ marginBottom: '4rem' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'white', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Briefcase size={22} style={{ color: 'var(--primary)' }} /> Open Positions
+          </h2>
+
+          <style dangerouslySetInnerHTML={{__html: `
+            .open-jobs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.25rem; }
+            @media (max-width: 480px) { .open-jobs-grid { grid-template-columns: 1fr; } }
+            .open-job-card {
+              background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px;
+              padding: 1.75rem; transition: all 0.25s ease;
+            }
+            .open-job-card:hover { border-color: rgba(59,130,246,0.25); transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+            .open-job-type {
+              display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 0.15rem 0.5rem;
+              border-radius: 5px; background: rgba(6,182,212,0.12); color: var(--secondary); border: 1px solid rgba(6,182,212,0.2);
+            }
+            .open-job-meta { display: flex; flex-wrap: wrap; gap: 1rem; margin: 0.75rem 0 1rem; color: var(--text-muted); font-size: 0.85rem; }
+            .open-job-meta-item { display: flex; align-items: center; gap: 0.25rem; }
+          `}} />
+
+          <div className="open-jobs-grid">
+            {jobs.map(job => (
+              <div key={job._id} className="open-job-card">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+                  <h3 style={{ color: 'white', fontSize: '1.15rem', fontWeight: 700 }}>{job.title}</h3>
+                  <span className="open-job-type">{job.type}</span>
+                </div>
+                <div className="open-job-meta">
+                  <span className="open-job-meta-item"><Briefcase size={14} /> {job.department}</span>
+                  <span className="open-job-meta-item"><MapPin size={14} /> {job.location}</span>
+                  {job.experience && <span className="open-job-meta-item"><Clock size={14} /> {job.experience}</span>}
+                  {job.salary && <span className="open-job-meta-item"><DollarSign size={14} /> {job.salary}</span>}
+                </div>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                  {job.description.length > 150 ? job.description.substring(0, 150) + '...' : job.description}
+                </p>
+                {job.requirements && (
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginTop: '0.75rem', fontStyle: 'italic' }}>
+                    Requirements: {job.requirements.length > 100 ? job.requirements.substring(0, 100) + '...' : job.requirements}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Registration Form */}
       <div className="form-card glass">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', justifyContent: 'center', marginBottom: '2rem' }}>
           <UserCheck size={28} style={{ color: 'var(--secondary)' }} />

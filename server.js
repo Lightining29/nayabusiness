@@ -129,14 +129,22 @@ app.post('/api/contact', async (req, res) => {
 
 // 2. Submit Career Registration
 app.post('/api/register', async (req, res) => {
-  const { first_name, last_name, email, mobno, qualification, city } = req.body;
+  const { first_name, last_name, email, mobno, qualification, city, job_title } = req.body;
   if (!first_name || !last_name || !email || !mobno || !qualification || !city) {
     return res.status(400).json({ error: 'All fields are required' });
   }
 
   if (mongoose.connection.readyState === 1) {
     try {
-      const newRegistration = new Registration({ first_name, last_name, email, mobno, qualification, city });
+      const newRegistration = new Registration({ 
+        first_name, 
+        last_name, 
+        email, 
+        mobno, 
+        qualification, 
+        city,
+        job_title: job_title || 'General Application'
+      });
       await newRegistration.save();
       return res.status(201).json({ message: 'Career registration submitted successfully!' });
     } catch (err) {
@@ -145,7 +153,17 @@ app.post('/api/register', async (req, res) => {
     }
   } else {
     // Demo mode: save to memory
-    const mockRegistration = { _id: Date.now().toString(), first_name, last_name, email, mobno, qualification, city, createdAt: new Date() };
+    const mockRegistration = { 
+      _id: Date.now().toString(), 
+      first_name, 
+      last_name, 
+      email, 
+      mobno, 
+      qualification, 
+      city, 
+      job_title: job_title || 'General Application',
+      createdAt: new Date() 
+    };
     registrationInMemoryDb.push(mockRegistration);
     console.log('Demo Mode: Career Registration submitted', mockRegistration);
     return res.status(201).json({ message: 'Registered successfully (Demo Mode - Saved in memory)' });

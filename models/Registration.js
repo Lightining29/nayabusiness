@@ -32,6 +32,11 @@ const registrationSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  job_title: {
+    type: String,
+    default: 'General Application',
+    trim: true
+  },
   createdAt: {
     type: Date,
     default: Date.now

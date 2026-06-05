@@ -8,6 +8,7 @@ export default function Register() {
   const [mobno, setMobno] = useState('');
   const [qualification, setQualification] = useState('');
   const [city, setCity] = useState('');
+  const [selectedJob, setSelectedJob] = useState('General Application');
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
@@ -52,7 +53,8 @@ export default function Register() {
           email,
           mobno,
           qualification,
-          city
+          city,
+          job_title: selectedJob
         })
       });
 
@@ -68,6 +70,7 @@ export default function Register() {
       setMobno('');
       setQualification('');
       setCity('');
+      setSelectedJob('General Application');
     } catch (err) {
       setError(err.message || 'Server connection error. Please try again.');
     } finally {
@@ -158,6 +161,23 @@ export default function Register() {
 
         <form onSubmit={handleRegister}>
           
+          <div className="form-group">
+            <label>Position Applied For</label>
+            <select 
+              className="form-input"
+              value={selectedJob}
+              onChange={(e) => setSelectedJob(e.target.value)}
+              style={{ background: 'var(--bg-input, rgba(255,255,255,0.05))', color: 'white' }}
+            >
+              <option value="General Application" style={{ background: '#1e293b', color: 'white' }}>General Application (No Specific Job)</option>
+              {jobs.map(job => (
+                <option key={job._id} value={job.title} style={{ background: '#1e293b', color: 'white' }}>
+                  {job.title} ({job.department} - {job.location})
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="form-group-row">
             <div className="form-group">
               <label>First Name</label>

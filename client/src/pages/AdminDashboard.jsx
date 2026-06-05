@@ -367,6 +367,7 @@ export default function AdminDashboard() {
                   <tr>
                     <th>#</th>
                     <th>Name</th>
+                    <th>Position</th>
                     <th>Email</th>
                     <th>Mobile</th>
                     <th>Qualification</th>
@@ -379,6 +380,7 @@ export default function AdminDashboard() {
                     <tr key={app._id}>
                       <td style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{idx + 1}</td>
                       <td style={{ color: 'white', fontWeight: 600 }}>{app.first_name} {app.last_name}</td>
+                      <td style={{ color: 'var(--secondary)', fontWeight: 600 }}>{app.job_title || 'General Application'}</td>
                       <td><a href={`mailto:${app.email}`} style={{ color: 'var(--primary)' }}>{app.email}</a></td>
                       <td>{app.mobno}</td>
                       <td>{app.qualification}</td>

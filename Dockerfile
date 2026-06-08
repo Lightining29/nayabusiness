@@ -17,6 +17,8 @@ RUN npm install --omit=dev
 # Copy server files and models
 COPY server.js ./
 COPY models/ ./models/
+COPY routes/ ./routes/
+COPY middleware/ ./middleware/
 
 # Copy built client from Stage 1
 COPY --from=client-build /app/client/dist ./client/dist

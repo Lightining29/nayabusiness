@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import JobCard from '../components/JobCard';
 import ApplyModal from '../components/ApplyModal';
 
@@ -13,11 +12,13 @@ export default function Jobs() {
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    // Fetch active jobs from backend
-    axios.get(`${import.meta.env.VITE_API_URL || ''}/api/jobs`)
-      .then(res => setJobs(res.data))
-      .catch(err => console.error('Failed to load jobs', err));
+    fetch('/api/jobs')
+      .then(res => res.json())
+      .then(data => setJobs(data))
+      .catch(err => console.error('Failed to load jobs', err))
+      .finally(() => setLoading(false));
   }, []);
+
 
   const handleApply = (job) => {
     setSelectedJob(job);

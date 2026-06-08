@@ -9,6 +9,13 @@ const Contact = require('./models/Contact');
 const Registration = require('./models/Registration');
 const Blog = require('./models/Blog');
 const Job = require('./models/Job');
+const User = require('./models/User');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+// Import route files
+const authRoutes = require('./routes/auth');
+const jobRoutes = require('./routes/jobs');
 
 // Admin credentials (use env vars in production)
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
@@ -21,6 +28,27 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.get('/health', (req, res) => { res.status(200).send('OK'); });
+
+// Mount route files
+app.use('/api/auth', authRoutes);
+app.use('/api', jobRoutes);
+
+// User login endpoint (used by Login.jsx)
+app.post('/api/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ error: 'Invalid credentials' });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'fallback-secret', { expiresIn: '7d' });
+    res.json({ token, user: { id: user._id, name: user.name, email: user.email, city: user.city, skills: user.skills } });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ error: 'Login failed' });
+  }
+});
+
 // MongoDB Connection
 const mongoURI = process.env.MONGODB_URI;
 

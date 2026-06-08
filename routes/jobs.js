@@ -1,5 +1,5 @@
 const express = require('express');
-const toast = require('react-hot-toast');
+
 const router = express.Router();
 const Job = require('../models/Job');
 const Application = require('../models/Application');
@@ -56,7 +56,7 @@ router.post('/jobs/:id/apply', auth.verifyUser, async (req, res) => {
     const { coverLetter } = req.body; // optional text
     const application = new Application({
       job: req.params.id,
-      user: req.user.id,
+      applicant: req.user.id,
       coverLetter,
     });
     await application.save();

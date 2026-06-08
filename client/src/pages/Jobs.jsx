@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import JobCard from '../components/JobCard';
 import ApplyModal from '../components/ApplyModal';
-import './Jobs.css';
 
-const Jobs = () => {
+// Bright light color palette (using CSS variables for flexibility)
+// Assuming global CSS defines --primary-light, --bg-light, --card-bg, etc.
+
+export default function Jobs() {
   const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -41,4 +44,4 @@ const Jobs = () => {
   );
 };
 
-export default Jobs;
+

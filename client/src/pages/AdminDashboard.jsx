@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Briefcase, Users, Mail, PlusCircle, Trash2, ToggleLeft, ToggleRight, LogOut, CheckCircle, AlertCircle, ChevronDown, ChevronUp, MapPin, Clock, DollarSign } from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
+import { Briefcase, Users, Mail, PlusCircle, Trash2, ToggleLeft, ToggleRight, LogOut, CheckCircle, AlertCircle, ChevronDown, ChevronUp, MapPin, Clock, DollarSign, Edit } from 'lucide-react';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -26,7 +27,10 @@ export default function AdminDashboard() {
   const [contacts, setContacts] = useState([]);
   const [contactsLoading, setContactsLoading] = useState(false);
 
-  // New job form
+  const [editJob, setEditJob] = useState(null);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editJobLoading, setEditJobLoading] = useState(false);
+  const [editJobMsg, setEditJobMsg] = useState(null);
   const [showJobForm, setShowJobForm] = useState(false);
   const [jobForm, setJobForm] = useState({
     title: '', department: '', location: '', type: 'Full-Time',
@@ -107,7 +111,30 @@ export default function AdminDashboard() {
     } catch (err) { console.error(err); }
   };
 
-  // Delete job
+  // Update job handler
+  const handleUpdateJob = async (e) => {
+    e.preventDefault();
+    if (!editJob) return;
+    setEditJobLoading(true);
+    setEditJobMsg(null);
+    try {
+      const res = await fetch(`/api/admin/jobs/${editJob._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editJob),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Update failed');
+      toast.success('Job updated successfully');
+      setShowEditForm(false);
+      fetchJobs();
+    } catch (err) {
+      toast.error(err.message || 'Failed to update job');
+      setEditJobMsg({ type: 'error', text: err.message });
+    } finally {
+      setEditJobLoading(false);
+    }
+  };
   const deleteJob = async (id) => {
     if (!window.confirm('Are you sure you want to permanently delete this job posting?')) return;
     try {
@@ -183,6 +210,8 @@ export default function AdminDashboard() {
         .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text-muted); }
         .empty-state-icon { opacity: 0.3; margin-bottom: 1rem; }
       `}} />
+
+      <Toaster position="top-right" />
 
       {/* Header */}
       <div className="admin-header">
@@ -300,6 +329,73 @@ export default function AdminDashboard() {
             </div>
           )}
 
+          {/* Edit Job Form (conditionally rendered) */}
+          {showEditForm && editJob && (
+            <div className="glass" style={{ padding: '2.5rem', borderRadius: '16px', marginBottom: '2.5rem', border: '1px solid var(--border-color)' }}>
+              <h3 style={{ color: 'white', fontSize: '1.3rem', fontWeight: 700, marginBottom: '1.75rem' }}>Edit Job Posting</h3>
+              {editJobMsg && (
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', padding: '0.85rem 1rem', borderRadius: '8px', marginBottom: '1.5rem', fontSize: '0.9rem', fontWeight: 600,
+                             color: editJobMsg.type === 'success' ? 'var(--accent)' : '#f87171',
+                             background: editJobMsg.type === 'success' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
+                             border: `1px solid ${editJobMsg.type === 'success' ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}` }}>
+                  {editJobMsg.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
+                  <span>{editJobMsg.text}</span>
+                </div>
+              )}
+              <form onSubmit={handleUpdateJob}>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Job Title *</label>
+                    <input className="form-input" required value={editJob.title} onChange={e => setEditJob({ ...editJob, title: e.target.value })} />
+                  </div>
+                  <div className="form-group">
+                    <label>Department *</label>
+                    <input className="form-input" required value={editJob.department} onChange={e => setEditJob({ ...editJob, department: e.target.value })} />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Location *</label>
+                    <input className="form-input" required value={editJob.location} onChange={e => setEditJob({ ...editJob, location: e.target.value })} />
+                  </div>
+                  <div className="form-group">
+                    <label>Job Type</label>
+                    <select className="form-input" value={editJob.type} onChange={e => setEditJob({ ...editJob, type: e.target.value })}>
+                      <option>Full-Time</option>
+                      <option>Part-Time</option>
+                      <option>Contract</option>
+                      <option>Internship</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Experience Required</label>
+                    <input className="form-input" value={editJob.experience} onChange={e => setEditJob({ ...editJob, experience: e.target.value })} />
+                  </div>
+                  <div className="form-group">
+                    <label>Salary Range</label>
+                    <input className="form-input" value={editJob.salary} onChange={e => setEditJob({ ...editJob, salary: e.target.value })} />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>Description *</label>
+                  <textarea className="form-input" required style={{ minHeight: '120px' }} value={editJob.description} onChange={e => setEditJob({ ...editJob, description: e.target.value })} />
+                </div>
+                <div className="form-group">
+                  <label>Requirements</label>
+                  <textarea className="form-input" style={{ minHeight: '100px' }} value={editJob.requirements} onChange={e => setEditJob({ ...editJob, requirements: e.target.value })} />
+                </div>
+                <button type="submit" className="btn btn-accent" disabled={editJobLoading} style={{ padding: '0.75rem 2rem' }}>
+                  {editJobLoading ? 'Updating...' : 'Update Job'}
+                </button>
+                <button type="button" className="btn btn-secondary" style={{ marginLeft: '0.5rem', padding: '0.75rem 2rem' }} onClick={() => setShowEditForm(false)}>
+                  Cancel
+                </button>
+              </form>
+            </div>
+          )}
+
           {/* Jobs List */}
           {jobsLoading ? (
             <div className="empty-state">Loading job postings...</div>
@@ -333,6 +429,9 @@ export default function AdminDashboard() {
                       </p>
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+                      <button className="action-btn" title="Edit" onClick={() => { setEditJob(job); setShowEditForm(true); }} style={{ color: '#60a5fa' }}>
+                        <Edit size={20} />
+                      </button>
                       <button className="action-btn" title={job.isActive ? 'Deactivate' : 'Activate'} onClick={() => toggleJob(job._id)}
                         style={{ color: job.isActive ? 'var(--accent)' : 'var(--text-muted)' }}>
                         {job.isActive ? <ToggleRight size={24} /> : <ToggleLeft size={24} />}

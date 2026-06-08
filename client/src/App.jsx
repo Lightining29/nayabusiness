@@ -2,7 +2,6 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
-
 import Home from './pages/Home';
 import About from './pages/About';
 import TelecomServices from './pages/TelecomServices';
@@ -13,6 +12,14 @@ import Register from './pages/Register';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import Jobs from './pages/Jobs';
+import Login from './pages/Login';
+import Profile from './pages/Profile';
+import ProtectedRoute from './components/ProtectedRoute';
+
+// ... existing imports remain
+
+// Add new routes inside <Routes>
+
 
 function AppLayout() {
   const location = useLocation();
@@ -40,6 +47,8 @@ function AppLayout() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/register" element={<Register />} />
           <Route path="/jobs" element={<Jobs />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           
           {/* Admin routes */}
           <Route path="/admin" element={<AdminLogin />} />

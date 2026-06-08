@@ -1,11 +1,12 @@
 const express = require('express');
+const toast = require('react-hot-toast');
 const router = express.Router();
 const Job = require('../models/Job');
 const Application = require('../models/Application');
 const auth = require('../middleware/auth');
 
 // Public: list active jobs
-router.get('/jobs', async (req, res) => {
+router.get('/admin/jobs', auth.verifyAdmin, async (req, res) => {
   try {
     const jobs = await Job.find({ isActive: true }).sort({ createdAt: -1 });
     res.json(jobs);

@@ -2,7 +2,8 @@
 FROM node:20-alpine AS client-build
 WORKDIR /app/client
 COPY client/package*.json ./
-RUN npm install
+COPY client/public ./public
+RUN npm ci
 COPY client/ ./
 RUN npm run build
 
@@ -12,7 +13,7 @@ WORKDIR /app
 
 # Copy root package files and install server dependencies
 COPY package*.json ./
-RUN npm install --omit=dev
+RUN npm ci --omit=dev
 
 # Copy server files and models
 COPY server.js ./
@@ -24,11 +25,7 @@ COPY middleware/ ./middleware/
 COPY --from=client-build /app/client/dist ./client/dist
 
 # Expose port
-EXPOSE 5000
-
-# Set environment
-ENV NODE_ENV=production
-ENV PORT=5000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s CMD wget -qO- http://localhost:$PORT/health || exit 1
 
 # Start the Express server
 CMD ["node", "server.js"]

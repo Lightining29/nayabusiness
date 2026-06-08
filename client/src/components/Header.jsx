@@ -1,6 +1,27 @@
-import React, { useState } from 'react';
-import { NavLink, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { Cpu, Menu, X, ChevronDown, Radio, Globe } from 'lucide-react';
+
+export default function Header() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [telecomOpen, setTelecomOpen] = useState(false);
+  const [softwareOpen, setSoftwareOpen] = useState(false);
+  const [isAuth, setIsAuth] = useState(false);
+  const navigate = useNavigate();
+
+  // Check JWT token on mount
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsAuth(!!token);
+  }, []);
+
+  const toggleMenu = () => setIsOpen(!isOpen);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setIsAuth(false);
+    navigate('/');
+  };
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -120,24 +141,6 @@ export default function Header() {
                 onClick={() => setIsOpen(false)}
               >
                 Blog
-              </NavLink>
-            </li>
-            <li>
-              <NavLink 
-                to="/contact" 
-                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-                onClick={() => setIsOpen(false)}
-              >
-                Contact Us
-              </NavLink>
-            </li>
-            <li>
-              <NavLink 
-                to="/login" 
-                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-                onClick={() => setIsOpen(false)}
-              >
-                Login
               </NavLink>
             </li>
 

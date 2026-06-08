@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import Chatbot from './components/Chatbot';
+
 import Home from './pages/Home';
 import About from './pages/About';
 import TelecomServices from './pages/TelecomServices';
@@ -49,7 +49,7 @@ function AppLayout() {
       </main>
 
       {!isAdminRoute && <Footer />}
-      <Chatbot />
+      
     </div>
   );
 }

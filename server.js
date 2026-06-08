@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 const Contact = require('./models/Contact');
 const Registration = require('./models/Registration');
@@ -318,6 +319,23 @@ app.delete('/api/admin/jobs/:id', async (req, res) => {
     }
   } else {
     return res.status(200).json({ message: 'Deleted (Demo Mode)' });
+  }
+});
+
+
+// Generic webhook proxy – forwards any POST body to the configured N8N webhook
+app.post('/api/webhook', async (req, res) => {
+  try {
+    const response = await fetch(process.env.N8N_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body),
+    });
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (err) {
+    console.error('Generic webhook proxy error:', err);
+    res.status(500).json({ error: 'Webhook proxy failed' });
   }
 });
 

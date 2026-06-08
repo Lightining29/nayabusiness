@@ -133,13 +133,21 @@ export default function Header() {
             </li>
             <li>
               <NavLink 
-                to="/register" 
+                to="/login" 
                 className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
                 onClick={() => setIsOpen(false)}
               >
-                <button className="btn btn-primary" style={{ padding: '0.4rem 1rem', fontSize: '0.85rem', borderRadius: '6px' }}>
-                  Apply For Job
-                </button>
+                Login
+              </NavLink>
+            </li>
+
+            <li>
+              <NavLink 
+                to="/jobs" 
+                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                onClick={() => setIsOpen(false)}
+              >
+                Jobs
               </NavLink>
             </li>
           </ul>

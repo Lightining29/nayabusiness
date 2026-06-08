@@ -12,6 +12,7 @@ import Contact from './pages/Contact';
 import Register from './pages/Register';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import Jobs from './pages/Jobs';
 
 function AppLayout() {
   const location = useLocation();
@@ -38,6 +39,7 @@ function AppLayout() {
           <Route path="/blog" element={<Blog />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/jobs" element={<Jobs />} />
           
           {/* Admin routes */}
           <Route path="/admin" element={<AdminLogin />} />

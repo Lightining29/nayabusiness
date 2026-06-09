@@ -65,16 +65,16 @@ export default function Jobs() {
         <h1 style={{
           fontSize: '2.5rem',
           fontWeight: 800,
-          color: 'white',
+          color: '#000000',
           marginBottom: '0.5rem',
-          background: 'linear-gradient(135deg, #3b82f6, #06b6d4)',
+          background: 'linear-gradient(135deg, #0ea5e9, #06b6d4)',
           backgroundClip: 'text',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
         }}>
           Career Opportunities
         </h1>
-        <p style={{ color: 'rgba(148, 163, 184, 0.9)', fontSize: '1.05rem' }}>
+        <p style={{ color: '#4b5563', fontSize: '1.05rem' }}>
           Join our team and grow with Rancom Technologies
         </p>
       </div>
@@ -91,7 +91,7 @@ export default function Jobs() {
             left: '1rem',
             top: '50%',
             transform: 'translateY(-50%)',
-            color: 'rgba(148, 163, 184, 0.6)',
+            color: '#9ca3af',
             pointerEvents: 'none',
           }} />
           <input
@@ -102,21 +102,24 @@ export default function Jobs() {
             style={{
               width: '100%',
               padding: '0.875rem 1rem 0.875rem 2.75rem',
-              background: 'rgba(30, 41, 59, 0.8)',
-              border: '1px solid rgba(148, 163, 184, 0.2)',
+              background: 'white',
+              border: '1px solid rgba(14, 165, 233, 0.2)',
               borderRadius: '10px',
-              color: 'white',
+              color: '#000000',
               fontSize: '0.95rem',
               outline: 'none',
               transition: 'all 0.3s ease',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
             }}
             onFocus={(e) => {
-              e.target.style.borderColor = 'rgba(59, 130, 246, 0.5)';
-              e.target.style.background = 'rgba(30, 41, 59, 1)';
+              e.target.style.borderColor = 'rgba(14, 165, 233, 0.5)';
+              e.target.style.background = '#f0f7ff';
+              e.target.style.boxShadow = '0 4px 15px rgba(14, 165, 233, 0.1)';
             }}
             onBlur={(e) => {
-              e.target.style.borderColor = 'rgba(148, 163, 184, 0.2)';
-              e.target.style.background = 'rgba(30, 41, 59, 0.8)';
+              e.target.style.borderColor = 'rgba(14, 165, 233, 0.2)';
+              e.target.style.background = 'white';
+              e.target.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.05)';
             }}
           />
         </div>
@@ -134,7 +137,7 @@ export default function Jobs() {
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
-              color: 'rgba(203, 213, 225, 0.9)',
+              color: '#000000',
               fontSize: '0.9rem',
               fontWeight: 600,
               marginBottom: '0.75rem',
@@ -150,12 +153,12 @@ export default function Jobs() {
                     padding: '0.5rem 1rem',
                     borderRadius: '8px',
                     border: selectedType === type
-                      ? '2px solid #3b82f6'
-                      : '1px solid rgba(148, 163, 184, 0.2)',
+                      ? '2px solid #0ea5e9'
+                      : '1px solid rgba(14, 165, 233, 0.2)',
                     background: selectedType === type
-                      ? 'rgba(59, 130, 246, 0.2)'
-                      : 'transparent',
-                    color: selectedType === type ? '#3b82f6' : 'rgba(148, 163, 184, 0.8)',
+                      ? 'rgba(14, 165, 233, 0.1)'
+                      : 'white',
+                    color: selectedType === type ? '#0ea5e9' : '#4b5563',
                     fontSize: '0.85rem',
                     fontWeight: 500,
                     cursor: 'pointer',
@@ -174,7 +177,7 @@ export default function Jobs() {
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
-              color: 'rgba(203, 213, 225, 0.9)',
+              color: '#000000',
               fontSize: '0.9rem',
               fontWeight: 600,
               marginBottom: '0.75rem',
@@ -191,11 +194,11 @@ export default function Jobs() {
                     borderRadius: '8px',
                     border: selectedDept === dept
                       ? '2px solid #06b6d4'
-                      : '1px solid rgba(148, 163, 184, 0.2)',
+                      : '1px solid rgba(14, 165, 233, 0.2)',
                     background: selectedDept === dept
-                      ? 'rgba(6, 182, 212, 0.2)'
-                      : 'transparent',
-                    color: selectedDept === dept ? '#06b6d4' : 'rgba(148, 163, 184, 0.8)',
+                      ? 'rgba(6, 182, 212, 0.1)'
+                      : 'white',
+                    color: selectedDept === dept ? '#06b6d4' : '#4b5563',
                     fontSize: '0.85rem',
                     fontWeight: 500,
                     cursor: 'pointer',
@@ -219,8 +222,8 @@ export default function Jobs() {
           minHeight: '400px',
           gap: '1rem',
         }}>
-          <Loader size={32} style={{ color: '#3b82f6', animation: 'spin 1s linear infinite' }} />
-          <span style={{ color: 'rgba(148, 163, 184, 0.9)', fontSize: '1.05rem' }}>
+          <Loader size={32} style={{ color: '#0ea5e9', animation: 'spin 1s linear infinite' }} />
+          <span style={{ color: '#4b5563', fontSize: '1.05rem' }}>
             Loading opportunities...
           </span>
         </div>
@@ -229,12 +232,12 @@ export default function Jobs() {
           <div style={{
             marginBottom: '1.5rem',
             padding: '1rem',
-            background: 'rgba(59, 130, 246, 0.08)',
+            background: 'rgba(14, 165, 233, 0.08)',
             borderRadius: '8px',
-            borderLeft: '3px solid #3b82f6',
+            borderLeft: '3px solid #0ea5e9',
           }}>
-            <p style={{ color: 'rgba(148, 163, 184, 0.9)', margin: 0, fontWeight: 500 }}>
-              Found <strong style={{ color: '#3b82f6' }}>{filteredJobs.length}</strong> position{filteredJobs.length !== 1 ? 's' : ''}
+            <p style={{ color: '#4b5563', margin: 0, fontWeight: 500 }}>
+              Found <strong style={{ color: '#0ea5e9' }}>{filteredJobs.length}</strong> position{filteredJobs.length !== 1 ? 's' : ''}
             </p>
           </div>
           <div style={{
@@ -267,10 +270,10 @@ export default function Jobs() {
           }}>
             🔍
           </div>
-          <h3 style={{ color: 'rgba(203, 213, 225, 0.9)', fontSize: '1.25rem', fontWeight: 600 }}>
+          <h3 style={{ color: '#000000', fontSize: '1.25rem', fontWeight: 600 }}>
             No jobs found
           </h3>
-          <p style={{ color: 'rgba(148, 163, 184, 0.7)', marginTop: '0.5rem' }}>
+          <p style={{ color: '#4b5563', marginTop: '0.5rem' }}>
             Try adjusting your search or filter criteria
           </p>
         </div>

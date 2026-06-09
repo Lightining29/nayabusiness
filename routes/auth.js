@@ -21,7 +21,7 @@ const upload = multer({
 // Register – expects multipart/form-data (resume PDF)
 router.post('/register', upload.single('resume'), async (req, res) => {
   try {
-    const { name, email, password, phone, city, resumeUrl, skills } = req.body;
+    const { name, email, password, phone, city, skills } = req.body;
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'Name, email and password are required' });
     }
@@ -34,17 +34,18 @@ router.post('/register', upload.single('resume'), async (req, res) => {
       password, // pre-save hook will hash
       phone,
       city,
-      resumeUrl,
       skills: skills ? skills.split(',').map(s => s.trim()) : [],
     });
 
     if (req.file) {
-      user.resume = { data: req.file.buffer, contentType: req.file.mimetype };
+      user.resume = req.file.buffer;
+      user.resumeContentType = req.file.mimetype;
+      user.resumeFileName = req.file.originalname;
     }
 
     await user.save();
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'fallback-secret', { expiresIn: '7d' });
-    res.status(201).json({ token, user: { id: user._id, name, email, phone, city, resumeUrl, skills: user.skills } });
+    res.status(201).json({ token, user: { id: user._id, name, email, phone, city, hasResume: !!user.resume, resumeFileName: user.resumeFileName, skills: user.skills } });
   } catch (err) {
     console.error('Register error:', err);
     res.status(500).json({ error: 'Registration failed' });
@@ -60,7 +61,7 @@ router.post('/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'fallback-secret', { expiresIn: '7d' });
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email, phone: user.phone, city: user.city, resumeUrl: user.resumeUrl, skills: user.skills } });
+    res.json({ token, user: { id: user._id, name: user.name, email: user.email, phone: user.phone, city: user.city, hasResume: !!user.resume, resumeFileName: user.resumeFileName, skills: user.skills } });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Login failed' });
@@ -69,14 +70,14 @@ router.post('/login', async (req, res) => {
 
 // Get current user profile (protected)
 router.get('/me', authMiddleware, async (req, res) => {
-  const { _id, name, email, phone, city, resumeUrl, skills } = req.user;
-  res.json({ id: _id, name, email, phone, city, resumeUrl, skills });
+  const { _id, name, email, phone, city, resumeContentType, resumeFileName, skills } = req.user;
+  res.json({ id: _id, name, email, phone, city, hasResume: !!resumeContentType, resumeFileName, skills });
 });
 
 // Update current user profile (protected)
-router.put('/me', authMiddleware, async (req, res) => {
+router.put('/me', authMiddleware, upload.single('resume'), async (req, res) => {
   try {
-    const { name, email, phone, city, resumeUrl, skills, password } = req.body;
+    const { name, email, phone, city, skills, password } = req.body;
     const user = await User.findById(req.user._id);
 
     if (!user) {
@@ -98,11 +99,16 @@ router.put('/me', authMiddleware, async (req, res) => {
     user.email = email;
     user.phone = phone;
     user.city = city;
-    user.resumeUrl = resumeUrl;
     user.skills = Array.isArray(skills) ? skills : String(skills || '').split(',').map(s => s.trim()).filter(Boolean);
 
     if (password) {
       user.password = password;
+    }
+
+    if (req.file) {
+      user.resume = req.file.buffer;
+      user.resumeContentType = req.file.mimetype;
+      user.resumeFileName = req.file.originalname;
     }
 
     await user.save();
@@ -114,13 +120,30 @@ router.put('/me', authMiddleware, async (req, res) => {
         email: user.email,
         phone: user.phone,
         city: user.city,
-        resumeUrl: user.resumeUrl,
+        hasResume: !!user.resume,
+        resumeFileName: user.resumeFileName,
         skills: user.skills
       }
     });
   } catch (err) {
     console.error('Profile update error:', err);
     res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
+router.get('/me/resume', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user || !user.resume) {
+      return res.status(404).json({ error: 'Resume not found' });
+    }
+
+    res.setHeader('Content-Type', user.resumeContentType || 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${user.resumeFileName || 'resume.pdf'}"`);
+    return res.send(user.resume);
+  } catch (err) {
+    console.error('Resume fetch error:', err);
+    res.status(500).json({ error: 'Failed to fetch resume' });
   }
 });
 

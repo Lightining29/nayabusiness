@@ -13,6 +13,7 @@ const UserSchema = new mongoose.Schema({
   skills: [{ type: String }],
   resume: { type: Buffer }, // PDF binary
   resumeContentType: { type: String }, // should be 'application/pdf'
+  resumeFileName: { type: String },
   createdAt: { type: Date, default: Date.now }
 });
 

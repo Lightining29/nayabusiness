@@ -21,7 +21,7 @@ export default function Header() {
     lastName: '',
     email: '',
     phone: '',
-    resume: '',
+    resume: null,
     password: '',
     skills: ''
   });
@@ -131,20 +131,18 @@ export default function Header() {
     setRegisterSuccess('');
 
     try {
+      const formData = new FormData();
+      formData.append('first_name', firstName);
+      formData.append('last_name', lastName);
+      formData.append('email', email);
+      formData.append('mobno', phone);
+      formData.append('password', password);
+      formData.append('skills', skills);
+      formData.append('resume', resume);
+
       const res = await fetch('/api/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          first_name: firstName,
-          last_name: lastName,
-          email,
-          mobno: phone,
-          resume,
-          password,
-          skills
-        })
+        body: formData
       });
 
       const data = await res.json();
@@ -158,7 +156,7 @@ export default function Header() {
         lastName: '',
         email: '',
         phone: '',
-        resume: '',
+        resume: null,
         password: '',
         skills: ''
       });
@@ -536,7 +534,7 @@ export default function Header() {
 
               <div className="form-group">
                 <label>Resume</label>
-                <input className="form-input" type="url" placeholder="https://example.com/resume.pdf" value={registerForm.resume} onChange={(e) => updateRegisterForm('resume', e.target.value)} required />
+                <input className="form-input" type="file" accept="application/pdf,.pdf" onChange={(e) => updateRegisterForm('resume', e.target.files[0] || null)} required />
               </div>
 
               <div className="form-group full-width">

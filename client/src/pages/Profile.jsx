@@ -6,7 +6,9 @@ const emptyProfile = {
   email: '',
   phone: '',
   city: '',
-  resumeUrl: '',
+  resume: null,
+  hasResume: false,
+  resumeFileName: '',
   skills: '',
   password: ''
 };
@@ -46,7 +48,9 @@ export default function Profile() {
           email: data.email || '',
           phone: data.phone || '',
           city: data.city || '',
-          resumeUrl: data.resumeUrl || '',
+          resume: null,
+          hasResume: !!data.hasResume,
+          resumeFileName: data.resumeFileName || '',
           skills: Array.isArray(data.skills) ? data.skills.join(', ') : '',
           password: ''
         });
@@ -64,6 +68,31 @@ export default function Profile() {
     setProfile((current) => ({ ...current, [field]: value }));
   };
 
+  const handleResumeDownload = async () => {
+    setError('');
+
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/auth/me/resume', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to open resume.');
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank', 'noopener,noreferrer');
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (err) {
+      setError(err.message || 'Could not open resume.');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -78,26 +107,27 @@ export default function Profile() {
 
     try {
       const token = localStorage.getItem('token');
-      const body = {
-        name: profile.name,
-        email: profile.email,
-        phone: profile.phone,
-        city: profile.city,
-        resumeUrl: profile.resumeUrl,
-        skills: skillList
-      };
+      const body = new FormData();
+      body.append('name', profile.name);
+      body.append('email', profile.email);
+      body.append('phone', profile.phone);
+      body.append('city', profile.city);
+      body.append('skills', skillList.join(', '));
 
       if (profile.password) {
-        body.password = profile.password;
+        body.append('password', profile.password);
+      }
+
+      if (profile.resume) {
+        body.append('resume', profile.resume);
       }
 
       const res = await fetch('/api/auth/me', {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(body)
+        body
       });
       const data = await res.json();
 
@@ -108,6 +138,9 @@ export default function Profile() {
       setSuccess(data.message || 'Profile updated successfully.');
       setProfile((current) => ({
         ...current,
+        resume: null,
+        hasResume: data.user?.hasResume ?? current.hasResume,
+        resumeFileName: data.user?.resumeFileName || current.resumeFileName,
         password: '',
         skills: Array.isArray(data.user?.skills) ? data.user.skills.join(', ') : current.skills
       }));
@@ -178,7 +211,7 @@ export default function Profile() {
               <UserRound size={42} />
             </div>
             <h1>{profile.name || 'Your Profile'}</h1>
-            <p className="profile-muted">Manage your account details, career information, resume link, and skills from one clean dashboard.</p>
+            <p className="profile-muted">Manage your account details, career information, PDF resume, and skills from one clean dashboard.</p>
 
             <div className="profile-info-list">
               <div className="profile-info-item"><Mail size={18} /> <span>{profile.email || 'No email added'}</span></div>
@@ -199,10 +232,10 @@ export default function Profile() {
           <section className="profile-card">
             <div className="profile-card-header">
               <h2 className="profile-card-title"><Sparkles size={22} /> Edit Details</h2>
-              {profile.resumeUrl && (
-                <a className="btn btn-secondary" href={profile.resumeUrl} target="_blank" rel="noreferrer">
-                  <ExternalLink size={16} /> Resume
-                </a>
+              {profile.hasResume && (
+                <button type="button" className="btn btn-secondary" onClick={handleResumeDownload}>
+                  <ExternalLink size={16} /> Resume PDF
+                </button>
               )}
             </div>
 
@@ -243,8 +276,13 @@ export default function Profile() {
                 </div>
 
                 <div className="form-group full-width">
-                  <label>Resume Link</label>
-                  <input className="form-input" type="url" value={profile.resumeUrl} onChange={(e) => updateProfile('resumeUrl', e.target.value)} placeholder="https://example.com/resume.pdf" />
+                  <label>Resume PDF</label>
+                  <input className="form-input" type="file" accept="application/pdf,.pdf" onChange={(e) => updateProfile('resume', e.target.files[0] || null)} />
+                  {profile.resumeFileName && (
+                    <p style={{ color: '#64748b', fontSize: '0.85rem', marginTop: '0.4rem' }}>
+                      Current file: {profile.resumeFileName}
+                    </p>
+                  )}
                 </div>
 
                 <div className="form-group full-width">

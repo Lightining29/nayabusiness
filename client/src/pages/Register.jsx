@@ -8,7 +8,7 @@ export default function Register() {
   const [mobno, setMobno] = useState('');
   const [qualification, setQualification] = useState('');
   const [city, setCity] = useState('');
-  const [resume, setResume] = useState('');
+  const [resume, setResume] = useState(null);
   const [password, setPassword] = useState('');
   const [skills, setSkills] = useState('');
   const [selectedJob, setSelectedJob] = useState('General Application');
@@ -35,7 +35,7 @@ export default function Register() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    if (!firstName || !lastName || !email || !mobno || !qualification || !city) {
+    if (!firstName || !lastName || !email || !mobno || !qualification || !city || !resume) {
       setError('Please fill in all inputs.');
       return;
     }
@@ -45,23 +45,21 @@ export default function Register() {
     setSuccess(null);
 
     try {
+      const formData = new FormData();
+      formData.append('first_name', firstName);
+      formData.append('last_name', lastName);
+      formData.append('email', email);
+      formData.append('mobno', mobno);
+      formData.append('qualification', qualification);
+      formData.append('city', city);
+      formData.append('resume', resume);
+      formData.append('password', password);
+      formData.append('skills', skills);
+      formData.append('job_title', selectedJob);
+
       const res = await fetch('/api/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          first_name: firstName,
-          last_name: lastName,
-          email,
-          mobno,
-          qualification,
-          city,
-          resume,
-          password,
-          skills,
-          job_title: selectedJob
-        })
+        body: formData
       });
 
       const data = await res.json();
@@ -76,7 +74,7 @@ export default function Register() {
       setMobno('');
       setQualification('');
       setCity('');
-      setResume('');
+      setResume(null);
       setPassword('');
       setSkills('');
       setSelectedJob('General Application');
@@ -263,11 +261,11 @@ export default function Register() {
           <div className="form-group">
             <label>Resume</label>
             <input
-              type="url"
-              value={resume}
-              onChange={(e) => setResume(e.target.value)}
-              placeholder="https://example.com/resume.pdf"
+              type="file"
+              accept="application/pdf,.pdf"
+              onChange={(e) => setResume(e.target.files[0] || null)}
               className="form-input"
+              required
             />
           </div>
 

@@ -31,6 +31,12 @@ const registrationSchema = new mongoose.Schema({
     trim: true
   },
   resume: {
+    type: Buffer
+  },
+  resumeContentType: {
+    type: String
+  },
+  resumeFileName: {
     type: String,
     trim: true
   },

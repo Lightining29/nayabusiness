@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const multer = require('multer');
 require('dotenv').config();
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
@@ -23,6 +24,17 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'rancom@2026';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+const resumeUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype !== 'application/pdf') {
+      return cb(new Error('Resume must be a PDF file'), false);
+    }
+    cb(null, true);
+  }
+});
 
 // Middleware
 app.use(cors());
@@ -56,9 +68,13 @@ app.post('/api/login', async (req, res) => {
         password,
         phone: registration.mobno,
         city: registration.city,
-        resumeUrl: registration.resume,
         skills: registration.skills ? registration.skills.split(',').map(skill => skill.trim()).filter(Boolean) : []
       });
+      if (registration.resume) {
+        user.resume = registration.resume;
+        user.resumeContentType = registration.resumeContentType;
+        user.resumeFileName = registration.resumeFileName;
+      }
       await user.save();
     }
 
@@ -180,8 +196,8 @@ app.post('/api/contact', async (req, res) => {
 });
 
 // 2. Submit Career Registration
-app.post('/api/register', async (req, res) => {
-  const { first_name, last_name, email, mobno, qualification, city, job_title, resume, password, skills } = req.body;
+app.post('/api/register', resumeUpload.single('resume'), async (req, res) => {
+  const { first_name, last_name, email, mobno, qualification, city, job_title, password, skills } = req.body;
   if (!first_name || !last_name || !email || !mobno) {
     return res.status(400).json({ error: 'All fields are required' });
   }
@@ -203,11 +219,15 @@ app.post('/api/register', async (req, res) => {
         mobno, 
         qualification, 
         city,
-        resume,
         password: hashedPassword,
         skills,
         job_title: job_title || 'General Application'
       });
+      if (req.file) {
+        newRegistration.resume = req.file.buffer;
+        newRegistration.resumeContentType = req.file.mimetype;
+        newRegistration.resumeFileName = req.file.originalname;
+      }
       await newRegistration.save();
 
       if (password) {
@@ -217,9 +237,13 @@ app.post('/api/register', async (req, res) => {
           password,
           phone: mobno,
           city,
-          resumeUrl: resume,
           skills: skills ? skills.split(',').map(skill => skill.trim()).filter(Boolean) : []
         });
+        if (req.file) {
+          user.resume = req.file.buffer;
+          user.resumeContentType = req.file.mimetype;
+          user.resumeFileName = req.file.originalname;
+        }
         await user.save();
       }
 
@@ -238,7 +262,8 @@ app.post('/api/register', async (req, res) => {
       mobno, 
       qualification, 
       city, 
-      resume,
+      resumeFileName: req.file?.originalname,
+      resumeContentType: req.file?.mimetype,
       password: password ? '[hidden]' : undefined,
       skills,
       job_title: job_title || 'General Application',
@@ -306,7 +331,7 @@ app.post('/api/admin/login', (req, res) => {
 app.get('/api/admin/applications', async (req, res) => {
   if (mongoose.connection.readyState === 1) {
     try {
-      const applications = await Registration.find().sort({ createdAt: -1 });
+      const applications = await Registration.find().select('-resume').sort({ createdAt: -1 });
       return res.status(200).json(applications);
     } catch (err) {
       console.error(err);
@@ -314,6 +339,26 @@ app.get('/api/admin/applications', async (req, res) => {
     }
   } else {
     return res.status(200).json(registrationInMemoryDb);
+  }
+});
+
+app.get('/api/admin/applications/:id/resume', async (req, res) => {
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(404).json({ error: 'Resume unavailable in demo mode' });
+  }
+
+  try {
+    const application = await Registration.findById(req.params.id);
+    if (!application || !application.resume) {
+      return res.status(404).json({ error: 'Resume not found' });
+    }
+
+    res.setHeader('Content-Type', application.resumeContentType || 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${application.resumeFileName || 'resume.pdf'}"`);
+    return res.send(application.resume);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Failed to fetch resume' });
   }
 });
 

@@ -867,3 +867,61 @@ textarea.form-input {
     justify-content: center;
   }
 }
+.dark {
+  background: #0f172a;
+  color: white;
+}
+
+.dark body {
+  background: #0f172a;
+  color: white;
+}
+
+.dark .glass-nav {
+  background: rgba(15, 23, 42, 0.9);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.dark .nav-link {
+  color: #e2e8f0;
+}
+
+.dark .dropdown-menu {
+  background: #1e293b;
+}
+
+.dark .dropdown-item {
+  color: #f8fafc;
+}
+
+.dark .register-modal,
+.dark .login-modal {
+  background: #1e293b;
+  color: white;
+}
+
+.dark .form-input {
+  background: #334155;
+  color: white;
+  border: 1px solid #475569;
+}
+
+.dark .form-input::placeholder {
+  color: #94a3b8;
+}
+.theme-toggle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.05);
+}

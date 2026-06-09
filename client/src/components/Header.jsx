@@ -1,11 +1,19 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { AlertCircle, CheckCircle, Cpu, Menu, X, ChevronDown, LogIn, UserPlus } from 'lucide-react';
+import { Moon, Sun } from "lucide-react";
+
+
+
+
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [telecomOpen, setTelecomOpen] = useState(false);
   const [softwareOpen, setSoftwareOpen] = useState(false);
+const [darkMode, setDarkMode] = useState(() => {
+  return localStorage.getItem("theme") === "dark";
+});
   const [isAuth, setIsAuth] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [loginForm, setLoginForm] = useState({
@@ -28,13 +36,22 @@ export default function Header() {
   const [registerLoading, setRegisterLoading] = useState(false);
   const [registerSuccess, setRegisterSuccess] = useState('');
   const [registerError, setRegisterError] = useState('');
+
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     setIsAuth(!!token);
   }, []);
-
+useEffect(() => {
+  if (darkMode) {
+    document.documentElement.classList.add("dark");
+    localStorage.setItem("theme", "dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+    localStorage.setItem("theme", "light");
+  }
+}, [darkMode]);
   const toggleMenu = () => setIsOpen(!isOpen);
 
   const handleLogout = () => {
@@ -42,6 +59,7 @@ export default function Header() {
     setIsAuth(false);
     navigate('/');
   };
+
 
   const openLoginModal = () => {
     setLoginError('');
@@ -58,6 +76,7 @@ export default function Header() {
   const updateLoginForm = (field, value) => {
     setLoginForm((current) => ({ ...current, [field]: value }));
   };
+
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -291,7 +310,14 @@ export default function Header() {
                 Jobs
               </NavLink>
             </li>
-
+  <li>
+             <button
+  className="theme-toggle"
+  onClick={() => setDarkMode(!darkMode)}
+>
+  {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+</button>
+            </li>
             {/* Auth Buttons */}
             <li className="nav-auth">
               {!isAuth ? (

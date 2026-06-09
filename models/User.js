@@ -7,7 +7,9 @@ const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true }, // hashed
+  phone: { type: String },
   city: { type: String },
+  resumeUrl: { type: String },
   skills: [{ type: String }],
   resume: { type: Buffer }, // PDF binary
   resumeContentType: { type: String }, // should be 'application/pdf'

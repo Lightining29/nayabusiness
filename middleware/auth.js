@@ -12,7 +12,7 @@ module.exports = async (req, res, next) => {
     return res.status(401).json({ error: 'Invalid token format' });
   }
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const payload = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
     // Attach the full user doc (without password) to request
     const user = await User.findById(payload.id).select('-password -resume');
     if (!user) {

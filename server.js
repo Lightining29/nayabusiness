@@ -54,7 +54,9 @@ app.post('/api/login', async (req, res) => {
         name: `${registration.first_name} ${registration.last_name}`.trim(),
         email: registration.email,
         password,
+        phone: registration.mobno,
         city: registration.city,
+        resumeUrl: registration.resume,
         skills: registration.skills ? registration.skills.split(',').map(skill => skill.trim()).filter(Boolean) : []
       });
       await user.save();
@@ -213,7 +215,9 @@ app.post('/api/register', async (req, res) => {
           name: `${first_name} ${last_name}`.trim(),
           email,
           password,
+          phone: mobno,
           city,
+          resumeUrl: resume,
           skills: skills ? skills.split(',').map(skill => skill.trim()).filter(Boolean) : []
         });
         await user.save();

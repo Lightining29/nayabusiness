@@ -46,14 +46,14 @@ export default function AdminLogin() {
   return (
     <div className="container-width animate-fade-in" style={{ paddingTop: '6rem', paddingBottom: '6rem', display: 'flex', justifyContent: 'center' }}>
       
-      <div className="glass" style={{ maxWidth: '440px', width: '100%', padding: '3rem', borderRadius: '20px', border: '1px solid var(--border-color)' }}>
-        
+      <div className="glass" style={{ maxWidth: '440px', width: '100%', padding: '3rem', borderRadius: '20px', border: '1px solid var(--border-color)', background: 'white' }}>
+
         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '16px', background: 'linear-gradient(135deg, var(--primary) 0%, #2563eb 100%)', marginBottom: '1.25rem', boxShadow: '0 0 30px rgba(59, 130, 246, 0.3)' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '16px', background: 'linear-gradient(135deg, var(--primary) 0%, #0284c7 100%)', marginBottom: '1.25rem', boxShadow: '0 0 30px rgba(14, 165, 233, 0.3)' }}>
             <ShieldCheck size={32} color="white" />
           </div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'white', marginBottom: '0.5rem' }}>Admin Portal</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Sign in to manage jobs & applications</p>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#000000', marginBottom: '0.5rem' }}>Admin Portal</h1>
+          <p style={{ color: '#666666', fontSize: '0.9rem' }}>Sign in to manage jobs & applications</p>
         </div>
 
         {error && (
@@ -65,7 +65,7 @@ export default function AdminLogin() {
 
         <form onSubmit={handleLogin}>
           <div className="form-group">
-            <label>Username</label>
+            <label style={{ color: '#000000' }}>Username</label>
             <input
               type="text"
               className="form-input"
@@ -77,7 +77,7 @@ export default function AdminLogin() {
           </div>
 
           <div className="form-group" style={{ position: 'relative' }}>
-            <label>Password</label>
+            <label style={{ color: '#000000' }}>Password</label>
             <div style={{ position: 'relative' }}>
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -108,7 +108,7 @@ export default function AdminLogin() {
           </button>
         </form>
 
-        <p style={{ textAlign: 'center', marginTop: '1.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+        <p style={{ textAlign: 'center', marginTop: '1.5rem', color: '#666666', fontSize: '0.8rem' }}>
           Protected area. Authorized personnel only.
         </p>
       </div>

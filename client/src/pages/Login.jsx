@@ -56,13 +56,13 @@ export default function Login() {
         </div>
       )}
 
-      <form onSubmit={handleLogin} className="glass">
+      <form onSubmit={handleLogin} className="glass" style={{ background: 'white' }}>
         <div className="form-group">
-          <label>Email Address</label>
+          <label style={{ color: '#000000' }}>Email Address</label>
           <input type="email" className="form-input" placeholder="Enter your email" required value={email} onChange={e => setEmail(e.target.value)} />
         </div>
         <div className="form-group">
-          <label>Password</label>
+          <label style={{ color: '#000000' }}>Password</label>
           <input type="password" className="form-input" placeholder="Enter your password" required value={password} onChange={e => setPassword(e.target.value)} />
         </div>
         <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: '100%', marginTop: '1rem' }}>

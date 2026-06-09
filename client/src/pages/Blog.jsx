@@ -98,11 +98,14 @@ export default function Blog() {
         }
         .blog-card {
           padding: 2.5rem;
+          background: white;
+          border: 1px solid rgba(14, 165, 233, 0.2);
+          border-radius: 12px;
         }
         .blog-meta {
           display: flex;
           gap: 1.5rem;
-          color: var(--text-muted);
+          color: #666666;
           font-size: 0.85rem;
           margin: 0.75rem 0 1.5rem 0;
           flex-wrap: wrap;
@@ -122,7 +125,7 @@ export default function Blog() {
           font-weight: 600;
         }
         .blog-content {
-          color: var(--text-secondary);
+          color: #333333;
           line-height: 1.7;
           font-size: 0.95rem;
           white-space: pre-wrap;
@@ -166,7 +169,7 @@ export default function Blog() {
             <div className="blog-list">
               {blogs.map((post) => (
                 <article key={post._id} className="premium-card blog-card">
-                  <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'white', lineHeight: '1.3' }}>{post.title}</h2>
+                  <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#000000', lineHeight: '1.3' }}>{post.title}</h2>
                   
                   <div className="blog-meta">
                     <span className="meta-item">
@@ -198,8 +201,8 @@ export default function Blog() {
 
         {/* Create post form */}
         <aside>
-          <div className="glass" style={{ padding: '2.5rem', borderRadius: '16px', border: '1px solid var(--border-color)', position: 'sticky', top: '100px' }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'white', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div className="glass" style={{ padding: '2.5rem', borderRadius: '16px', border: '1px solid var(--border-color)', position: 'sticky', top: '100px', background: 'white' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#000000', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <PlusCircle size={20} style={{ color: 'var(--primary)' }} /> Publish Article
             </h3>
 

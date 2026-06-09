@@ -165,50 +165,50 @@ export default function AdminDashboard() {
         .admin-tab {
           display: flex; align-items: center; gap: 0.5rem; padding: 0.7rem 1.25rem; border-radius: 10px;
           font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease;
-          background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-secondary);
+          background: rgba(14,165,233,0.05); border: 1px solid rgba(14,165,233,0.2); color: #666666;
         }
-        .admin-tab:hover { color: white; background: rgba(255,255,255,0.06); }
-        .admin-tab.active { color: white; background: rgba(59,130,246,0.15); border-color: var(--primary); }
+        .admin-tab:hover { color: #000000; background: rgba(14,165,233,0.12); }
+        .admin-tab.active { color: white; background: rgba(14,165,233,0.25); border-color: var(--primary); }
         .tab-badge {
-          background: rgba(59,130,246,0.2); color: var(--primary); font-size: 0.75rem; font-weight: 700;
+          background: rgba(14,165,233,0.2); color: var(--primary); font-size: 0.75rem; font-weight: 700;
           padding: 0.15rem 0.5rem; border-radius: 20px; min-width: 22px; text-align: center;
         }
         .admin-tab.active .tab-badge { background: var(--primary); color: white; }
-        .data-table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border-color); }
+        .data-table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid rgba(14,165,233,0.2); background: white; }
         .data-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
         .data-table th {
           padding: 0.85rem 1.25rem; text-align: left; font-weight: 700; font-size: 0.8rem;
-          text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);
-          background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-color);
+          text-transform: uppercase; letter-spacing: 0.05em; color: #666666;
+          background: rgba(14,165,233,0.05); border-bottom: 1px solid rgba(14,165,233,0.2);
         }
         .data-table td {
-          padding: 0.85rem 1.25rem; border-bottom: 1px solid var(--border-color);
-          color: var(--text-secondary); vertical-align: top;
+          padding: 0.85rem 1.25rem; border-bottom: 1px solid rgba(14,165,233,0.15);
+          color: #333333; vertical-align: top;
         }
         .data-table tr:last-child td { border-bottom: none; }
-        .data-table tr:hover td { background: rgba(59,130,246,0.03); }
+        .data-table tr:hover td { background: rgba(14,165,233,0.05); }
         .status-active { color: var(--accent); font-weight: 700; }
         .status-inactive { color: #f87171; font-weight: 700; }
         .action-btn {
           background: none; border: none; cursor: pointer; padding: 0.35rem; border-radius: 6px;
           transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center;
         }
-        .action-btn:hover { background: rgba(255,255,255,0.08); }
+        .action-btn:hover { background: rgba(14,165,233,0.08); }
         .action-btn.danger:hover { background: rgba(239,68,68,0.12); }
         .job-card {
-          background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px;
+          background: white; border: 1px solid rgba(14,165,233,0.2); border-radius: 14px;
           padding: 1.75rem; transition: all 0.2s; position: relative; overflow: hidden;
         }
-        .job-card:hover { border-color: rgba(59,130,246,0.2); }
+        .job-card:hover { border-color: rgba(14,165,233,0.4); }
         .job-type-badge {
           display: inline-block; font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.6rem;
           border-radius: 6px; background: rgba(6,182,212,0.12); color: var(--secondary); border: 1px solid rgba(6,182,212,0.2);
         }
-        .job-meta { display: flex; gap: 1.25rem; color: var(--text-muted); font-size: 0.85rem; margin: 0.75rem 0; flex-wrap: wrap; }
+        .job-meta { display: flex; gap: 1.25rem; color: #666666; font-size: 0.85rem; margin: 0.75rem 0; flex-wrap: wrap; }
         .job-meta-item { display: flex; align-items: center; gap: 0.3rem; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
         @media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } }
-        .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text-muted); }
+        .empty-state { text-align: center; padding: 4rem 2rem; color: #666666; }
         .empty-state-icon { opacity: 0.3; margin-bottom: 1rem; }
       `}} />
 
@@ -217,8 +217,8 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="admin-header">
         <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'white', marginBottom: '0.25rem' }}>Admin Dashboard</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Manage job postings, view applications, and review contact messages.</p>
+          <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#000000', marginBottom: '0.25rem' }}>Admin Dashboard</h1>
+          <p style={{ color: '#666666', fontSize: '0.9rem' }}>Manage job postings, view applications, and review contact messages.</p>
         </div>
         <button onClick={handleLogout} className="btn btn-secondary" style={{ gap: '0.4rem', fontSize: '0.85rem', padding: '0.5rem 1rem' }}>
           <LogOut size={16} /> Sign Out
@@ -232,9 +232,9 @@ export default function AdminDashboard() {
           { label: 'Total Applications', value: applications.length, color: 'var(--primary)' },
           { label: 'Contact Messages', value: contacts.length, color: 'var(--secondary)' }
         ].map((stat, i) => (
-          <div key={i} className="glass" style={{ padding: '1.5rem', borderRadius: '12px', borderLeft: `3px solid ${stat.color}` }}>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '0.25rem' }}>{stat.label}</p>
-            <h2 style={{ color: 'white', fontSize: '2rem', fontWeight: 800 }}>{stat.value}</h2>
+          <div key={i} className="glass" style={{ padding: '1.5rem', borderRadius: '12px', borderLeft: `3px solid ${stat.color}`, background: 'white' }}>
+            <p style={{ color: '#666666', fontSize: '0.85rem', marginBottom: '0.25rem' }}>{stat.label}</p>
+            <h2 style={{ color: '#000000', fontSize: '2rem', fontWeight: 800 }}>{stat.value}</h2>
           </div>
         ))}
       </div>
@@ -265,8 +265,8 @@ export default function AdminDashboard() {
 
           {/* Create Job Form */}
           {showJobForm && (
-            <div className="glass" style={{ padding: '2.5rem', borderRadius: '16px', marginBottom: '2.5rem', border: '1px solid var(--border-color)' }}>
-              <h3 style={{ color: 'white', fontSize: '1.3rem', fontWeight: 700, marginBottom: '1.75rem' }}>New Job Posting</h3>
+            <div className="glass" style={{ padding: '2.5rem', borderRadius: '16px', marginBottom: '2.5rem', border: '1px solid var(--border-color)', background: 'white' }}>
+              <h3 style={{ color: '#000000', fontSize: '1.3rem', fontWeight: 700, marginBottom: '1.75rem' }}>New Job Posting</h3>
 
               {jobFormMsg && (
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', padding: '0.85rem 1rem', borderRadius: '8px', marginBottom: '1.5rem', fontSize: '0.9rem', fontWeight: 600,
@@ -282,21 +282,21 @@ export default function AdminDashboard() {
               <form onSubmit={handleCreateJob}>
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Job Title *</label>
+                    <label style={{ color: '#000000' }}>Job Title *</label>
                     <input className="form-input" placeholder="e.g. RF Engineer" required value={jobForm.title} onChange={e => setJobForm({...jobForm, title: e.target.value})} />
                   </div>
                   <div className="form-group">
-                    <label>Department *</label>
+                    <label style={{ color: '#000000' }}>Department *</label>
                     <input className="form-input" placeholder="e.g. Telecom Division" required value={jobForm.department} onChange={e => setJobForm({...jobForm, department: e.target.value})} />
                   </div>
                 </div>
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Location *</label>
+                    <label style={{ color: '#000000' }}>Location *</label>
                     <input className="form-input" placeholder="e.g. Noida, UP" required value={jobForm.location} onChange={e => setJobForm({...jobForm, location: e.target.value})} />
                   </div>
                   <div className="form-group">
-                    <label>Job Type</label>
+                    <label style={{ color: '#000000' }}>Job Type</label>
                     <select className="form-input" value={jobForm.type} onChange={e => setJobForm({...jobForm, type: e.target.value})}>
                       <option value="Full-Time">Full-Time</option>
                       <option value="Part-Time">Part-Time</option>
@@ -307,20 +307,20 @@ export default function AdminDashboard() {
                 </div>
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Experience Required</label>
+                    <label style={{ color: '#000000' }}>Experience Required</label>
                     <input className="form-input" placeholder="e.g. 2-5 years" value={jobForm.experience} onChange={e => setJobForm({...jobForm, experience: e.target.value})} />
                   </div>
                   <div className="form-group">
-                    <label>Salary Range</label>
+                    <label style={{ color: '#000000' }}>Salary Range</label>
                     <input className="form-input" placeholder="e.g. ₹5L - ₹10L per annum" value={jobForm.salary} onChange={e => setJobForm({...jobForm, salary: e.target.value})} />
                   </div>
                 </div>
                 <div className="form-group">
-                  <label>Description *</label>
+                  <label style={{ color: '#000000' }}>Description *</label>
                   <textarea className="form-input" placeholder="Detailed job description..." required style={{ minHeight: '120px' }} value={jobForm.description} onChange={e => setJobForm({...jobForm, description: e.target.value})} />
                 </div>
                 <div className="form-group">
-                  <label>Requirements</label>
+                  <label style={{ color: '#000000' }}>Requirements</label>
                   <textarea className="form-input" placeholder="Required skills and qualifications..." style={{ minHeight: '100px' }} value={jobForm.requirements} onChange={e => setJobForm({...jobForm, requirements: e.target.value})} />
                 </div>
                 <button type="submit" className="btn btn-accent" style={{ padding: '0.75rem 2rem' }} disabled={jobFormLoading}>
@@ -332,8 +332,8 @@ export default function AdminDashboard() {
 
           {/* Edit Job Form (conditionally rendered) */}
           {showEditForm && editJob && (
-            <div className="glass" style={{ padding: '2.5rem', borderRadius: '16px', marginBottom: '2.5rem', border: '1px solid var(--border-color)' }}>
-              <h3 style={{ color: 'white', fontSize: '1.3rem', fontWeight: 700, marginBottom: '1.75rem' }}>Edit Job Posting</h3>
+            <div className="glass" style={{ padding: '2.5rem', borderRadius: '16px', marginBottom: '2.5rem', border: '1px solid var(--border-color)', background: 'white' }}>
+              <h3 style={{ color: '#000000', fontSize: '1.3rem', fontWeight: 700, marginBottom: '1.75rem' }}>Edit Job Posting</h3>
               {editJobMsg && (
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', padding: '0.85rem 1rem', borderRadius: '8px', marginBottom: '1.5rem', fontSize: '0.9rem', fontWeight: 600,
                              color: editJobMsg.type === 'success' ? 'var(--accent)' : '#f87171',
@@ -346,21 +346,21 @@ export default function AdminDashboard() {
               <form onSubmit={handleUpdateJob}>
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Job Title *</label>
+                    <label style={{ color: '#000000' }}>Job Title *</label>
                     <input className="form-input" required value={editJob.title} onChange={e => setEditJob({ ...editJob, title: e.target.value })} />
                   </div>
                   <div className="form-group">
-                    <label>Department *</label>
+                    <label style={{ color: '#000000' }}>Department *</label>
                     <input className="form-input" required value={editJob.department} onChange={e => setEditJob({ ...editJob, department: e.target.value })} />
                   </div>
                 </div>
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Location *</label>
+                    <label style={{ color: '#000000' }}>Location *</label>
                     <input className="form-input" required value={editJob.location} onChange={e => setEditJob({ ...editJob, location: e.target.value })} />
                   </div>
                   <div className="form-group">
-                    <label>Job Type</label>
+                    <label style={{ color: '#000000' }}>Job Type</label>
                     <select className="form-input" value={editJob.type} onChange={e => setEditJob({ ...editJob, type: e.target.value })}>
                       <option>Full-Time</option>
                       <option>Part-Time</option>
@@ -371,20 +371,20 @@ export default function AdminDashboard() {
                 </div>
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Experience Required</label>
+                    <label style={{ color: '#000000' }}>Experience Required</label>
                     <input className="form-input" value={editJob.experience} onChange={e => setEditJob({ ...editJob, experience: e.target.value })} />
                   </div>
                   <div className="form-group">
-                    <label>Salary Range</label>
+                    <label style={{ color: '#000000' }}>Salary Range</label>
                     <input className="form-input" value={editJob.salary} onChange={e => setEditJob({ ...editJob, salary: e.target.value })} />
                   </div>
                 </div>
                 <div className="form-group">
-                  <label>Description *</label>
+                  <label style={{ color: '#000000' }}>Description *</label>
                   <textarea className="form-input" required style={{ minHeight: '120px' }} value={editJob.description} onChange={e => setEditJob({ ...editJob, description: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label>Requirements</label>
+                  <label style={{ color: '#000000' }}>Requirements</label>
                   <textarea className="form-input" style={{ minHeight: '100px' }} value={editJob.requirements} onChange={e => setEditJob({ ...editJob, requirements: e.target.value })} />
                 </div>
                 <button type="submit" className="btn btn-accent" disabled={editJobLoading} style={{ padding: '0.75rem 2rem' }}>
@@ -413,7 +413,7 @@ export default function AdminDashboard() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
-                        <h3 style={{ color: 'white', fontSize: '1.2rem', fontWeight: 700 }}>{job.title}</h3>
+                        <h3 style={{ color: '#000000', fontSize: '1.2rem', fontWeight: 700 }}>{job.title}</h3>
                         <span className="job-type-badge">{job.type}</span>
                         <span className={job.isActive ? 'status-active' : 'status-inactive'} style={{ fontSize: '0.8rem' }}>
                           ● {job.isActive ? 'Active' : 'Inactive'}
@@ -425,7 +425,7 @@ export default function AdminDashboard() {
                         {job.experience && <span className="job-meta-item"><Clock size={14} /> {job.experience}</span>}
                         {job.salary && <span className="job-meta-item"><DollarSign size={14} /> {job.salary}</span>}
                       </div>
-                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                      <p style={{ color: '#333333', fontSize: '0.9rem', lineHeight: '1.6' }}>
                         {job.description.length > 200 ? job.description.substring(0, 200) + '...' : job.description}
                       </p>
                     </div>
@@ -478,14 +478,14 @@ export default function AdminDashboard() {
                 <tbody>
                   {applications.map((app, idx) => (
                     <tr key={app._id}>
-                      <td style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{idx + 1}</td>
-                      <td style={{ color: 'white', fontWeight: 600 }}>{app.first_name} {app.last_name}</td>
+                      <td style={{ color: '#666666', fontWeight: 600 }}>{idx + 1}</td>
+                      <td style={{ color: '#000000', fontWeight: 600 }}>{app.first_name} {app.last_name}</td>
                       <td style={{ color: 'var(--secondary)', fontWeight: 600 }}>{app.job_title || 'General Application'}</td>
                       <td><a href={`mailto:${app.email}`} style={{ color: 'var(--primary)' }}>{app.email}</a></td>
-                      <td>{app.mobno}</td>
-                      <td>{app.qualification}</td>
-                      <td>{app.city}</td>
-                      <td style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{new Date(app.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+                      <td style={{ color: '#333333' }}>{app.mobno}</td>
+                      <td style={{ color: '#333333' }}>{app.qualification}</td>
+                      <td style={{ color: '#333333' }}>{app.city}</td>
+                      <td style={{ fontSize: '0.85rem', color: '#666666' }}>{new Date(app.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -523,13 +523,13 @@ export default function AdminDashboard() {
                 <tbody>
                   {contacts.map((msg, idx) => (
                     <tr key={msg._id}>
-                      <td style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{idx + 1}</td>
-                      <td style={{ color: 'white', fontWeight: 600 }}>{msg.name}</td>
-                      <td>{msg.subject}</td>
+                      <td style={{ color: '#666666', fontWeight: 600 }}>{idx + 1}</td>
+                      <td style={{ color: '#000000', fontWeight: 600 }}>{msg.name}</td>
+                      <td style={{ color: '#333333' }}>{msg.subject}</td>
                       <td><a href={`mailto:${msg.email}`} style={{ color: 'var(--primary)' }}>{msg.email}</a></td>
-                      <td>{msg.tel}</td>
-                      <td style={{ maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{msg.msg}</td>
-                      <td style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{new Date(msg.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+                      <td style={{ color: '#333333' }}>{msg.tel}</td>
+                      <td style={{ maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#333333' }}>{msg.msg}</td>
+                      <td style={{ fontSize: '0.85rem', color: '#666666' }}>{new Date(msg.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
                     </tr>
                   ))}
                 </tbody>

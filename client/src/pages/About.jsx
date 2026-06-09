@@ -46,13 +46,13 @@ export default function About() {
         <div className="about-split" style={{ display: 'contents' }}>
           <div>
             <span className="hero-subtitle" style={{ color: 'var(--primary)' }}>ABOUT RANCOM TECHNOLOGIES</span>
-            <h1 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '1.5rem', color: 'white' }}>
+            <h1 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '1.5rem', color: '#000000' }}>
               Leading Telecom & Software Experts
             </h1>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', lineHeight: '1.8', marginBottom: '1.5rem' }}>
+            <p style={{ color: '#333333', fontSize: '1.1rem', lineHeight: '1.8', marginBottom: '1.5rem' }}>
               Rancom Technologies is a premier Telecom engineering, database architecture, and Software Development agency. We deliver end-to-end setups including network audits, BTS node configurations, full-stack website programming, corporate domain registration, custom branding, and search engine optimization.
             </p>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', lineHeight: '1.8' }}>
+            <p style={{ color: '#333333', fontSize: '1.1rem', lineHeight: '1.8' }}>
               Our fundamental vision is to serve our international client base with affordable, top-tier innovations. By ensuring a robust technical advantage, we enable businesses to achieve persistent growth and maximize long-term asset value in a highly competitive digital landscape.
             </p>
           </div>
@@ -69,25 +69,25 @@ export default function About() {
 
       {/* Core Values */}
       <div style={{ padding: '4rem 0', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)', marginBottom: '5rem' }}>
-        <h2 className="text-center" style={{ fontSize: '2.2rem', fontWeight: 800, marginBottom: '3rem' }}>Why Choose Our Engineers?</h2>
-        
+        <h2 className="text-center" style={{ fontSize: '2.2rem', fontWeight: 800, marginBottom: '3rem', color: '#000000' }}>Why Choose Our Engineers?</h2>
+
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '2rem' }}>
-          <div className="glass" style={{ padding: '2rem', borderRadius: '12px', textAlign: 'center' }}>
+          <div className="glass" style={{ padding: '2rem', borderRadius: '12px', textAlign: 'center', background: 'white' }}>
             <div style={{ color: 'var(--primary)', display: 'inline-block', marginBottom: '1rem' }}><Zap size={36} /></div>
-            <h3 style={{ color: 'white', fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.75rem' }}>Speed & Efficiency</h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>We deliver highly optimized sites and quick network implementations to keep your operations moving forward.</p>
+            <h3 style={{ color: '#000000', fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.75rem' }}>Speed & Efficiency</h3>
+            <p style={{ color: '#333333', fontSize: '0.9rem' }}>We deliver highly optimized sites and quick network implementations to keep your operations moving forward.</p>
           </div>
 
-          <div className="glass" style={{ padding: '2rem', borderRadius: '12px', textAlign: 'center' }}>
+          <div className="glass" style={{ padding: '2rem', borderRadius: '12px', textAlign: 'center', background: 'white' }}>
             <div style={{ color: 'var(--secondary)', display: 'inline-block', marginBottom: '1rem' }}><Award size={36} /></div>
-            <h3 style={{ color: 'white', fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.75rem' }}>High Quality</h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>We follow strict testing protocols and build setups utilizing the industry's best-practice standards.</p>
+            <h3 style={{ color: '#000000', fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.75rem' }}>High Quality</h3>
+            <p style={{ color: '#333333', fontSize: '0.9rem' }}>We follow strict testing protocols and build setups utilizing the industry's best-practice standards.</p>
           </div>
 
-          <div className="glass" style={{ padding: '2rem', borderRadius: '12px', textAlign: 'center' }}>
+          <div className="glass" style={{ padding: '2rem', borderRadius: '12px', textAlign: 'center', background: 'white' }}>
             <div style={{ color: 'var(--accent)', display: 'inline-block', marginBottom: '1rem' }}><Users size={36} /></div>
-            <h3 style={{ color: 'white', fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.75rem' }}>Expert Team</h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Our engineers are fully certified in RF operations, hardware rigging, and modern full-stack languages.</p>
+            <h3 style={{ color: '#000000', fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.75rem' }}>Expert Team</h3>
+            <p style={{ color: '#333333', fontSize: '0.9rem' }}>Our engineers are fully certified in RF operations, hardware rigging, and modern full-stack languages.</p>
           </div>
         </div>
       </div>

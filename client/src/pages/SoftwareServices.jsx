@@ -98,16 +98,16 @@ export default function SoftwareServices() {
         .sidebar-item {
           padding: 0.8rem 1.2rem;
           border-radius: 8px;
-          color: var(--text-secondary);
-          background: rgba(255,255,255,0.02);
-          border: 1px solid var(--border-color);
+          color: #666666;
+          background: rgba(14, 165, 233, 0.05);
+          border: 1px solid rgba(14, 165, 233, 0.2);
           font-weight: 500;
           transition: all var(--transition-fast);
           cursor: pointer;
         }
         .sidebar-item:hover, .sidebar-item.active {
-          color: white;
-          background: rgba(59, 130, 246, 0.12);
+          color: #000000;
+          background: rgba(14, 165, 233, 0.15);
           border-color: var(--primary);
           padding-left: 1.5rem;
         }
@@ -152,15 +152,15 @@ export default function SoftwareServices() {
         </aside>
 
         {/* Dynamic Detail Content */}
-        <main className="glass" style={{ padding: '3rem', borderRadius: '16px', border: '1px solid var(--border-color)' }}>
+        <main className="glass" style={{ padding: '3rem', borderRadius: '16px', border: '1px solid var(--border-color)', background: 'white' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
             <div style={{ color: 'var(--secondary)', background: 'rgba(6, 182, 212, 0.1)', padding: '0.75rem', borderRadius: '12px' }}>
               {service.icon}
             </div>
-            <h2 style={{ fontSize: '2rem', fontWeight: 800, color: 'white' }}>{service.title}</h2>
+            <h2 style={{ fontSize: '2rem', fontWeight: 800, color: '#000000' }}>{service.title}</h2>
           </div>
 
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', lineHeight: '1.8', marginBottom: '2rem' }}>
+          <p style={{ color: '#333333', fontSize: '1.1rem', lineHeight: '1.8', marginBottom: '2rem' }}>
             {service.desc}
           </p>
 
@@ -178,10 +178,10 @@ export default function SoftwareServices() {
 
             <div className="inner-split" style={{ display: 'contents' }}>
               <div>
-                <h3 style={{ color: 'white', fontSize: '1.25rem', marginBottom: '1rem', fontWeight: 700 }}>Service Deliverables</h3>
+                <h3 style={{ color: '#000000', fontSize: '1.25rem', marginBottom: '1rem', fontWeight: 700 }}>Service Deliverables</h3>
                 <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   {service.points.map((pt, index) => (
-                    <li key={index} style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+                    <li key={index} style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start', color: '#333333', fontSize: '0.95rem' }}>
                       <span style={{ color: 'var(--secondary)', fontWeight: 'bold' }}>✓</span>
                       <span>{pt}</span>
                     </li>
@@ -199,10 +199,10 @@ export default function SoftwareServices() {
             </div>
           </div>
 
-          <div className="glass" style={{ marginTop: '3rem', padding: '2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.04)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
+          <div className="glass" style={{ marginTop: '3rem', padding: '2rem', borderRadius: '12px', border: '1px solid rgba(14,165,233,0.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem', background: 'white' }}>
             <div>
-              <h4 style={{ color: 'white', fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.25rem' }}>Need premium software development?</h4>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Talk to our development leads to request a technical proposal.</p>
+              <h4 style={{ color: '#000000', fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.25rem' }}>Need premium software development?</h4>
+              <p style={{ color: '#666666', fontSize: '0.85rem' }}>Talk to our development leads to request a technical proposal.</p>
             </div>
             <Link to="/contact" className="btn btn-primary" style={{ padding: '0.6rem 1.2rem', fontSize: '0.9rem' }}>
               Start Your Project

@@ -104,7 +104,7 @@ export default function Home() {
       </section>
 
       {/* Why Choose Us call-out */}
-      <section className="section-spacing" style={{ background: 'rgba(11, 17, 32, 0.4)', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)' }}>
+      <section className="section-spacing" style={{ background: 'rgba(14, 165, 233, 0.05)', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)' }}>
         <div className="container-width" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center' }}>
           
           {/* Mobile responsive column stack */}
@@ -121,21 +121,21 @@ export default function Home() {
             <div>
               <span className="hero-subtitle" style={{ color: 'var(--primary)' }}>OUR MISSION</span>
               <h2 className="section-title" style={{ marginBottom: '1.5rem', textAlign: 'left' }}>Designed for everyone, built to scale.</h2>
-              <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '1.05rem', lineHeight: '1.8' }}>
+              <p style={{ color: '#333333', marginBottom: '1.5rem', fontSize: '1.05rem', lineHeight: '1.8' }}>
                 We believe in providing dynamic and responsive telecom and software frameworks in a systematic way. Our focus is to deliver best-in-class configurations with clean documentation and complete security, giving our clients a distinct edge in competitive markets.
               </p>
               <div style={{ display: 'flex', gap: '2rem', marginTop: '2rem' }}>
                 <div>
-                  <h4 style={{ color: 'white', fontSize: '2rem', fontWeight: 800 }}>10+</h4>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Years Experience</p>
+                  <h4 style={{ color: '#000000', fontSize: '2rem', fontWeight: 800 }}>10+</h4>
+                  <p style={{ color: '#666666', fontSize: '0.85rem' }}>Years Experience</p>
                 </div>
                 <div>
-                  <h4 style={{ color: 'white', fontSize: '2rem', fontWeight: 800 }}>500+</h4>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Completed Audits</p>
+                  <h4 style={{ color: '#000000', fontSize: '2rem', fontWeight: 800 }}>500+</h4>
+                  <p style={{ color: '#666666', fontSize: '0.85rem' }}>Completed Audits</p>
                 </div>
                 <div>
-                  <h4 style={{ color: 'white', fontSize: '2rem', fontWeight: 800 }}>99.9%</h4>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Network Reliability</p>
+                  <h4 style={{ color: '#000000', fontSize: '2rem', fontWeight: 800 }}>99.9%</h4>
+                  <p style={{ color: '#666666', fontSize: '0.85rem' }}>Network Reliability</p>
                 </div>
               </div>
             </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import JobCard from '../components/JobCard';
 import ApplyModal from '../components/ApplyModal';
 
@@ -7,7 +7,6 @@ import ApplyModal from '../components/ApplyModal';
 
 export default function Jobs() {
   const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -15,8 +14,7 @@ export default function Jobs() {
     fetch('/api/jobs')
       .then(res => res.json())
       .then(data => setJobs(data))
-      .catch(err => console.error('Failed to load jobs', err))
-      .finally(() => setLoading(false));
+      .catch(err => console.error('Failed to load jobs', err));
   }, []);
 
 

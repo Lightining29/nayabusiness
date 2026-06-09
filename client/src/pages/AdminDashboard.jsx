@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
-import { Briefcase, Users, Mail, PlusCircle, Trash2, ToggleLeft, ToggleRight, LogOut, CheckCircle, AlertCircle, ChevronDown, ChevronUp, MapPin, Clock, DollarSign, Edit } from 'lucide-react';
+import { Briefcase, Users, Mail, PlusCircle, Trash2, ToggleLeft, ToggleRight, LogOut, CheckCircle, AlertCircle, ChevronUp, MapPin, Clock, DollarSign, Edit } from 'lucide-react';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -71,6 +71,7 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchJobs();
     fetchApplications();
     fetchContacts();

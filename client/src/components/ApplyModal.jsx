@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { X, Briefcase, MapPin, Clock, DollarSign, Send } from 'lucide-react';
 
 export default function ApplyModal({ job, onClose }) {

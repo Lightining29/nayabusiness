@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { BookOpen, User, Calendar, Tag, AlertCircle, PlusCircle, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { User, Calendar, Tag, AlertCircle, PlusCircle, CheckCircle } from 'lucide-react';
 
 export default function Blog() {
   const [blogs, setBlogs] = useState([]);
@@ -32,6 +32,7 @@ export default function Blog() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchBlogs();
   }, []);
 

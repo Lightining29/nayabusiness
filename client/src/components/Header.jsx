@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { Cpu, Menu, X, ChevronDown } from 'lucide-react';
+import { Cpu, Menu, X, ChevronDown, LogIn, UserPlus } from 'lucide-react';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,6 +11,7 @@ export default function Header() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsAuth(!!token);
   }, []);
 
@@ -52,49 +53,128 @@ export default function Header() {
           <span>RANCOM <span className="gradient-text-blue" style={{ fontSize: '0.8rem', fontWeight: 600, verticalAlign: 'middle', marginLeft: '0.2rem' }}>TECHNOLOGIES</span></span>
         </Link>
 
+        {/* Mobile Menu Button */}
         <button className="menu-btn" onClick={toggleMenu} aria-label="Toggle menu">
           {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
 
+        {/* Navigation Links */}
         <nav>
           <ul className={`nav-links ${isOpen ? 'mobile-open' : ''}`}>
             <li>
-              <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)} end>Home</NavLink>
+              <NavLink 
+                to="/" 
+                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                onClick={() => setIsOpen(false)}
+                end
+              >
+                Home
+              </NavLink>
             </li>
             <li>
-              <NavLink to="/about" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>About Us</NavLink>
+              <NavLink 
+                to="/about" 
+                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                onClick={() => setIsOpen(false)}
+              >
+                About Us
+              </NavLink>
             </li>
+
+            {/* Telecom Dropdown */}
             <li className="dropdown-container">
-              <span className="nav-link" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }} onClick={() => setTelecomOpen(!telecomOpen)}>
+              <span 
+                className="nav-link" 
+                style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                onClick={() => setTelecomOpen(!telecomOpen)}
+              >
                 Telecom Services <ChevronDown size={14} />
               </span>
               <div className={`dropdown-menu ${telecomOpen ? 'mobile-show' : ''}`}>
-                {telecomServices.map((service, idx) => (
-                  <Link key={idx} to={service.path} className="dropdown-item" onClick={() => { setIsOpen(false); setTelecomOpen(false); }}>{service.name}</Link>
+                {telecomServices.map((service, index) => (
+                  <Link 
+                    key={index} 
+                    to={service.path} 
+                    className="dropdown-item" 
+                    onClick={() => { setIsOpen(false); setTelecomOpen(false); }}
+                  >
+                    {service.name}
+                  </Link>
                 ))}
               </div>
             </li>
+
+            {/* Software Dropdown */}
             <li className="dropdown-container">
-              <span className="nav-link" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }} onClick={() => setSoftwareOpen(!softwareOpen)}>
+              <span 
+                className="nav-link" 
+                style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                onClick={() => setSoftwareOpen(!softwareOpen)}
+              >
                 Software Services <ChevronDown size={14} />
               </span>
               <div className={`dropdown-menu ${softwareOpen ? 'mobile-show' : ''}`}>
-                {softwareServices.map((service, idx) => (
-                  <Link key={idx} to={service.path} className="dropdown-item" onClick={() => { setIsOpen(false); setSoftwareOpen(false); }}>{service.name}</Link>
+                {softwareServices.map((service, index) => (
+                  <Link 
+                    key={index} 
+                    to={service.path} 
+                    className="dropdown-item" 
+                    onClick={() => { setIsOpen(false); setSoftwareOpen(false); }}
+                  >
+                    {service.name}
+                  </Link>
                 ))}
               </div>
             </li>
+
             <li>
-              <NavLink to="/blog" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>Blog</NavLink>
+              <NavLink 
+                to="/blog" 
+                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                onClick={() => setIsOpen(false)}
+              >
+                Blog
+              </NavLink>
             </li>
+
             <li>
-              <NavLink to="/jobs" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>Jobs</NavLink>
+              <NavLink 
+                to="/jobs" 
+                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                onClick={() => setIsOpen(false)}
+              >
+                Jobs
+              </NavLink>
             </li>
-            {isAuth && (
-              <li>
-                <button className="nav-link" onClick={handleLogout}>Logout</button>
-              </li>
-            )}
+
+            {/* Auth Buttons */}
+            <li className="nav-auth">
+              {!isAuth ? (
+                <>
+                  <Link 
+                    to="/login" 
+                    className="nav-link btn-auth"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <LogIn size={18} /> Login
+                  </Link>
+                  <Link 
+                    to="/register" 
+                    className="nav-link btn-auth btn-primary"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <UserPlus size={18} /> Register
+                  </Link>
+                </>
+              ) : (
+                <button 
+                  onClick={handleLogout}
+                  className="nav-link btn-auth"
+                >
+                  Logout
+                </button>
+              )}
+            </li>
           </ul>
         </nav>
       </div>

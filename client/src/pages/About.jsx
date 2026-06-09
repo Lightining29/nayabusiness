@@ -1,5 +1,4 @@
-import React from 'react';
-import { Cpu, CheckCircle2, Award, Zap, Users } from 'lucide-react';
+import { Zap, Award, Users, CheckCircle2 } from 'lucide-react';
 
 export default function About() {
   const serviceHighlights = [

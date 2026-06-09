@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { UserCheck, AlertCircle, CheckCircle, Briefcase, MapPin, Clock, DollarSign } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { AlertCircle, CheckCircle, Briefcase, MapPin, Clock, DollarSign, UserCheck } from 'lucide-react';
 
 export default function Register() {
   const [firstName, setFirstName] = useState('');

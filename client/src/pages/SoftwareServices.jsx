@@ -1,6 +1,5 @@
-import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Code, Layout, Server, Palette, Search, CheckCircle } from 'lucide-react';
+import { Code, Layout, Server, Palette, Search } from 'lucide-react';
 
 export default function SoftwareServices() {
   const { serviceId } = useParams();

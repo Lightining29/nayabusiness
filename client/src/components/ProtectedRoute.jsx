@@ -1,4 +1,3 @@
-import React from 'react';
 import { Navigate } from 'react-router-dom';
 
 // Simple client‑side guard: if a JWT token exists in localStorage, allow rendering.

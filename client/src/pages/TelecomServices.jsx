@@ -1,6 +1,5 @@
-import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Radio, ShieldCheck, Activity, Award, Network, Compass, Signal, TowerControl, Database, HardDrive, Cpu } from 'lucide-react';
+import { ShieldCheck, Activity, Award, Network, Compass, Signal, TowerControl, Database, HardDrive, Cpu, Radio } from 'lucide-react';
 
 export default function TelecomServices() {
   const { serviceId } = useParams();

@@ -1,6 +1,5 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
-import { Radio, ShieldAlert, Cpu, BarChart3, Palette, Code, Server, HeartHandshake } from 'lucide-react';
+import { ShieldAlert, BarChart3, Palette, Code, Server, HeartHandshake, Cpu, Radio } from 'lucide-react';
 
 export default function Home() {
   const coreFeatures = [

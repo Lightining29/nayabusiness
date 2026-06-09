@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { UserCheck, AlertCircle, CheckCircle } from 'lucide-react';
+import { useState } from 'react';
+import { AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Briefcase, MapPin, Clock, DollarSign } from 'lucide-react';
 
 export default function JobCard({ job, onApply }) {

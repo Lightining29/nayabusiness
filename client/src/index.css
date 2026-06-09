@@ -1176,3 +1176,305 @@ textarea.form-input {
   box-shadow:
     0 0 30px rgba(56,189,248,0.3);
 }
+
+/* SOFTWARE SERVICE PAGE DARK MODE */
+
+.dark main.glass {
+  background: rgba(15, 23, 42, 0.85) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  backdrop-filter: blur(18px);
+  color: white;
+}
+
+/* Service Title */
+.dark main.glass h2 {
+  color: #fff !important;
+  background: linear-gradient(
+    135deg,
+    #ffffff,
+    #38bdf8,
+    #22d3ee
+  );
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Service Description */
+.dark main.glass p {
+  color: #cbd5e1 !important;
+}
+
+/* Deliverables */
+.dark main.glass li {
+  color: #e2e8f0 !important;
+}
+
+/* Sidebar */
+.dark .sidebar-item {
+  background: rgba(30,41,59,0.6);
+  color: #cbd5e1;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.dark .sidebar-item:hover,
+.dark .sidebar-item.active {
+  background: rgba(56,189,248,0.15);
+  color: white;
+  border-color: #38bdf8;
+}
+
+/* Icon Box */
+.dark main.glass > div:first-child > div:first-child {
+  background: rgba(56,189,248,0.15) !important;
+  color: #38bdf8 !important;
+}
+
+/* Deliverables Heading */
+.dark main.glass h3 {
+  color: white !important;
+}
+
+/* Image Container */
+.dark main.glass img {
+  filter: brightness(0.9);
+}
+
+/* Bottom CTA Glass Box */
+.dark main.glass .glass {
+  background: rgba(30,41,59,0.5) !important;
+  border: 1px solid rgba(56,189,248,0.15) !important;
+}
+
+.dark main.glass .glass h4 {
+  color: white !important;
+}
+
+.dark main.glass .glass p {
+  color: #94a3b8 !important;
+}
+.dark [style*="background: white"] {
+  background: rgba(15, 23, 42, 0.85) !important;
+}
+
+.dark [style*="color: #000000"] {
+  color: white !important;
+}
+
+.dark [style*="color: #333333"] {
+  color: #cbd5e1 !important;
+}
+
+.dark [style*="color: #666666"] {
+  color: #94a3b8 !important;
+}
+/* ====================================
+   TELECOM SERVICES DARK MODE
+==================================== */
+
+.dark .telecom-grid {
+  color: white;
+}
+
+/* Main Service Card */
+
+.dark .telecom-grid main.glass {
+  background: rgba(15, 23, 42, 0.85) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  backdrop-filter: blur(18px);
+
+  box-shadow:
+    0 10px 40px rgba(0,0,0,0.4),
+    0 0 25px rgba(56,189,248,0.08);
+}
+
+/* Sidebar */
+
+.dark .telecom-grid .sidebar-item {
+  background: rgba(30,41,59,0.6);
+  color: #cbd5e1;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.dark .telecom-grid .sidebar-item:hover,
+.dark .telecom-grid .sidebar-item.active {
+  background: rgba(56,189,248,0.15);
+  color: white;
+  border-color: #38bdf8;
+
+  box-shadow:
+    0 0 20px rgba(56,189,248,0.15);
+}
+
+/* Title */
+
+.dark .telecom-grid h2 {
+  background: linear-gradient(
+    135deg,
+    #ffffff,
+    #38bdf8,
+    #22d3ee
+  );
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Text */
+
+.dark .telecom-grid p {
+  color: #cbd5e1 !important;
+}
+
+.dark .telecom-grid h3,
+.dark .telecom-grid h4 {
+  color: white !important;
+}
+
+.dark .telecom-grid li {
+  color: #e2e8f0 !important;
+}
+
+/* Icon Box */
+
+.dark .telecom-grid main.glass > div:first-child > div:first-child {
+  background: rgba(56,189,248,0.15) !important;
+  color: #38bdf8 !important;
+}
+
+/* Image */
+
+.dark .telecom-grid img {
+  filter: brightness(0.9);
+}
+
+/* Bottom CTA */
+
+.dark .telecom-grid .glass:last-child {
+  background: rgba(30,41,59,0.5) !important;
+  border: 1px solid rgba(56,189,248,0.15) !important;
+
+  box-shadow:
+    0 0 25px rgba(56,189,248,0.08);
+}
+
+/* Hover Effect */
+
+.dark .telecom-grid main.glass:hover {
+  box-shadow:
+    0 20px 50px rgba(0,0,0,0.45),
+    0 0 35px rgba(56,189,248,0.12);
+}
+.dark [style*="background: white"] {
+  background: rgba(15, 23, 42, 0.85) !important;
+}
+
+.dark [style*="color: #000000"] {
+  color: white !important;
+}
+
+.dark [style*="color: #333333"] {
+  color: #cbd5e1 !important;
+}
+
+.dark [style*="color: #666666"] {
+  color: #94a3b8 !important;
+}
+/* ====================================
+   JOBS PAGE DARK MODE
+==================================== */
+
+.dark input[type="text"] {
+  background: rgba(15, 23, 42, 0.9) !important;
+  color: white !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.25);
+}
+
+.dark input[type="text"]::placeholder {
+  color: #94a3b8;
+}
+
+.dark input[type="text"]:focus {
+  border-color: #38bdf8 !important;
+
+  box-shadow:
+    0 0 25px rgba(56,189,248,0.15);
+}
+
+/* Filter Buttons */
+
+.dark button {
+  transition: all 0.3s ease;
+}
+
+.dark button:hover {
+  transform: translateY(-2px);
+}
+
+/* Filter Labels */
+
+.dark label {
+  color: white !important;
+}
+
+/* Results Box */
+
+.dark [style*="borderLeft: 3px solid #0ea5e9"] {
+  background: rgba(30,41,59,0.6) !important;
+}
+
+/* Loading */
+
+.dark .loading-text,
+.dark span {
+  color: #cbd5e1;
+}
+
+/* Empty State */
+
+.dark h3 {
+  color: white !important;
+}
+
+/* Search Icon */
+
+.dark svg {
+  color: #38bdf8;
+}
+
+/* Job Cards */
+
+.dark .premium-card,
+.dark .job-card {
+  background: rgba(15,23,42,0.85);
+  border: 1px solid rgba(255,255,255,0.08);
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.35);
+}
+
+.dark .premium-card:hover,
+.dark .job-card:hover {
+  box-shadow:
+    0 20px 50px rgba(0,0,0,0.45),
+    0 0 30px rgba(56,189,248,0.12);
+}
+.dark [style*="background: white"] {
+  background: rgba(15, 23, 42, 0.85) !important;
+}
+
+.dark [style*="color: #000000"] {
+  color: white !important;
+}
+
+.dark [style*="color: #4b5563"] {
+  color: #cbd5e1 !important;
+}
+
+.dark [style*="color: #666666"] {
+  color: #94a3b8 !important;
+}

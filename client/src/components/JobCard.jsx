@@ -5,24 +5,24 @@ export default function JobCard({ job, onApply }) {
     <div style={{
       padding: '1.75rem',
       borderRadius: '14px',
-      background: 'rgba(30, 41, 59, 0.8)',
-      backdropFilter: 'blur(10px)',
-      border: '1px solid rgba(148, 163, 184, 0.2)',
+      background: 'white',
+      border: '1px solid rgba(14, 165, 233, 0.2)',
       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       cursor: 'pointer',
       position: 'relative',
       overflow: 'hidden',
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
     }}
     onMouseEnter={(e) => {
-      e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.5)';
-      e.currentTarget.style.background = 'rgba(30, 41, 59, 1)';
-      e.currentTarget.style.boxShadow = '0 0 20px rgba(59, 130, 246, 0.15)';
+      e.currentTarget.style.borderColor = 'rgba(14, 165, 233, 0.5)';
+      e.currentTarget.style.background = '#f0f7ff';
+      e.currentTarget.style.boxShadow = '0 8px 30px rgba(14, 165, 233, 0.15)';
       e.currentTarget.style.transform = 'translateY(-2px)';
     }}
     onMouseLeave={(e) => {
-      e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.2)';
-      e.currentTarget.style.background = 'rgba(30, 41, 59, 0.8)';
-      e.currentTarget.style.boxShadow = 'none';
+      e.currentTarget.style.borderColor = 'rgba(14, 165, 233, 0.2)';
+      e.currentTarget.style.background = 'white';
+      e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)';
       e.currentTarget.style.transform = 'translateY(0)';
     }}>
       {/* Background accent */}
@@ -32,7 +32,7 @@ export default function JobCard({ job, onApply }) {
         right: '0',
         width: '120px',
         height: '120px',
-        background: 'radial-gradient(circle, rgba(59, 130, 246, 0.1), transparent)',
+        background: 'radial-gradient(circle, rgba(14, 165, 233, 0.1), transparent)',
         borderRadius: '50%',
         pointerEvents: 'none',
       }} />
@@ -43,18 +43,18 @@ export default function JobCard({ job, onApply }) {
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem', gap: '1rem' }}>
           <div>
             <h3 style={{ 
-              color: 'white', 
+              color: '#000000', 
               fontSize: '1.3rem', 
               fontWeight: 700, 
               margin: '0 0 0.4rem 0',
-              background: 'linear-gradient(135deg, #3b82f6, #06b6d4)',
+              background: 'linear-gradient(135deg, #0ea5e9, #06b6d4)',
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
             }}>
               {job.title}
             </h3>
-            <p style={{ color: 'rgba(148, 163, 184, 0.8)', fontSize: '0.85rem', margin: 0 }}>
+            <p style={{ color: '#4b5563', fontSize: '0.85rem', margin: 0 }}>
               {job.department}
             </p>
           </div>
@@ -64,9 +64,9 @@ export default function JobCard({ job, onApply }) {
             fontWeight: 700, 
             padding: '0.4rem 0.8rem',
             borderRadius: '8px', 
-            background: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(59, 130, 246, 0.2))',
+            background: 'rgba(6,182,212,0.1)',
             color: '#06b6d4',
-            border: '1px solid rgba(6,182,212,0.4)',
+            border: '1px solid rgba(6,182,212,0.3)',
             whiteSpace: 'nowrap',
             textTransform: 'uppercase',
             letterSpacing: '0.5px',
@@ -82,18 +82,18 @@ export default function JobCard({ job, onApply }) {
           gap: '0.75rem', 
           margin: '1.25rem 0',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(148, 163, 184, 0.9)', fontSize: '0.85rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#4b5563', fontSize: '0.85rem' }}>
             <MapPin size={16} style={{ color: '#f97316' }} />
             <span>{job.location}</span>
           </div>
           {job.experience && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(148, 163, 184, 0.9)', fontSize: '0.85rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#4b5563', fontSize: '0.85rem' }}>
               <Clock size={16} style={{ color: '#8b5cf6' }} />
               <span>{job.experience}</span>
             </div>
           )}
           {job.salary && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(148, 163, 184, 0.9)', fontSize: '0.85rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#4b5563', fontSize: '0.85rem' }}>
               <DollarSign size={16} style={{ color: '#10b981' }} />
               <span>{job.salary}</span>
             </div>
@@ -102,7 +102,7 @@ export default function JobCard({ job, onApply }) {
 
         {/* Description */}
         <p style={{ 
-          color: 'rgba(203, 213, 225, 0.9)', 
+          color: '#4b5563', 
           fontSize: '0.9rem', 
           lineHeight: '1.6', 
           margin: '1rem 0',
@@ -117,18 +117,18 @@ export default function JobCard({ job, onApply }) {
         {job.requirements && (
           <div style={{ 
             padding: '0.75rem', 
-            background: 'rgba(59, 130, 246, 0.08)',
+            background: 'rgba(14, 165, 233, 0.08)',
             borderRadius: '8px',
             marginBottom: '1rem',
-            borderLeft: '3px solid rgba(59, 130, 246, 0.4)',
+            borderLeft: '3px solid rgba(14, 165, 233, 0.4)',
           }}>
             <p style={{ 
-              color: 'rgba(148, 163, 184, 0.9)', 
+              color: '#4b5563', 
               fontSize: '0.82rem', 
               margin: 0,
               fontWeight: 500,
             }}>
-              <strong style={{ color: 'rgba(203, 213, 225, 1)' }}>Requirements:</strong> {job.requirements.length > 100 
+              <strong style={{ color: '#000000' }}>Requirements:</strong> {job.requirements.length > 100 
                 ? job.requirements.substring(0, 100) + '...' 
                 : job.requirements}
             </p>
@@ -143,7 +143,7 @@ export default function JobCard({ job, onApply }) {
             padding: '0.75rem 1.5rem',
             fontSize: '0.95rem',
             fontWeight: 600,
-            background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+            background: 'linear-gradient(135deg, #0ea5e9, #0284c7)',
             color: 'white',
             border: 'none',
             borderRadius: '8px',
@@ -155,11 +155,11 @@ export default function JobCard({ job, onApply }) {
             transition: 'all 0.3s ease',
           }}
           onMouseEnter={(e) => {
-            e.target.style.background = 'linear-gradient(135deg, #2563eb, #1d4ed8)';
+            e.target.style.background = 'linear-gradient(135deg, #0284c7, #0369a1)';
             e.target.style.transform = 'translateX(4px)';
           }}
           onMouseLeave={(e) => {
-            e.target.style.background = 'linear-gradient(135deg, #3b82f6, #2563eb)';
+            e.target.style.background = 'linear-gradient(135deg, #0ea5e9, #0284c7)';
             e.target.style.transform = 'translateX(0)';
           }}
         >

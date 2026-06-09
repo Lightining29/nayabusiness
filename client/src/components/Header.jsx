@@ -11,9 +11,9 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [telecomOpen, setTelecomOpen] = useState(false);
   const [softwareOpen, setSoftwareOpen] = useState(false);
-const [darkMode, setDarkMode] = useState(() => {
-  return localStorage.getItem("theme") === "dark";
-});
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem("theme") === "dark";
+  });
   const [isAuth, setIsAuth] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [loginForm, setLoginForm] = useState({
@@ -43,15 +43,15 @@ const [darkMode, setDarkMode] = useState(() => {
     const token = localStorage.getItem('token');
     setIsAuth(!!token);
   }, []);
-useEffect(() => {
-  if (darkMode) {
-    document.documentElement.classList.add("dark");
-    localStorage.setItem("theme", "dark");
-  } else {
-    document.documentElement.classList.remove("dark");
-    localStorage.setItem("theme", "light");
-  }
-}, [darkMode]);
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  }, [darkMode]);
   const toggleMenu = () => setIsOpen(!isOpen);
 
   const handleLogout = () => {
@@ -210,188 +210,201 @@ useEffect(() => {
 
   return (
     <>
-    <header className="glass-nav">
-      <div className="header-container">
-        <Link to="/" className="logo-container" onClick={() => setIsOpen(false)}>
-          <Cpu className="logo-icon" />
-          <span>RANCOM <span className="gradient-text-blue" style={{ fontSize: '0.8rem', fontWeight: 600, verticalAlign: 'middle', marginLeft: '0.2rem' }}>TECHNOLOGIES</span></span>
-        </Link>
+      <header className="glass-nav">
+        <div className="header-container">
+          <Link to="/" className="logo-container" onClick={() => setIsOpen(false)}>
+            <Cpu className="logo-icon" />
+            <span>RANCOM <span className="gradient-text-blue" style={{ fontSize: '0.8rem', fontWeight: 600, verticalAlign: 'middle', marginLeft: '0.2rem' }}>TECHNOLOGIES</span></span>
+          </Link>
 
-        {/* Mobile Menu Button */}
-        <button className="menu-btn" onClick={toggleMenu} aria-label="Toggle menu">
-          {isOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+          {/* Mobile Menu Button */}
+          <button className="menu-btn" onClick={toggleMenu} aria-label="Toggle menu">
+            {isOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
 
-        {/* Navigation Links */}
-        <nav>
-          <ul className={`nav-links ${isOpen ? 'mobile-open' : ''}`}>
-            <li>
-              <NavLink 
-                to="/" 
-                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-                onClick={() => setIsOpen(false)}
-                end
-              >
-                Home
-              </NavLink>
-            </li>
-            <li>
-              <NavLink 
-                to="/about" 
-                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-                onClick={() => setIsOpen(false)}
-              >
-                About Us
-              </NavLink>
-            </li>
-
-            {/* Telecom Dropdown */}
-            <li className="dropdown-container">
-              <span 
-                className="nav-link" 
-                style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
-                onClick={() => setTelecomOpen(!telecomOpen)}
-              >
-                Telecom Services <ChevronDown size={14} />
-              </span>
-              <div className={`dropdown-menu ${telecomOpen ? 'mobile-show' : ''}`}>
-                {telecomServices.map((service, index) => (
-                  <Link 
-                    key={index} 
-                    to={service.path} 
-                    className="dropdown-item" 
-                    onClick={() => { setIsOpen(false); setTelecomOpen(false); }}
-                  >
-                    {service.name}
-                  </Link>
-                ))}
-              </div>
-            </li>
-
-            {/* Software Dropdown */}
-            <li className="dropdown-container">
-              <span 
-                className="nav-link" 
-                style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
-                onClick={() => setSoftwareOpen(!softwareOpen)}
-              >
-                Software Services <ChevronDown size={14} />
-              </span>
-              <div className={`dropdown-menu ${softwareOpen ? 'mobile-show' : ''}`}>
-                {softwareServices.map((service, index) => (
-                  <Link 
-                    key={index} 
-                    to={service.path} 
-                    className="dropdown-item" 
-                    onClick={() => { setIsOpen(false); setSoftwareOpen(false); }}
-                  >
-                    {service.name}
-                  </Link>
-                ))}
-              </div>
-            </li>
-
-            <li>
-              <NavLink 
-                to="/blog" 
-                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-                onClick={() => setIsOpen(false)}
-              >
-                Blog
-              </NavLink>
-            </li>
-
-            <li>
-              <NavLink 
-                to="/jobs" 
-                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-                onClick={() => setIsOpen(false)}
-              >
-                Jobs
-              </NavLink>
-            </li>
-  <li>
-             <button
-  className="theme-toggle"
-  onClick={() => setDarkMode(!darkMode)}
->
-  {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-</button>
-            </li>
-            {/* Auth Buttons */}
-            <li className="nav-auth">
-              {!isAuth ? (
-                <>
-                  <button 
-                    type="button"
-                    className="auth-btn login-btn"
-                    style={{
-                      background: 'linear-gradient(to right, #1E40AF, #1D4ED8)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '8px',
-                      padding: '0.5rem 1rem',
-                      fontWeight: '600',
-                      transition: 'all 0.3s ease',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                      marginRight: '0.5rem',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      cursor: 'pointer'
-                    }}
-                    onClick={openLoginModal}
-                  >
-                    <LogIn size={16} className="icon" style={{ marginRight: '0.5rem' }} /> Login
-                  </button>
-                  <button 
-                    type="button"
-                    className="auth-btn register-btn"
-                    style={{
-                      background: 'linear-gradient(to right, #059669, #047857)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '8px',
-                      padding: '0.5rem 1rem',
-                      fontWeight: '600',
-                      transition: 'all 0.3s ease',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      cursor: 'pointer'
-                    }}
-                    onClick={openRegisterModal}
-                  >
-                    <UserPlus size={16} className="icon" style={{ marginRight: '0.5rem' }} /> Register
-                  </button>
-                </>
-              ) : (
-                <button 
-                  onClick={handleLogout}
-                  className="auth-btn logout-btn"
-                  style={{
-                    background: 'linear-gradient(to right, #EF4444, #DC2626)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '0.5rem 1rem',
-                    fontWeight: '600',
-                    transition: 'all 0.3s ease',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                    cursor: 'pointer'
-                  }}
+          {/* Navigation Links */}
+          <nav>
+            <ul className={`nav-links ${isOpen ? 'mobile-open' : ''}`}>
+              <li>
+                <NavLink
+                  to="/"
+                  className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                  onClick={() => setIsOpen(false)}
+                  end
                 >
-                  Logout
-                </button>
-              )}
-            </li>
-          </ul>
-        </nav>
-      </div>
-    </header>
+                  Home
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to="/about"
+                  className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  About Us
+                </NavLink>
+              </li>
 
-    {loginModalOpen && (
-      <div className="register-modal-backdrop" onClick={closeLoginModal}>
-        <style dangerouslySetInnerHTML={{__html: `
+              {/* Telecom Dropdown */}
+              <li className="dropdown-container">
+                <span
+                  className="nav-link"
+                  style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                  onClick={() => setTelecomOpen(!telecomOpen)}
+                >
+                  Telecom Services <ChevronDown size={14} />
+                </span>
+                <div className={`dropdown-menu ${telecomOpen ? 'mobile-show' : ''}`}>
+                  {telecomServices.map((service, index) => (
+                    <Link
+                      key={index}
+                      to={service.path}
+                      className="dropdown-item"
+                      onClick={() => { setIsOpen(false); setTelecomOpen(false); }}
+                    >
+                      {service.name}
+                    </Link>
+                  ))}
+                </div>
+              </li>
+
+              {/* Software Dropdown */}
+              <li className="dropdown-container">
+                <span
+                  className="nav-link"
+                  style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                  onClick={() => setSoftwareOpen(!softwareOpen)}
+                >
+                  Software Services <ChevronDown size={14} />
+                </span>
+                <div className={`dropdown-menu ${softwareOpen ? 'mobile-show' : ''}`}>
+                  {softwareServices.map((service, index) => (
+                    <Link
+                      key={index}
+                      to={service.path}
+                      className="dropdown-item"
+                      onClick={() => { setIsOpen(false); setSoftwareOpen(false); }}
+                    >
+                      {service.name}
+                    </Link>
+                  ))}
+                </div>
+              </li>
+
+              <li>
+                <NavLink
+                  to="/blog"
+                  className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  Blog
+                </NavLink>
+              </li>
+
+              <li>
+                <NavLink
+                  to="/jobs"
+                  className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  Jobs
+                </NavLink>
+              </li>
+              <li>
+                <button
+                  className="theme-toggle"
+                  onClick={() => setDarkMode(!darkMode)}
+                >
+                  {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+                </button>
+              </li>
+              {/* Auth Buttons */}
+              <li className="nav-auth">
+                {!isAuth ? (
+                  <>
+                    <button
+                      type="button"
+                      className="auth-btn login-btn"
+                      style={{
+                        background: 'linear-gradient(to right, #1E40AF, #1D4ED8)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '0.5rem 1rem',
+                        fontWeight: '600',
+                        transition: 'all 0.3s ease',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                        marginRight: '0.5rem',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        cursor: 'pointer'
+                      }}
+                      onClick={openLoginModal}
+                    >
+                      <LogIn size={16} className="icon" style={{ marginRight: '0.5rem' }} /> Login
+                    </button>
+                    <button
+                      type="button"
+                      className="auth-btn register-btn"
+                      style={{
+                        background: 'linear-gradient(to right, #059669, #047857)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '0.5rem 1rem',
+                        fontWeight: '600',
+                        transition: 'all 0.3s ease',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        cursor: 'pointer'
+                      }}
+                      onClick={openRegisterModal}
+                    >
+                      <UserPlus size={16} className="icon" style={{ marginRight: '0.5rem' }} /> Register
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={handleLogout}
+                    className="auth-btn logout-btn"
+                    style={{
+                      background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 50%, #B91C1C 100%)',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '12px',
+                      padding: '0.65rem 1.3rem',
+                      fontWeight: '700',
+                      fontSize: '0.95rem',
+                      letterSpacing: '0.3px',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      boxShadow: '0 8px 20px rgba(239,68,68,0.35)',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-3px)';
+                      e.currentTarget.style.boxShadow =
+                        '0 15px 30px rgba(239,68,68,0.5)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow =
+                        '0 8px 20px rgba(239,68,68,0.35)';
+                    }}
+                  >
+                    🚪 Logout
+                  </button>
+                )}
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </header>
+
+      {loginModalOpen && (
+        <div className="register-modal-backdrop" onClick={closeLoginModal}>
+          <style dangerouslySetInnerHTML={{
+            __html: `
           .register-modal-backdrop {
             position: fixed; inset: 0; z-index: 2000; background: rgba(15, 23, 42, 0.55);
             display: flex; align-items: center; justify-content: center; padding: 1rem;
@@ -425,52 +438,53 @@ useEffect(() => {
           }
         `}} />
 
-        <div className="register-modal login-modal" role="dialog" aria-modal="true" aria-labelledby="login-modal-title" onClick={(e) => e.stopPropagation()}>
-          <div className="register-modal-header">
-            <h2 id="login-modal-title" className="register-modal-title">
-              <LogIn size={22} /> Login
-            </h2>
-            <button type="button" className="register-modal-close" onClick={closeLoginModal} aria-label="Close login modal">
-              <X size={20} />
-            </button>
+          <div className="register-modal login-modal" role="dialog" aria-modal="true" aria-labelledby="login-modal-title" onClick={(e) => e.stopPropagation()}>
+            <div className="register-modal-header">
+              <h2 id="login-modal-title" className="register-modal-title">
+                <LogIn size={22} /> Login
+              </h2>
+              <button type="button" className="register-modal-close" onClick={closeLoginModal} aria-label="Close login modal">
+                <X size={20} />
+              </button>
+            </div>
+
+            {loginSuccess && (
+              <div className="register-modal-alert success">
+                <CheckCircle size={18} />
+                <span>{loginSuccess}</span>
+              </div>
+            )}
+
+            {loginError && (
+              <div className="register-modal-alert error">
+                <AlertCircle size={18} />
+                <span>{loginError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleLoginSubmit}>
+              <div className="form-group">
+                <label>Email</label>
+                <input className="form-input" type="email" placeholder="Email address" value={loginForm.email} onChange={(e) => updateLoginForm('email', e.target.value)} required />
+              </div>
+
+              <div className="form-group">
+                <label>Password</label>
+                <input className="form-input" type="password" placeholder="Password" value={loginForm.password} onChange={(e) => updateLoginForm('password', e.target.value)} required />
+              </div>
+
+              <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.85rem 1rem', fontSize: '1rem' }} disabled={loginLoading}>
+                {loginLoading ? 'Signing in...' : 'Login'}
+              </button>
+            </form>
           </div>
-
-          {loginSuccess && (
-            <div className="register-modal-alert success">
-              <CheckCircle size={18} />
-              <span>{loginSuccess}</span>
-            </div>
-          )}
-
-          {loginError && (
-            <div className="register-modal-alert error">
-              <AlertCircle size={18} />
-              <span>{loginError}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleLoginSubmit}>
-            <div className="form-group">
-              <label>Email</label>
-              <input className="form-input" type="email" placeholder="Email address" value={loginForm.email} onChange={(e) => updateLoginForm('email', e.target.value)} required />
-            </div>
-
-            <div className="form-group">
-              <label>Password</label>
-              <input className="form-input" type="password" placeholder="Password" value={loginForm.password} onChange={(e) => updateLoginForm('password', e.target.value)} required />
-            </div>
-
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.85rem 1rem', fontSize: '1rem' }} disabled={loginLoading}>
-              {loginLoading ? 'Signing in...' : 'Login'}
-            </button>
-          </form>
         </div>
-      </div>
-    )}
+      )}
 
-    {registerModalOpen && (
-      <div className="register-modal-backdrop" onClick={closeRegisterModal}>
-        <style dangerouslySetInnerHTML={{__html: `
+      {registerModalOpen && (
+        <div className="register-modal-backdrop" onClick={closeRegisterModal}>
+          <style dangerouslySetInnerHTML={{
+            __html: `
           .register-modal-backdrop {
             position: fixed; inset: 0; z-index: 2000; background: rgba(15, 23, 42, 0.55);
             display: flex; align-items: center; justify-content: center; padding: 1rem;
@@ -507,75 +521,75 @@ useEffect(() => {
           }
         `}} />
 
-        <div className="register-modal" role="dialog" aria-modal="true" aria-labelledby="register-modal-title" onClick={(e) => e.stopPropagation()}>
-          <div className="register-modal-header">
-            <h2 id="register-modal-title" className="register-modal-title">
-              <UserPlus size={22} /> Register
-            </h2>
-            <button type="button" className="register-modal-close" onClick={closeRegisterModal} aria-label="Close register modal">
-              <X size={20} />
-            </button>
+          <div className="register-modal" role="dialog" aria-modal="true" aria-labelledby="register-modal-title" onClick={(e) => e.stopPropagation()}>
+            <div className="register-modal-header">
+              <h2 id="register-modal-title" className="register-modal-title">
+                <UserPlus size={22} /> Register
+              </h2>
+              <button type="button" className="register-modal-close" onClick={closeRegisterModal} aria-label="Close register modal">
+                <X size={20} />
+              </button>
+            </div>
+
+            {registerSuccess && (
+              <div className="register-modal-alert success">
+                <CheckCircle size={18} />
+                <span>{registerSuccess}</span>
+              </div>
+            )}
+
+            {registerError && (
+              <div className="register-modal-alert error">
+                <AlertCircle size={18} />
+                <span>{registerError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleRegisterSubmit}>
+              <div className="register-modal-grid">
+                <div className="form-group">
+                  <label>First Name</label>
+                  <input className="form-input" type="text" placeholder="First name" value={registerForm.firstName} onChange={(e) => updateRegisterForm('firstName', e.target.value)} required />
+                </div>
+
+                <div className="form-group">
+                  <label>Last Name</label>
+                  <input className="form-input" type="text" placeholder="Last name" value={registerForm.lastName} onChange={(e) => updateRegisterForm('lastName', e.target.value)} required />
+                </div>
+
+                <div className="form-group">
+                  <label>Email</label>
+                  <input className="form-input" type="email" placeholder="Email address" value={registerForm.email} onChange={(e) => updateRegisterForm('email', e.target.value)} required />
+                </div>
+
+                <div className="form-group">
+                  <label>Phone No</label>
+                  <input className="form-input" type="tel" placeholder="Phone number" value={registerForm.phone} onChange={(e) => updateRegisterForm('phone', e.target.value)} required />
+                </div>
+
+                <div className="form-group">
+                  <label>Password</label>
+                  <input className="form-input" type="password" placeholder="Password" value={registerForm.password} onChange={(e) => updateRegisterForm('password', e.target.value)} required />
+                </div>
+
+                <div className="form-group">
+                  <label>Resume</label>
+                  <input className="form-input" type="file" accept="application/pdf,.pdf" onChange={(e) => updateRegisterForm('resume', e.target.files[0] || null)} required />
+                </div>
+
+                <div className="form-group full-width">
+                  <label>Skills</label>
+                  <textarea className="form-input" placeholder="React, Node.js, RF survey, telecom tools..." value={registerForm.skills} onChange={(e) => updateRegisterForm('skills', e.target.value)} required />
+                </div>
+              </div>
+
+              <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.85rem 1rem', fontSize: '1rem' }} disabled={registerLoading}>
+                {registerLoading ? 'Submitting...' : 'Submit Registration'}
+              </button>
+            </form>
           </div>
-
-          {registerSuccess && (
-            <div className="register-modal-alert success">
-              <CheckCircle size={18} />
-              <span>{registerSuccess}</span>
-            </div>
-          )}
-
-          {registerError && (
-            <div className="register-modal-alert error">
-              <AlertCircle size={18} />
-              <span>{registerError}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleRegisterSubmit}>
-            <div className="register-modal-grid">
-              <div className="form-group">
-                <label>First Name</label>
-                <input className="form-input" type="text" placeholder="First name" value={registerForm.firstName} onChange={(e) => updateRegisterForm('firstName', e.target.value)} required />
-              </div>
-
-              <div className="form-group">
-                <label>Last Name</label>
-                <input className="form-input" type="text" placeholder="Last name" value={registerForm.lastName} onChange={(e) => updateRegisterForm('lastName', e.target.value)} required />
-              </div>
-
-              <div className="form-group">
-                <label>Email</label>
-                <input className="form-input" type="email" placeholder="Email address" value={registerForm.email} onChange={(e) => updateRegisterForm('email', e.target.value)} required />
-              </div>
-
-              <div className="form-group">
-                <label>Phone No</label>
-                <input className="form-input" type="tel" placeholder="Phone number" value={registerForm.phone} onChange={(e) => updateRegisterForm('phone', e.target.value)} required />
-              </div>
-
-              <div className="form-group">
-                <label>Password</label>
-                <input className="form-input" type="password" placeholder="Password" value={registerForm.password} onChange={(e) => updateRegisterForm('password', e.target.value)} required />
-              </div>
-
-              <div className="form-group">
-                <label>Resume</label>
-                <input className="form-input" type="file" accept="application/pdf,.pdf" onChange={(e) => updateRegisterForm('resume', e.target.files[0] || null)} required />
-              </div>
-
-              <div className="form-group full-width">
-                <label>Skills</label>
-                <textarea className="form-input" placeholder="React, Node.js, RF survey, telecom tools..." value={registerForm.skills} onChange={(e) => updateRegisterForm('skills', e.target.value)} required />
-              </div>
-            </div>
-
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.85rem 1rem', fontSize: '1rem' }} disabled={registerLoading}>
-              {registerLoading ? 'Submitting...' : 'Submit Registration'}
-            </button>
-          </form>
         </div>
-      </div>
-    )}
+      )}
     </>
   );
 }

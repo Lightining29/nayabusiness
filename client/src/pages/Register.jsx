@@ -8,6 +8,9 @@ export default function Register() {
   const [mobno, setMobno] = useState('');
   const [qualification, setQualification] = useState('');
   const [city, setCity] = useState('');
+  const [resume, setResume] = useState('');
+  const [password, setPassword] = useState('');
+  const [skills, setSkills] = useState('');
   const [selectedJob, setSelectedJob] = useState('General Application');
 
   const [loading, setLoading] = useState(false);
@@ -54,6 +57,9 @@ export default function Register() {
           mobno,
           qualification,
           city,
+          resume,
+          password,
+          skills,
           job_title: selectedJob
         })
       });
@@ -70,6 +76,9 @@ export default function Register() {
       setMobno('');
       setQualification('');
       setCity('');
+      setResume('');
+      setPassword('');
+      setSkills('');
       setSelectedJob('General Application');
     } catch (err) {
       setError(err.message || 'Server connection error. Please try again.');
@@ -258,6 +267,17 @@ export default function Register() {
               value={resume}
               onChange={(e) => setResume(e.target.value)}
               placeholder="https://example.com/resume.pdf"
+              className="form-input"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Create a password"
               className="form-input"
             />
           </div>

@@ -24,12 +24,21 @@ const registrationSchema = new mongoose.Schema({
   },
   qualification: {
     type: String,
-    required: true,
     trim: true
   },
   city: {
     type: String,
-    required: true,
+    trim: true
+  },
+  resume: {
+    type: String,
+    trim: true
+  },
+  password: {
+    type: String
+  },
+  skills: {
+    type: String,
     trim: true
   },
   job_title: {

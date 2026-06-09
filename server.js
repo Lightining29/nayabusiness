@@ -158,13 +158,14 @@ app.post('/api/contact', async (req, res) => {
 
 // 2. Submit Career Registration
 app.post('/api/register', async (req, res) => {
-  const { first_name, last_name, email, mobno, qualification, city, job_title } = req.body;
-  if (!first_name || !last_name || !email || !mobno || !qualification || !city) {
+  const { first_name, last_name, email, mobno, qualification, city, job_title, resume, password, skills } = req.body;
+  if (!first_name || !last_name || !email || !mobno) {
     return res.status(400).json({ error: 'All fields are required' });
   }
 
   if (mongoose.connection.readyState === 1) {
     try {
+      const hashedPassword = password ? await bcrypt.hash(password, 10) : undefined;
       const newRegistration = new Registration({ 
         first_name, 
         last_name, 
@@ -172,6 +173,9 @@ app.post('/api/register', async (req, res) => {
         mobno, 
         qualification, 
         city,
+        resume,
+        password: hashedPassword,
+        skills,
         job_title: job_title || 'General Application'
       });
       await newRegistration.save();
@@ -190,6 +194,9 @@ app.post('/api/register', async (req, res) => {
       mobno, 
       qualification, 
       city, 
+      resume,
+      password: password ? '[hidden]' : undefined,
+      skills,
       job_title: job_title || 'General Application',
       createdAt: new Date() 
     };

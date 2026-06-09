@@ -37,8 +37,29 @@ app.use('/api', jobRoutes);
 app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ error: 'Invalid credentials' });
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      const registration = await Registration.findOne({ email });
+      if (!registration || !registration.password) {
+        return res.status(400).json({ error: 'Invalid credentials' });
+      }
+
+      const registrationPasswordMatch = await bcrypt.compare(password, registration.password);
+      if (!registrationPasswordMatch) {
+        return res.status(400).json({ error: 'Invalid credentials' });
+      }
+
+      user = new User({
+        name: `${registration.first_name} ${registration.last_name}`.trim(),
+        email: registration.email,
+        password,
+        city: registration.city,
+        skills: registration.skills ? registration.skills.split(',').map(skill => skill.trim()).filter(Boolean) : []
+      });
+      await user.save();
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'fallback-secret', { expiresIn: '7d' });
@@ -166,6 +187,13 @@ app.post('/api/register', async (req, res) => {
   if (mongoose.connection.readyState === 1) {
     try {
       const hashedPassword = password ? await bcrypt.hash(password, 10) : undefined;
+      if (password) {
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+          return res.status(400).json({ error: 'Email already registered. Please login.' });
+        }
+      }
+
       const newRegistration = new Registration({ 
         first_name, 
         last_name, 
@@ -179,6 +207,18 @@ app.post('/api/register', async (req, res) => {
         job_title: job_title || 'General Application'
       });
       await newRegistration.save();
+
+      if (password) {
+        const user = new User({
+          name: `${first_name} ${last_name}`.trim(),
+          email,
+          password,
+          city,
+          skills: skills ? skills.split(',').map(skill => skill.trim()).filter(Boolean) : []
+        });
+        await user.save();
+      }
+
       return res.status(201).json({ message: 'Career registration submitted successfully!' });
     } catch (err) {
       console.error(err);

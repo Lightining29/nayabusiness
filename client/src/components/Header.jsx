@@ -7,6 +7,14 @@ export default function Header() {
   const [telecomOpen, setTelecomOpen] = useState(false);
   const [softwareOpen, setSoftwareOpen] = useState(false);
   const [isAuth, setIsAuth] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [loginForm, setLoginForm] = useState({
+    email: '',
+    password: ''
+  });
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginSuccess, setLoginSuccess] = useState('');
+  const [loginError, setLoginError] = useState('');
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
   const [registerForm, setRegisterForm] = useState({
     firstName: '',
@@ -33,6 +41,64 @@ export default function Header() {
     localStorage.removeItem('token');
     setIsAuth(false);
     navigate('/');
+  };
+
+  const openLoginModal = () => {
+    setLoginError('');
+    setLoginSuccess('');
+    setLoginModalOpen(true);
+    setIsOpen(false);
+  };
+
+  const closeLoginModal = () => {
+    if (loginLoading) return;
+    setLoginModalOpen(false);
+  };
+
+  const updateLoginForm = (field, value) => {
+    setLoginForm((current) => ({ ...current, [field]: value }));
+  };
+
+  const handleLoginSubmit = async (e) => {
+    e.preventDefault();
+    const { email, password } = loginForm;
+
+    if (!email || !password) {
+      setLoginError('Please fill in all fields.');
+      return;
+    }
+
+    setLoginLoading(true);
+    setLoginError('');
+    setLoginSuccess('');
+
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Login failed.');
+      }
+
+      localStorage.setItem('token', data.token);
+      setIsAuth(true);
+      setLoginSuccess('Login successful!');
+      setLoginForm({ email: '', password: '' });
+      setTimeout(() => {
+        setLoginModalOpen(false);
+        navigate('/profile');
+      }, 500);
+    } catch (err) {
+      setLoginError(err.message || 'Server connection error. Please try again.');
+    } finally {
+      setLoginLoading(false);
+    }
   };
 
   const openRegisterModal = () => {
@@ -232,8 +298,8 @@ export default function Header() {
             <li className="nav-auth">
               {!isAuth ? (
                 <>
-                  <NavLink 
-                    to="/login" 
+                  <button 
+                    type="button"
                     className="auth-btn login-btn"
                     style={{
                       background: 'linear-gradient(to right, #1E40AF, #1D4ED8)',
@@ -246,12 +312,13 @@ export default function Header() {
                       boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                       marginRight: '0.5rem',
                       display: 'inline-flex',
-                      alignItems: 'center'
+                      alignItems: 'center',
+                      cursor: 'pointer'
                     }}
-                    onClick={() => setIsOpen(false)}
+                    onClick={openLoginModal}
                   >
                     <LogIn size={16} className="icon" style={{ marginRight: '0.5rem' }} /> Login
-                  </NavLink>
+                  </button>
                   <button 
                     type="button"
                     className="auth-btn register-btn"
@@ -297,6 +364,85 @@ export default function Header() {
         </nav>
       </div>
     </header>
+
+    {loginModalOpen && (
+      <div className="register-modal-backdrop" onClick={closeLoginModal}>
+        <style dangerouslySetInnerHTML={{__html: `
+          .register-modal-backdrop {
+            position: fixed; inset: 0; z-index: 2000; background: rgba(15, 23, 42, 0.55);
+            display: flex; align-items: center; justify-content: center; padding: 1rem;
+          }
+          .register-modal {
+            width: min(640px, 100%); max-height: 92vh; overflow-y: auto; background: #ffffff;
+            border-radius: 14px; box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28); padding: 1.5rem;
+          }
+          .login-modal { width: min(440px, 100%); }
+          .register-modal-header {
+            display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem;
+          }
+          .register-modal-title {
+            color: #0f172a; font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;
+          }
+          .register-modal-close {
+            width: 38px; height: 38px; border: none; border-radius: 8px; background: #f1f5f9; color: #0f172a;
+            display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+          }
+          .register-modal .form-group { margin-bottom: 1rem; }
+          .register-modal label { color: #0f172a; font-weight: 700; margin-bottom: 0.45rem; display: block; }
+          .register-modal-alert {
+            display: flex; align-items: center; gap: 0.5rem; padding: 0.9rem 1rem; border-radius: 8px;
+            margin-bottom: 1rem; font-weight: 600; font-size: 0.92rem;
+          }
+          .register-modal-alert.success { color: #047857; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.22); }
+          .register-modal-alert.error { color: #dc2626; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.22); }
+          @media (max-width: 640px) {
+            .register-modal { padding: 1.1rem; }
+            .register-modal-title { font-size: 1.15rem; }
+          }
+        `}} />
+
+        <div className="register-modal login-modal" role="dialog" aria-modal="true" aria-labelledby="login-modal-title" onClick={(e) => e.stopPropagation()}>
+          <div className="register-modal-header">
+            <h2 id="login-modal-title" className="register-modal-title">
+              <LogIn size={22} /> Login
+            </h2>
+            <button type="button" className="register-modal-close" onClick={closeLoginModal} aria-label="Close login modal">
+              <X size={20} />
+            </button>
+          </div>
+
+          {loginSuccess && (
+            <div className="register-modal-alert success">
+              <CheckCircle size={18} />
+              <span>{loginSuccess}</span>
+            </div>
+          )}
+
+          {loginError && (
+            <div className="register-modal-alert error">
+              <AlertCircle size={18} />
+              <span>{loginError}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleLoginSubmit}>
+            <div className="form-group">
+              <label>Email</label>
+              <input className="form-input" type="email" placeholder="Email address" value={loginForm.email} onChange={(e) => updateLoginForm('email', e.target.value)} required />
+            </div>
+
+            <div className="form-group">
+              <label>Password</label>
+              <input className="form-input" type="password" placeholder="Password" value={loginForm.password} onChange={(e) => updateLoginForm('password', e.target.value)} required />
+            </div>
+
+            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.85rem 1rem', fontSize: '1rem' }} disabled={loginLoading}>
+              {loginLoading ? 'Signing in...' : 'Login'}
+            </button>
+          </form>
+        </div>
+      </div>
+    )}
 
     {registerModalOpen && (
       <div className="register-modal-backdrop" onClick={closeRegisterModal}>

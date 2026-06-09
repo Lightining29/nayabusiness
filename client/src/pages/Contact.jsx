@@ -72,9 +72,9 @@ export default function Contact() {
         <h1 style={{
           fontSize: '2.5rem',
           fontWeight: 800,
-          color: 'white',
+          color: '#000000',
           marginBottom: '0.75rem',
-          background: 'linear-gradient(135deg, #3b82f6, #06b6d4)',
+          background: 'linear-gradient(135deg, #0ea5e9, #06b6d4)',
           backgroundClip: 'text',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
@@ -82,7 +82,7 @@ export default function Contact() {
           Get In Touch
         </h1>
         <p style={{
-          color: 'rgba(148, 163, 184, 0.9)',
+          color: '#4b5563',
           fontSize: '1.1rem',
           maxWidth: '500px',
           margin: '0 auto',
@@ -105,13 +105,13 @@ export default function Contact() {
           {/* Office Info */}
           <div style={{
             padding: '2rem',
-            background: 'rgba(30, 41, 59, 0.8)',
-            border: '1px solid rgba(148, 163, 184, 0.2)',
+            background: 'white',
+            border: '1px solid rgba(14, 165, 233, 0.2)',
             borderRadius: '14px',
-            backdropFilter: 'blur(10px)',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
           }}>
             <h3 style={{
-              color: 'white',
+              color: '#000000',
               fontSize: '1.3rem',
               fontWeight: 700,
               marginBottom: '1.5rem',
@@ -119,7 +119,7 @@ export default function Contact() {
               Rancom Technologies
             </h3>
             <p style={{
-              color: 'rgba(148, 163, 184, 0.8)',
+              color: '#4b5563',
               fontSize: '0.95rem',
               lineHeight: '1.6',
               marginBottom: '2rem',
@@ -146,10 +146,10 @@ export default function Contact() {
                   <MapPin size={20} />
                 </div>
                 <div>
-                  <h4 style={{ color: 'white', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.25rem 0' }}>
+                  <h4 style={{ color: '#000000', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.25rem 0' }}>
                     Office Address
                   </h4>
-                  <p style={{ color: 'rgba(148, 163, 184, 0.8)', fontSize: '0.9rem', margin: 0 }}>
+                  <p style={{ color: '#4b5563', fontSize: '0.9rem', margin: 0 }}>
                     452 Telecom Plaza, Sector-62<br />IT Park, Noida, UP 201301, India
                   </p>
                 </div>
@@ -172,10 +172,10 @@ export default function Contact() {
                   <Phone size={20} />
                 </div>
                 <div>
-                  <h4 style={{ color: 'white', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.25rem 0' }}>
+                  <h4 style={{ color: '#000000', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.25rem 0' }}>
                     Call Us
                   </h4>
-                  <p style={{ color: 'rgba(148, 163, 184, 0.8)', fontSize: '0.9rem', margin: 0 }}>
+                  <p style={{ color: '#4b5563', fontSize: '0.9rem', margin: 0 }}>
                     +91 (120) 455-8900<br />+1 (800) 555-0199
                   </p>
                 </div>
@@ -198,10 +198,10 @@ export default function Contact() {
                   <Mail size={20} />
                 </div>
                 <div>
-                  <h4 style={{ color: 'white', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.25rem 0' }}>
+                  <h4 style={{ color: '#000000', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 0.25rem 0' }}>
                     Email Us
                   </h4>
-                  <p style={{ color: 'rgba(148, 163, 184, 0.8)', fontSize: '0.9rem', margin: 0 }}>
+                  <p style={{ color: '#4b5563', fontSize: '0.9rem', margin: 0 }}>
                     contact@rancomtechnologies.com<br />support@rancomtechnologies.com
                   </p>
                 </div>
@@ -212,16 +212,16 @@ export default function Contact() {
           {/* Response Time Info */}
           <div style={{
             padding: '1.5rem',
-            background: 'rgba(59, 130, 246, 0.1)',
-            border: '1px solid rgba(59, 130, 246, 0.3)',
+            background: 'rgba(14, 165, 233, 0.08)',
+            border: '1px solid rgba(14, 165, 233, 0.2)',
             borderRadius: '10px',
           }}>
             <p style={{
-              color: 'rgba(148, 163, 184, 0.9)',
+              color: '#4b5563',
               fontSize: '0.9rem',
               margin: 0,
             }}>
-              ⏱️ <strong>Response Time:</strong> We typically respond within 24 hours during business days.
+              ⏱️ <strong style={{ color: '#000000' }}>Response Time:</strong> We typically respond within 24 hours during business days.
             </p>
           </div>
         </div>
@@ -229,13 +229,13 @@ export default function Contact() {
         {/* Contact Form */}
         <div style={{
           padding: '2.5rem',
-          background: 'rgba(30, 41, 59, 0.8)',
-          border: '1px solid rgba(148, 163, 184, 0.2)',
+          background: 'white',
+          border: '1px solid rgba(14, 165, 233, 0.2)',
           borderRadius: '14px',
-          backdropFilter: 'blur(10px)',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
         }}>
           <h3 style={{
-            color: 'white',
+            color: '#000000',
             fontSize: '1.5rem',
             fontWeight: 800,
             marginBottom: '2rem',
@@ -297,7 +297,7 @@ export default function Contact() {
                 <div key={field.name}>
                   <label style={{
                     display: 'block',
-                    color: 'rgba(203, 213, 225, 0.9)',
+                    color: '#000000',
                     fontSize: '0.9rem',
                     fontWeight: 600,
                     marginBottom: '0.5rem',
@@ -315,24 +315,24 @@ export default function Contact() {
                     style={{
                       width: '100%',
                       padding: '0.875rem',
-                      background: 'rgba(255, 255, 255, 0.05)',
+                      background: 'white',
                       border: touched[field.name] && !formData[field.name]
                         ? '1px solid rgba(248, 113, 113, 0.5)'
-                        : '1px solid rgba(148, 163, 184, 0.2)',
+                        : '1px solid rgba(14, 165, 233, 0.2)',
                       borderRadius: '10px',
-                      color: 'white',
+                      color: '#000000',
                       fontSize: '0.95rem',
                       outline: 'none',
                       transition: 'all 0.2s ease',
                       boxSizing: 'border-box',
                     }}
                     onFocus={(e) => {
-                      e.target.style.borderColor = 'rgba(59, 130, 246, 0.5)';
-                      e.target.style.background = 'rgba(255, 255, 255, 0.08)';
+                      e.target.style.borderColor = 'rgba(14, 165, 233, 0.5)';
+                      e.target.style.background = '#f0f7ff';
                     }}
                     onBlur={(e) => {
-                      e.target.style.borderColor = 'rgba(148, 163, 184, 0.2)';
-                      e.target.style.background = 'rgba(255, 255, 255, 0.05)';
+                      e.target.style.borderColor = 'rgba(14, 165, 233, 0.2)';
+                      e.target.style.background = 'white';
                       handleBlur(e);
                     }}
                   />
@@ -351,7 +351,7 @@ export default function Contact() {
                 <div key={field.name}>
                   <label style={{
                     display: 'block',
-                    color: 'rgba(203, 213, 225, 0.9)',
+                    color: '#000000',
                     fontSize: '0.9rem',
                     fontWeight: 600,
                     marginBottom: '0.5rem',
@@ -369,24 +369,24 @@ export default function Contact() {
                     style={{
                       width: '100%',
                       padding: '0.875rem',
-                      background: 'rgba(255, 255, 255, 0.05)',
+                      background: 'white',
                       border: touched[field.name] && !formData[field.name]
                         ? '1px solid rgba(248, 113, 113, 0.5)'
-                        : '1px solid rgba(148, 163, 184, 0.2)',
+                        : '1px solid rgba(14, 165, 233, 0.2)',
                       borderRadius: '10px',
-                      color: 'white',
+                      color: '#000000',
                       fontSize: '0.95rem',
                       outline: 'none',
                       transition: 'all 0.2s ease',
                       boxSizing: 'border-box',
                     }}
                     onFocus={(e) => {
-                      e.target.style.borderColor = 'rgba(59, 130, 246, 0.5)';
-                      e.target.style.background = 'rgba(255, 255, 255, 0.08)';
+                      e.target.style.borderColor = 'rgba(14, 165, 233, 0.5)';
+                      e.target.style.background = '#f0f7ff';
                     }}
                     onBlur={(e) => {
-                      e.target.style.borderColor = 'rgba(148, 163, 184, 0.2)';
-                      e.target.style.background = 'rgba(255, 255, 255, 0.05)';
+                      e.target.style.borderColor = 'rgba(14, 165, 233, 0.2)';
+                      e.target.style.background = 'white';
                       handleBlur(e);
                     }}
                   />
@@ -398,7 +398,7 @@ export default function Contact() {
             <div style={{ marginBottom: '2rem' }}>
               <label style={{
                 display: 'block',
-                color: 'rgba(203, 213, 225, 0.9)',
+                color: '#000000',
                 fontSize: '0.9rem',
                 fontWeight: 600,
                 marginBottom: '0.5rem',
@@ -416,12 +416,12 @@ export default function Contact() {
                 style={{
                   width: '100%',
                   padding: '0.875rem',
-                  background: 'rgba(255, 255, 255, 0.05)',
+                  background: 'white',
                   border: touched.msg && !formData.msg
                     ? '1px solid rgba(248, 113, 113, 0.5)'
-                    : '1px solid rgba(148, 163, 184, 0.2)',
+                    : '1px solid rgba(14, 165, 233, 0.2)',
                   borderRadius: '10px',
-                  color: 'white',
+                  color: '#000000',
                   fontSize: '0.95rem',
                   fontFamily: 'inherit',
                   outline: 'none',
@@ -430,12 +430,12 @@ export default function Contact() {
                   boxSizing: 'border-box',
                 }}
                 onFocus={(e) => {
-                  e.target.style.borderColor = 'rgba(59, 130, 246, 0.5)';
-                  e.target.style.background = 'rgba(255, 255, 255, 0.08)';
+                  e.target.style.borderColor = 'rgba(14, 165, 233, 0.5)';
+                  e.target.style.background = '#f0f7ff';
                 }}
                 onBlur={(e) => {
-                  e.target.style.borderColor = 'rgba(148, 163, 184, 0.2)';
-                  e.target.style.background = 'rgba(255, 255, 255, 0.05)';
+                  e.target.style.borderColor = 'rgba(14, 165, 233, 0.2)';
+                  e.target.style.background = 'white';
                   handleBlur(e);
                 }}
               />
@@ -455,8 +455,8 @@ export default function Contact() {
                 justifyContent: 'center',
                 gap: '0.75rem',
                 background: loading
-                  ? 'rgba(59, 130, 246, 0.5)'
-                  : 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                  ? 'rgba(14, 165, 233, 0.5)'
+                  : 'linear-gradient(135deg, #0ea5e9, #0284c7)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '10px',
@@ -466,14 +466,14 @@ export default function Contact() {
               }}
               onMouseEnter={(e) => {
                 if (!loading) {
-                  e.target.style.background = 'linear-gradient(135deg, #2563eb, #1d4ed8)';
+                  e.target.style.background = 'linear-gradient(135deg, #0284c7, #0369a1)';
                   e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 10px 20px rgba(59, 130, 246, 0.3)';
+                  e.target.style.boxShadow = '0 10px 20px rgba(14, 165, 233, 0.3)';
                 }
               }}
               onMouseLeave={(e) => {
                 if (!loading) {
-                  e.target.style.background = 'linear-gradient(135deg, #3b82f6, #2563eb)';
+                  e.target.style.background = 'linear-gradient(135deg, #0ea5e9, #0284c7)';
                   e.target.style.transform = 'translateY(0)';
                   e.target.style.boxShadow = 'none';
                 }

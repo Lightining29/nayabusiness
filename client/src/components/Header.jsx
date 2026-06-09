@@ -150,25 +150,61 @@ export default function Header() {
             <li className="nav-auth">
               {!isAuth ? (
                 <>
-                  <Link 
+                  <NavLink 
                     to="/login" 
-                    className="nav-link btn-auth"
+                    className="auth-btn login-btn"
+                    style={{
+                      background: 'linear-gradient(to right, #1E40AF, #1D4ED8)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '0.5rem 1rem',
+                      fontWeight: '600',
+                      transition: 'all 0.3s ease',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                      marginRight: '0.5rem',
+                      display: 'inline-flex',
+                      alignItems: 'center'
+                    }}
                     onClick={() => setIsOpen(false)}
                   >
-                    <LogIn size={18} /> Login
-                  </Link>
-                  <Link 
+                    <LogIn size={16} className="icon" style={{ marginRight: '0.5rem' }} /> Login
+                  </NavLink>
+                  <NavLink 
                     to="/register" 
-                    className="nav-link btn-auth btn-primary"
+                    className="auth-btn register-btn"
+                    style={{
+                      background: 'linear-gradient(to right, #059669, #047857)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '0.5rem 1rem',
+                      fontWeight: '600',
+                      transition: 'all 0.3s ease',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                      display: 'inline-flex',
+                      alignItems: 'center'
+                    }}
                     onClick={() => setIsOpen(false)}
                   >
-                    <UserPlus size={18} /> Register
-                  </Link>
+                    <UserPlus size={16} className="icon" style={{ marginRight: '0.5rem' }} /> Register
+                  </NavLink>
                 </>
               ) : (
                 <button 
                   onClick={handleLogout}
-                  className="nav-link btn-auth"
+                  className="auth-btn logout-btn"
+                  style={{
+                    background: 'linear-gradient(to right, #EF4444, #DC2626)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '0.5rem 1rem',
+                    fontWeight: '600',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                    cursor: 'pointer'
+                  }}
                 >
                   Logout
                 </button>

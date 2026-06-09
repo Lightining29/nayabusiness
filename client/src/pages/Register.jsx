@@ -251,6 +251,28 @@ export default function Register() {
             />
           </div>
 
+          <div className="form-group">
+            <label>Resume</label>
+            <input
+              type="url"
+              value={resume}
+              onChange={(e) => setResume(e.target.value)}
+              placeholder="https://example.com/resume.pdf"
+              className="form-input"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Skills</label>
+            <textarea
+              value={skills}
+              onChange={(e) => setSkills(e.target.value)}
+              placeholder="List your technical skills, frameworks, and tools..."
+              className="form-textarea"
+              rows={4}
+            />
+          </div>
+
           <button
             type="submit"
             className="btn btn-primary"

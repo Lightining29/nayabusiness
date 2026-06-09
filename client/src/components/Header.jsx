@@ -392,7 +392,7 @@ export default function Header() {
                         '0 8px 20px rgba(239,68,68,0.35)';
                     }}
                   >
-                    🚪 Logout
+                     Logout
                   </button>
                 )}
               </li>

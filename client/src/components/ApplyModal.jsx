@@ -47,7 +47,7 @@ export default function ApplyModal({ job, onClose }) {
   return (
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
+      background: 'rgba(0,0,0,0.2)', backdropFilter: 'blur(8px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       zIndex: 9999, padding: '1rem',
       animation: 'fadeIn 0.3s ease',
@@ -57,11 +57,11 @@ export default function ApplyModal({ job, onClose }) {
           maxWidth: '560px', width: '100%',
           padding: '2.5rem',
           borderRadius: '16px',
-          background: 'rgba(15, 23, 42, 0.95)',
-          border: '1px solid rgba(148, 163, 184, 0.2)',
+          background: 'white',
+          border: '1px solid rgba(14, 165, 233, 0.2)',
           position: 'relative',
           maxHeight: '90vh', overflowY: 'auto',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1)',
           animation: 'slideUp 0.3s ease',
         }}
         onClick={(e) => e.stopPropagation()}
@@ -69,9 +69,9 @@ export default function ApplyModal({ job, onClose }) {
         {/* Close Button */}
         <button onClick={onClose} style={{
           position: 'absolute', top: '1.5rem', right: '1.5rem',
-          background: 'rgba(255, 255, 255, 0.08)',
+          background: 'rgba(14, 165, 233, 0.08)',
           border: 'none',
-          color: 'rgba(148, 163, 184, 0.8)',
+          color: '#4b5563',
           cursor: 'pointer',
           width: '36px',
           height: '36px',
@@ -83,12 +83,12 @@ export default function ApplyModal({ job, onClose }) {
           zIndex: 10,
         }}
         onMouseEnter={(e) => {
-          e.target.style.background = 'rgba(255, 255, 255, 0.12)';
-          e.target.style.color = 'rgba(148, 163, 184, 1)';
+          e.target.style.background = 'rgba(14, 165, 233, 0.15)';
+          e.target.style.color = '#0ea5e9';
         }}
         onMouseLeave={(e) => {
-          e.target.style.background = 'rgba(255, 255, 255, 0.08)';
-          e.target.style.color = 'rgba(148, 163, 184, 0.8)';
+          e.target.style.background = 'rgba(14, 165, 233, 0.08)';
+          e.target.style.color = '#4b5563';
         }}>
           <X size={20} />
         </button>
@@ -96,11 +96,11 @@ export default function ApplyModal({ job, onClose }) {
         {/* Header */}
         <div style={{ marginBottom: '2rem' }}>
           <h2 style={{
-            color: 'white',
+            color: '#000000',
             fontSize: '1.5rem',
             fontWeight: 800,
             marginBottom: '0.5rem',
-            background: 'linear-gradient(135deg, #3b82f6, #06b6d4)',
+            background: 'linear-gradient(135deg, #0ea5e9, #06b6d4)',
             backgroundClip: 'text',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
@@ -108,7 +108,7 @@ export default function ApplyModal({ job, onClose }) {
             Apply for Position
           </h2>
           <h3 style={{
-            color: 'rgba(203, 213, 225, 0.9)',
+            color: '#4b5563',
             fontSize: '1.1rem',
             fontWeight: 600,
             margin: 0,
@@ -124,40 +124,40 @@ export default function ApplyModal({ job, onClose }) {
           gap: '0.75rem',
           marginBottom: '2rem',
           padding: '1.25rem',
-          background: 'rgba(59, 130, 246, 0.08)',
+          background: 'rgba(14, 165, 233, 0.08)',
           borderRadius: '10px',
-          border: '1px solid rgba(59, 130, 246, 0.2)',
+          border: '1px solid rgba(14, 165, 233, 0.2)',
         }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(148, 163, 184, 0.9)', fontSize: '0.85rem', marginBottom: '0.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#4b5563', fontSize: '0.85rem', marginBottom: '0.25rem' }}>
               <Briefcase size={14} style={{ color: '#f97316' }} />
               <span style={{ fontWeight: 500 }}>Department</span>
             </div>
-            <p style={{ color: 'white', fontSize: '0.9rem', fontWeight: 600, margin: 0 }}>{job.department}</p>
+            <p style={{ color: '#000000', fontSize: '0.9rem', fontWeight: 600, margin: 0 }}>{job.department}</p>
           </div>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(148, 163, 184, 0.9)', fontSize: '0.85rem', marginBottom: '0.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#4b5563', fontSize: '0.85rem', marginBottom: '0.25rem' }}>
               <MapPin size={14} style={{ color: '#f97316' }} />
               <span style={{ fontWeight: 500 }}>Location</span>
             </div>
-            <p style={{ color: 'white', fontSize: '0.9rem', fontWeight: 600, margin: 0 }}>{job.location}</p>
+            <p style={{ color: '#000000', fontSize: '0.9rem', fontWeight: 600, margin: 0 }}>{job.location}</p>
           </div>
           {job.experience && (
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(148, 163, 184, 0.9)', fontSize: '0.85rem', marginBottom: '0.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#4b5563', fontSize: '0.85rem', marginBottom: '0.25rem' }}>
                 <Clock size={14} style={{ color: '#8b5cf6' }} />
                 <span style={{ fontWeight: 500 }}>Experience</span>
               </div>
-              <p style={{ color: 'white', fontSize: '0.9rem', fontWeight: 600, margin: 0 }}>{job.experience}</p>
+              <p style={{ color: '#000000', fontSize: '0.9rem', fontWeight: 600, margin: 0 }}>{job.experience}</p>
             </div>
           )}
           {job.salary && (
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(148, 163, 184, 0.9)', fontSize: '0.85rem', marginBottom: '0.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#4b5563', fontSize: '0.85rem', marginBottom: '0.25rem' }}>
                 <DollarSign size={14} style={{ color: '#10b981' }} />
                 <span style={{ fontWeight: 500 }}>Salary</span>
               </div>
-              <p style={{ color: 'white', fontSize: '0.9rem', fontWeight: 600, margin: 0 }}>{job.salary}</p>
+              <p style={{ color: '#000000', fontSize: '0.9rem', fontWeight: 600, margin: 0 }}>{job.salary}</p>
             </div>
           )}
         </div>
@@ -194,13 +194,13 @@ export default function ApplyModal({ job, onClose }) {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
               <label style={{
                 display: 'block',
-                color: 'rgba(203, 213, 225, 0.9)',
+                color: '#000000',
                 fontSize: '0.95rem',
                 fontWeight: 600,
               }}>
                 Cover Letter (optional)
               </label>
-              <span style={{ color: 'rgba(148, 163, 184, 0.7)', fontSize: '0.85rem' }}>
+              <span style={{ color: '#4b5563', fontSize: '0.85rem' }}>
                 {charCount} / 1000
               </span>
             </div>
@@ -213,10 +213,10 @@ export default function ApplyModal({ job, onClose }) {
               style={{
                 width: '100%',
                 padding: '0.875rem 1rem',
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(148, 163, 184, 0.2)',
+                background: 'white',
+                border: '1px solid rgba(14, 165, 233, 0.2)',
                 borderRadius: '10px',
-                color: 'white',
+                color: '#000000',
                 fontSize: '0.95rem',
                 fontFamily: 'inherit',
                 outline: 'none',
@@ -225,12 +225,12 @@ export default function ApplyModal({ job, onClose }) {
                 boxSizing: 'border-box',
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = 'rgba(59, 130, 246, 0.5)';
-                e.target.style.background = 'rgba(255, 255, 255, 0.08)';
+                e.target.style.borderColor = 'rgba(14, 165, 233, 0.5)';
+                e.target.style.background = '#f0f7ff';
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = 'rgba(148, 163, 184, 0.2)';
-                e.target.style.background = 'rgba(255, 255, 255, 0.05)';
+                e.target.style.borderColor = 'rgba(14, 165, 233, 0.2)';
+                e.target.style.background = 'white';
               }}
             />
           </div>
@@ -249,8 +249,8 @@ export default function ApplyModal({ job, onClose }) {
               justifyContent: 'center',
               gap: '0.5rem',
               background: loading
-                ? 'rgba(59, 130, 246, 0.5)'
-                : 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                ? 'rgba(14, 165, 233, 0.5)'
+                : 'linear-gradient(135deg, #0ea5e9, #0284c7)',
               color: 'white',
               border: 'none',
               borderRadius: '10px',
@@ -260,14 +260,14 @@ export default function ApplyModal({ job, onClose }) {
             }}
             onMouseEnter={(e) => {
               if (!loading) {
-                e.target.style.background = 'linear-gradient(135deg, #2563eb, #1d4ed8)';
+                e.target.style.background = 'linear-gradient(135deg, #0284c7, #0369a1)';
                 e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 10px 20px rgba(59, 130, 246, 0.3)';
+                e.target.style.boxShadow = '0 10px 20px rgba(14, 165, 233, 0.3)';
               }
             }}
             onMouseLeave={(e) => {
               if (!loading) {
-                e.target.style.background = 'linear-gradient(135deg, #3b82f6, #2563eb)';
+                e.target.style.background = 'linear-gradient(135deg, #0ea5e9, #0284c7)';
                 e.target.style.transform = 'translateY(0)';
                 e.target.style.boxShadow = 'none';
               }

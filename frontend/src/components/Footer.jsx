@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Cpu, Mail, Lock, ArrowRight } from 'lucide-react';
+import { Mail, Lock, ArrowRight } from 'lucide-react';
 
 export default function Footer() {
   const [email, setEmail] = useState('');
@@ -21,9 +21,18 @@ export default function Footer() {
     <footer>
       <div className="footer-container">
         <div className="footer-brand">
-          <h3>
-            <Cpu className="logo-icon" />
-            <span>RANCOM</span>
+          <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+            <img
+              src="/rancom.png"
+              alt="Rancom Technologies"
+              style={{ height: '40px', width: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(14,165,233,0.3)', flexShrink: 0 }}
+            />
+            <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
+              <span style={{ fontSize: '1.15rem', fontWeight: 800, color: '#000' }}>RANCOM TECHNOLOGIES</span>
+              <span style={{ fontSize: '0.65rem', fontWeight: 500, color: '#6b7280', letterSpacing: '0.04em' }}>
+                Pvt. Ltd. · Group of <span style={{ color: '#e53e3e', fontWeight: 700 }}>apple</span><span style={{ color: '#38a169', fontWeight: 700 }}>tree</span> infotech
+              </span>
+            </div>
           </h3>
           <p>
             RANCOM has been marked as of innovative characteristics with an elaboration of enhanced business and marketing skill sets. We are ebullient in accelerating the stability of your business in the farthest possible way.
@@ -123,7 +132,7 @@ export default function Footer() {
       </div>
 
       <div className="footer-bottom">
-        <p>© 2015 - 2026 RANCOM Technologies. All Rights Reserved.</p>
+        <p>© 2015 - 2026 Rancom Technologies Pvt. Ltd. · Group of <span style={{ color: '#e53e3e', fontWeight: 700 }}>apple</span><span style={{ color: '#38a169', fontWeight: 700 }}>tree</span> infotech. All Rights Reserved.</p>
         <div className="footer-bottom-links">
           <Link to="/">Home</Link>
           <Link to="/about">About</Link>

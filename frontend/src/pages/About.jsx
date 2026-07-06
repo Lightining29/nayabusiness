@@ -60,8 +60,11 @@ export default function About() {
           <div style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-glow)' }}>
             <img 
               src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80" 
-              alt="Rancom server backend data center"
+              alt="Rancom Technologies Pvt Ltd – server infrastructure and data center for software development in India"
               style={{ width: '100%', height: '420px', objectFit: 'cover', display: 'block' }}
+              loading="lazy"
+              width="800"
+              height="420"
             />
           </div>
         </div>

@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import About from './pages/About';
 import TelecomServices from './pages/TelecomServices';
 import SoftwareServices from './pages/SoftwareServices';
+import LocationPage from './pages/LocationPage';
 import Blog from './pages/Blog';
 import Contact from './pages/Contact';
 import Register from './pages/Register';
@@ -40,8 +41,12 @@ function AppLayout() {
           <Route path="/telecom/:serviceId" element={<TelecomServices />} />
           
           {/* Software routes */}
-          <Route path="/services" element={<Navigate to="/services/development" replace />} />
+          <Route path="/services" element={<Navigate to="/services/software-company" replace />} />
           <Route path="/services/:serviceId" element={<SoftwareServices />} />
+
+          {/* Location SEO pages */}
+          <Route path="/location" element={<Navigate to="/location/noida" replace />} />
+          <Route path="/location/:city" element={<LocationPage />} />
           
           <Route path="/blog" element={<Blog />} />
           <Route path="/contact" element={<Contact />} />

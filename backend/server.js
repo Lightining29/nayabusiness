@@ -256,6 +256,7 @@ async function seedBlogs() {
     const count = await Blog.countDocuments();
     if (count === 0) {
       const defaultBlogs = [
+        // ── Original 3 technical posts ──────────────────────────────────────
         {
           title: 'Understanding Line of Sight (LOS) Surveys in Telecom Projects',
           content: 'A Line of Sight (LOS) Survey is a fundamental component of telecommunication planning, determining if a clear RF path exists between two points. It is crucial for microwave link installation and radio network planning. By analyzing topographical maps, physical obstacles, and tree lines, engineers determine the optimum antenna height to avoid signal attenuation and ensure 99.999% network availability. Our team at Rancom Technologies utilizes state-of-the-art GPS receivers, high-frequency binoculars, and automated path loss software to guarantee precise and reliable survey results.',
@@ -273,10 +274,260 @@ async function seedBlogs() {
           content: 'In the digital age, a website is only as good as its visibility and performance. Clean coding, optimized database designs, and responsive layouts are not just developer preferences—they are vital search engine ranking factors. Google\'s core web vitals prioritize fast page loading, visual stability, and responsive interaction. By building web applications using modern, systematic design methods, organizations can achieve superior search engine rankings, leading to organic traffic growth and increased conversion rates. Our software services team specializes in designing high-speed, SEO-ready web applications customized to your corporate brand.',
           author: 'Software Development Division',
           tags: ['Web Development', 'SEO', 'Performance', 'Software Services']
+        },
+
+        // ── SEO-targeted blog posts ──────────────────────────────────────────
+        {
+          title: 'MERN vs Java: Which Stack is Better for Your Business in 2025?',
+          content: `When choosing a technology stack for your next project, the MERN Stack (MongoDB, Express.js, React, Node.js) and Java are two of the most popular options. Both have distinct strengths depending on your project requirements.
+
+MERN Stack — Speed and Flexibility
+MERN Stack developers build dynamic, real-time web applications with a single JavaScript language across the entire codebase. This means faster development cycles, lower costs, and seamless data flow from database to browser. At Rancom Technologies, our MERN Stack developers specialize in e-commerce platforms, SaaS dashboards, job portals, and real-time collaboration tools.
+
+Key MERN advantages:
+• JavaScript everywhere — frontend and backend in one language
+• Non-blocking I/O via Node.js handles thousands of concurrent users efficiently
+• React's virtual DOM delivers blazing-fast UI rendering
+• MongoDB's flexible schema adapts quickly to changing business needs
+• Lower development cost — ideal for startups and mid-sized companies
+
+Java — Enterprise Reliability
+Java remains the gold standard for enterprise software development. With strict typing, mature frameworks like Spring Boot, and decades of security hardening, Java is preferred for banking systems, government platforms, and high-transaction ERP software.
+
+Key Java advantages:
+• Strongly typed — fewer runtime errors in large codebases
+• Spring Boot enables rapid microservices architecture
+• Excellent support for multi-threading and high-concurrency
+• Enterprise-grade security and compliance features
+• Massive talent pool and long-term support
+
+Verdict
+For modern web applications, custom software products, HRMS platforms, and mobile-integrated solutions — MERN Stack is typically faster to build, cheaper to maintain, and easier to scale. For mission-critical enterprise systems, financial platforms, and large-scale ERP software, Java remains unmatched.
+
+At Rancom Technologies, we offer both MERN Stack and Java development services tailored to your exact business needs. Contact us today for a free technical consultation.`,
+          author: 'Rancom Technologies – Software Development Team',
+          tags: ['MERN Stack', 'Java', 'Software Development', 'Web Development', 'Custom Software']
+        },
+
+        {
+          title: 'Cost of Building an E-commerce Website in India (2025 Guide)',
+          content: `Planning to launch an online store? Understanding the real cost of building an e-commerce website in India helps you budget accurately and avoid surprises. At Rancom Technologies, we build custom e-commerce solutions for businesses of all sizes.
+
+Factors That Determine Cost
+
+1. Design Complexity
+A basic template-based design costs ₹15,000–₹40,000. A fully custom UI/UX with brand guidelines, animations, and mobile-first responsive design ranges from ₹50,000–₹2,00,000.
+
+2. Features and Functionality
+Core e-commerce features include product catalogue, cart, secure payment gateway (Razorpay, PayU, Stripe), order management, and customer accounts. Advanced features like real-time inventory, AI-powered recommendations, multi-vendor support, and GST invoicing add to the cost.
+
+3. Technology Stack
+MERN Stack (React + Node.js + MongoDB) is our recommended stack for scalable Indian e-commerce platforms. It enables fast performance, real-time updates, and easy integration with third-party APIs.
+
+4. Payment Gateway Integration
+Razorpay, CCAvenue, and PayU integration typically costs ₹5,000–₹15,000 and requires KYC and business registration documents.
+
+5. SEO and Performance Optimization
+A site built for search engines from day one gains organic traffic faster. Our SEO-ready e-commerce builds include structured data, optimized images, Core Web Vitals compliance, and Google Search Console setup.
+
+Estimated Total Costs:
+• Basic e-commerce (5–20 products): ₹25,000–₹75,000
+• Mid-sized store (50–500 products): ₹80,000–₹3,00,000
+• Enterprise multi-vendor platform: ₹3,00,000–₹10,00,000+
+
+Annual Maintenance: ₹15,000–₹60,000 (hosting, SSL, updates, backups)
+
+Why Choose Rancom Technologies?
+We deliver production-ready e-commerce websites with clean code, full documentation, and post-launch support. Our projects are optimized for India's market — GST compliance, Indian payment gateways, Hindi/English bilingual support, and mobile-first design.
+
+Get a free quote at rancomtechnologies.com/contact`,
+          author: 'Rancom Technologies – Web Development Division',
+          tags: ['E-commerce', 'Web Development Company', 'Cost', 'MERN Stack', 'Software Company in India']
+        },
+
+        {
+          title: 'Top 10 HRMS Features Every Growing Business Needs in 2025',
+          content: `Human Resource Management Software (HRMS) has become an essential tool for businesses looking to automate HR operations, reduce costs, and improve employee satisfaction. As a leading HRMS Software Development company in India, Rancom Technologies has built HRMS platforms for companies across multiple sectors.
+
+Here are the top 10 HRMS features that matter most:
+
+1. Employee Self-Service Portal
+Employees can update their profiles, apply for leave, download payslips, and view attendance logs — without HR intervention. This alone reduces HR query volume by 60%.
+
+2. Attendance and Leave Management
+Biometric integration, GPS-based check-in, shift scheduling, and automated leave balance calculations with approval workflows.
+
+3. Payroll Processing
+Automated salary calculations with TDS deductions, PF, ESI, professional tax, and direct bank transfer support. Generates Form 16, salary slips, and statutory reports automatically.
+
+4. Performance Management System
+Set KPIs, conduct 360-degree reviews, manage appraisal cycles, and generate performance reports to support data-driven promotion decisions.
+
+5. Recruitment and Onboarding
+Job posting management, applicant tracking, digital document collection, and structured onboarding workflows reduce time-to-hire and improve new employee experience.
+
+6. Training and Learning Management
+Schedule training programs, track completion, assess knowledge with quizzes, and maintain certifications for compliance requirements.
+
+7. Asset Management
+Track company laptops, mobiles, access cards, and equipment assigned to employees with checkout/return workflows.
+
+8. Compliance and Statutory Reports
+Auto-generate PF ECR, ESIC returns, professional tax challans, and other government compliance reports to avoid penalties.
+
+9. Analytics and HR Dashboard
+Real-time workforce analytics — headcount trends, attrition rates, leave utilization, and cost-per-hire — help leadership make informed decisions.
+
+10. Mobile App Access
+A mobile-first HRMS means your workforce can access their HR data anywhere. Critical for field teams, remote employees, and distributed organizations.
+
+Rancom Technologies builds custom HRMS software tailored to your company size, industry, and workflows. Whether you need a standalone payroll tool or a complete enterprise HR platform, we deliver it on time and on budget.
+
+Contact us at rancomtechnologies.com/contact for a free HRMS consultation.`,
+          author: 'Rancom Technologies – Custom Software Development Team',
+          tags: ['HRMS', 'HR Software', 'Custom Software Development', 'Software Company in India', 'Payroll']
+        },
+
+        {
+          title: 'ERP vs CRM Explained: Which Does Your Business Need?',
+          content: `Two of the most commonly confused enterprise software categories are ERP (Enterprise Resource Planning) and CRM (Customer Relationship Management). Both are powerful — but they serve very different purposes. As an ERP Software Company in India, Rancom Technologies helps businesses identify which system fits their needs and builds custom solutions accordingly.
+
+What is ERP?
+ERP software integrates your core business processes — finance, inventory, procurement, manufacturing, HR, and supply chain — into a single unified system. Think of ERP as the operating system of your entire company.
+
+Common ERP modules:
+• Accounts and Finance (GST, ledger, balance sheet)
+• Inventory and Warehouse Management
+• Purchase and Vendor Management
+• Sales Order Processing
+• Manufacturing and Production Planning
+• HRMS and Payroll
+• Project Management
+
+Who needs ERP?
+Manufacturing companies, distributors, retailers with complex inventory, construction firms, and any organization managing multiple departments that need integrated data visibility.
+
+What is CRM?
+CRM software focuses specifically on managing your relationship with customers — tracking leads, managing sales pipelines, automating follow-ups, handling customer support tickets, and analyzing customer behavior.
+
+Common CRM features:
+• Lead capture and management
+• Sales pipeline visualization
+• Email and call tracking
+• Customer segmentation
+• Support ticket management
+• Revenue forecasting
+
+Who needs CRM?
+Sales-driven organizations, real estate agencies, insurance companies, service businesses, and any team managing a large volume of customer interactions.
+
+Key Differences:
+
+| Feature         | ERP                        | CRM                         |
+|-----------------|----------------------------|-----------------------------|
+| Primary Focus   | Internal operations        | Customer relationships      |
+| Users           | Finance, HR, Operations    | Sales, Marketing, Support   |
+| Data Scope      | Company-wide               | Customer-facing only        |
+| Implementation  | Complex, longer timeline   | Faster, more targeted       |
+| Cost            | Higher investment          | Lower entry cost            |
+
+Do You Need Both?
+Many mid-to-large businesses benefit from integrating ERP and CRM so that sales data flows directly into finance and inventory systems. Rancom Technologies specializes in building custom ERP and CRM software that integrates seamlessly with your existing tools.
+
+Get a free consultation: rancomtechnologies.com/contact`,
+          author: 'Rancom Technologies – ERP Software Division',
+          tags: ['ERP Software', 'CRM', 'Custom Software Development', 'ERP Software Company', 'Business Software']
+        },
+
+        {
+          title: 'Why Every Business Needs a Mobile App in 2025',
+          content: `India now has over 750 million smartphone users. If your business doesn't have a mobile app, you are handing customers directly to competitors who do. As a Mobile App Development Company in India, Rancom Technologies has built apps for retail, healthcare, logistics, education, and service businesses.
+
+Here's why every business needs a mobile app in 2025:
+
+1. Your Customers Are on Their Phones
+Over 80% of internet usage in India happens on mobile devices. A dedicated app gives you a direct channel to your customers without competing for attention on social media or search engines.
+
+2. Push Notifications Drive Repeat Business
+Unlike a website, a mobile app lets you send push notifications for offers, reminders, and updates directly to your customer's lock screen. Businesses report 3x higher engagement from push notifications vs email.
+
+3. Faster Checkout and Conversions
+Mobile apps with saved payment methods and one-tap checkout convert 3x better than mobile websites. For e-commerce and food delivery businesses, this is a direct revenue driver.
+
+4. Offline Functionality
+Apps can work partially offline — displaying catalogs, saving user data, and queuing actions — giving a seamless experience even with poor connectivity. This is critical in India's Tier 2 and Tier 3 markets.
+
+5. Build Customer Loyalty
+Loyalty programs, reward points, personalized recommendations, and exclusive app-only offers keep customers coming back. Brands with apps see significantly higher customer lifetime value.
+
+6. Competitive Advantage
+In many Indian industries — real estate, clinics, coaching institutes, restaurants — most competitors still don't have a mobile app. Launching one now is a strong differentiator.
+
+7. Data and Analytics
+Every tap, scroll, and purchase in your app generates valuable behavioral data that helps you optimize your product, marketing, and operations continuously.
+
+What Kind of App Do You Need?
+• E-commerce App (React Native / Flutter)
+• Business Service App with booking system
+• Employee Field App for attendance and task management
+• HRMS Mobile App integrated with your HR system
+• Custom ERP companion app
+
+At Rancom Technologies, we build cross-platform mobile apps using React Native that work on both Android and iOS from a single codebase — reducing development cost without compromising quality.
+
+Ready to launch your app? Contact us at rancomtechnologies.com/contact`,
+          author: 'Rancom Technologies – Mobile App Development Team',
+          tags: ['Mobile App Development', 'Mobile App Development Company', 'React Native', 'Software Company in India', 'Business Growth']
+        },
+
+        {
+          title: 'Benefits of Cloud Computing for Indian Businesses in 2025',
+          content: `Cloud computing has transformed how Indian businesses operate — from startups in Bangalore to manufacturers in Pune. Whether you are migrating an existing system or building a new product, understanding cloud benefits helps you make a faster, smarter decision.
+
+What is Cloud Computing?
+Cloud computing delivers computing resources — servers, databases, storage, networking, software, and analytics — over the internet on a pay-as-you-go basis, eliminating the need for expensive on-premise infrastructure.
+
+Top Benefits for Indian Businesses:
+
+1. Massive Cost Reduction
+On-premise servers require large upfront capital investment for hardware, data center space, cooling, and IT staff. Cloud computing converts this to a predictable monthly operating expense. Indian SMBs report 30–60% reduction in IT costs after migrating to cloud.
+
+2. Scale Instantly
+During peak seasons (Diwali sales, IPL campaigns, financial year-end), your cloud infrastructure scales automatically to handle 10x traffic — then scales back down to save costs. No more over-provisioning for occasional demand spikes.
+
+3. Remote Work Enablement
+Post-pandemic, businesses need their teams to access systems from anywhere. Cloud-based HRMS, ERP, CRM, and project management tools work seamlessly from any device with a browser.
+
+4. Disaster Recovery and Business Continuity
+Cloud providers maintain multiple data center replicas. If one fails, traffic automatically routes to another — giving your business near-zero downtime. Automated daily backups mean you never lose more than 24 hours of data.
+
+5. Security and Compliance
+Leading cloud providers (AWS, Azure, Google Cloud) invest billions in security — encryption, DDoS protection, IAM access controls, and compliance certifications (ISO 27001, SOC 2, GDPR). This level of security is impossible for most businesses to replicate on-premise.
+
+6. Faster Time to Market
+Cloud eliminates the 3–6 month procurement and setup cycle for physical servers. Developers can spin up a new environment in minutes, accelerating product development and deployment.
+
+7. Integration Ecosystem
+Cloud platforms offer hundreds of pre-built integrations — payment gateways, SMS APIs, AI/ML services, analytics tools, and communication platforms — that your development team can use without building from scratch.
+
+Cloud Services We Offer
+Rancom Technologies helps Indian businesses with:
+• Cloud migration planning and execution
+• AWS / Azure / Google Cloud infrastructure setup
+• Cloud-native web and mobile application development
+• Serverless architecture for cost-optimized backends
+• Database migration (on-premise to cloud MongoDB / PostgreSQL)
+
+Whether you are a 10-person startup or a 500-employee enterprise, the cloud gives you enterprise-grade infrastructure at startup prices.
+
+Talk to our cloud architects: rancomtechnologies.com/contact`,
+          author: 'Rancom Technologies – Software Development Team',
+          tags: ['Cloud Computing', 'AWS', 'Software Development Company', 'Web Development', 'Digital Transformation', 'Software Company in India']
         }
       ];
+
       await Blog.insertMany(defaultBlogs);
-      console.log('Seeded default blog posts successfully.');
+      console.log(`Seeded ${defaultBlogs.length} default blog posts successfully.`);
     }
   } catch (err) {
     console.error('Failed to seed default blogs:', err.message);

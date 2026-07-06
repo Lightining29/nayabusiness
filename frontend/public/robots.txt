@@ -1,0 +1,27 @@
+User-agent: *
+Allow: /
+
+# Priority pages for crawling
+Allow: /about
+Allow: /services/
+Allow: /telecom/
+Allow: /blog
+Allow: /contact
+Allow: /jobs
+
+# Block user-specific and auth pages
+Disallow: /profile
+Disallow: /login
+Disallow: /register
+Disallow: /verify-otp
+Disallow: /admin
+Disallow: /admin/dashboard
+
+# Block API routes
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://www.rancomtechnologies.com/sitemap.xml
+
+# Crawl-delay for polite bots
+Crawl-delay: 5

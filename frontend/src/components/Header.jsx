@@ -373,20 +373,47 @@ export default function Header() {
   ];
 
   const softwareServices = [
-    { name: 'Web Development', path: '/services/development' },
-    { name: 'Web Design', path: '/services/design' },
-    { name: 'Web Hosting', path: '/services/hosting' },
-    { name: 'Logo Design', path: '/services/logo' },
-    { name: 'SEO Optimization', path: '/services/seo' }
+    { name: 'Software Development Company', path: '/services/software-company' },
+    { name: 'Custom Software Development',  path: '/services/custom-software' },
+    { name: 'Web Development Company',       path: '/services/web-development' },
+    { name: 'MERN Stack Development',        path: '/services/mern-stack' },
+    { name: 'Java Development Services',     path: '/services/java-development' },
+    { name: 'React.js Development',          path: '/services/reactjs-development' },
+    { name: 'Node.js Development',           path: '/services/nodejs-development' },
+    { name: 'Mobile App Development',        path: '/services/mobile-app' },
+    { name: 'E-commerce Development',        path: '/services/ecommerce' },
+    { name: 'ERP Software Development',      path: '/services/erp-software' },
+    { name: 'HRMS Software Development',     path: '/services/hrms-software' },
+    { name: 'CRM Software Development',      path: '/services/crm-software' },
+    { name: 'School Management Software',    path: '/services/school-software' },
+    { name: 'Hospital Management Software',  path: '/services/hospital-software' },
+    { name: 'SaaS Application Development',  path: '/services/saas-development' },
+    { name: 'Cloud Solutions',               path: '/services/cloud-solutions' },
+    { name: 'UI/UX Design',                  path: '/services/ui-ux-design' },
+    { name: 'DevOps Services',               path: '/services/devops' },
+    { name: 'QA & Software Testing',         path: '/services/qa-testing' },
+    { name: 'Software Maintenance',          path: '/services/software-maintenance' },
   ];
 
   return (
     <>
       <header className="glass-nav">
         <div className="header-container">
-          <Link to="/" className="logo-container" onClick={() => setIsOpen(false)}>
-            <Cpu className="logo-icon" />
-            <span>RANCOM <span className="gradient-text-blue" style={{ fontSize: '0.8rem', fontWeight: 600, verticalAlign: 'middle', marginLeft: '0.2rem' }}>TECHNOLOGIES</span></span>
+          <Link to="/" className="logo-container" onClick={() => setIsOpen(false)} style={{ gap: '0.6rem', alignItems: 'center' }}>
+            {/* Appletree Infotech logo */}
+            <img
+              src="/rancom.png"
+              alt="Rancom Technologies"
+              style={{ height: '36px', width: '36px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '1.5px solid rgba(14,165,233,0.25)' }}
+            />
+            <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
+              <span style={{ fontSize: '1.1rem', fontWeight: 800, letterSpacing: '-0.02em', color: '#000' }}>
+                RANCOM <span className="gradient-text-blue">TECHNOLOGIES</span>
+              </span>
+              <span style={{ fontSize: '0.76rem', fontWeight: 500, color: '#6b7280', letterSpacing: '0.04em' ,marginTop: '2px',display: 'inline-block'}}>
+               Group of <span style={{ color: '#e53e3e', fontWeight: 900 }}>Apple</span><span style={{ color: '#1d460591', fontWeight: 700 }}>tree</span> infotech
+              </span>
+            </div>
           </Link>
 
           {/* Mobile Menu Button */}

@@ -31,10 +31,8 @@ export default function Header() {
     phone: '',
     resume: null,
     password: '',
-    skills: '',
-    otp: ''
+    skills: ''
   });
-  const [registerOtpSent, setRegisterOtpSent] = useState(false);
   const [registerLoading, setRegisterLoading] = useState(false);
   const [registerSuccess, setRegisterSuccess] = useState('');
   const [registerError, setRegisterError] = useState('');
@@ -141,8 +139,6 @@ export default function Header() {
   const openRegisterModal = () => {
     setRegisterError('');
     setRegisterSuccess('');
-    setRegisterOtpSent(false);
-    setRegisterForm((current) => ({ ...current, otp: '' }));
     setRegisterModalOpen(true);
     setIsOpen(false);
   };
@@ -154,10 +150,6 @@ export default function Header() {
 
   const updateRegisterForm = (field, value) => {
     setRegisterForm((current) => ({ ...current, [field]: value }));
-    if (field === 'email') {
-      setRegisterOtpSent(false);
-      setRegisterForm((current) => ({ ...current, otp: '' }));
-    }
   };
 
   const resetRegisterForm = () => {
@@ -168,10 +160,8 @@ export default function Header() {
       phone: '',
       resume: null,
       password: '',
-      skills: '',
-      otp: ''
+      skills: ''
     });
-    setRegisterOtpSent(false);
   };
 
   const validateRegisterForm = () => {
@@ -184,7 +174,7 @@ export default function Header() {
   };
 
   const requestRegisterOtp = async () => {
-    const { firstName, lastName, email, phone } = registerForm;
+    const { firstName, lastName, email, phone, resume, password, skills } = registerForm;
     const res = await fetch('/api/register/request-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -201,34 +191,24 @@ export default function Header() {
       throw new Error(data.error || 'Failed to send email OTP.');
     }
 
-    setRegisterOtpSent(true);
-    setRegisterSuccess(data.message || 'Verification code sent to your email.');
-  };
+    // Close the register modal
+    setRegisterModalOpen(false);
 
-  const submitRegisterWithOtp = async () => {
-    const { firstName, lastName, email, phone, resume, password, skills, otp } = registerForm;
-    const formData = new FormData();
-    formData.append('first_name', firstName);
-    formData.append('last_name', lastName);
-    formData.append('email', email);
-    formData.append('mobno', phone);
-    formData.append('password', password);
-    formData.append('skills', skills);
-    formData.append('resume', resume);
-    formData.append('otp', otp.trim());
-
-    const res = await fetch('/api/register', {
-      method: 'POST',
-      body: formData
+    // Redirect to the OTP verification page with the registration details
+    navigate('/verify-otp', {
+      state: {
+        first_name: firstName,
+        last_name: lastName,
+        email,
+        mobno: phone,
+        qualification: '',
+        city: '',
+        resume,
+        password,
+        skills: skills || '',
+        job_title: 'General Application'
+      }
     });
-
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || 'Registration failed.');
-    }
-
-    setRegisterSuccess(data.message || 'Email verified and registration submitted successfully.');
-    resetRegisterForm();
   };
 
   const handleRegisterSubmit = async (e) => {
@@ -240,21 +220,12 @@ export default function Header() {
       return;
     }
 
-    if (registerOtpSent && !registerForm.otp.trim()) {
-      setRegisterError('Please enter the OTP sent to your email.');
-      return;
-    }
-
     setRegisterLoading(true);
     setRegisterError('');
     setRegisterSuccess('');
 
     try {
-      if (!registerOtpSent) {
-        await requestRegisterOtp();
-      } else {
-        await submitRegisterWithOtp();
-      }
+      await requestRegisterOtp();
     } catch (err) {
       setRegisterError(err.message || 'Server connection error. Please try again.');
     } finally {
@@ -644,89 +615,45 @@ export default function Header() {
             )}
 
             <form onSubmit={handleRegisterSubmit}>
-              {registerOtpSent && (
-                <div className="register-modal-alert success">
-                  <CheckCircle size={18} />
-                  <span>Enter the 6-digit OTP sent to {registerForm.email}. Registration is saved after verification.</span>
-                </div>
-              )}
-
               <div className="register-modal-grid">
                 <div className="form-group">
                   <label>First Name</label>
-                  <input className="form-input" type="text" placeholder="First name" value={registerForm.firstName} onChange={(e) => updateRegisterForm('firstName', e.target.value)} disabled={registerOtpSent} required />
+                  <input className="form-input" type="text" placeholder="First name" value={registerForm.firstName} onChange={(e) => updateRegisterForm('firstName', e.target.value)} disabled={registerLoading} required />
                 </div>
 
                 <div className="form-group">
                   <label>Last Name</label>
-                  <input className="form-input" type="text" placeholder="Last name" value={registerForm.lastName} onChange={(e) => updateRegisterForm('lastName', e.target.value)} disabled={registerOtpSent} required />
+                  <input className="form-input" type="text" placeholder="Last name" value={registerForm.lastName} onChange={(e) => updateRegisterForm('lastName', e.target.value)} disabled={registerLoading} required />
                 </div>
 
                 <div className="form-group">
                   <label>Email</label>
-                  <input className="form-input" type="email" placeholder="Email address" value={registerForm.email} onChange={(e) => updateRegisterForm('email', e.target.value)} disabled={registerOtpSent} required />
+                  <input className="form-input" type="email" placeholder="Email address" value={registerForm.email} onChange={(e) => updateRegisterForm('email', e.target.value)} disabled={registerLoading} required />
                 </div>
 
                 <div className="form-group">
                   <label>Phone No</label>
-                  <input className="form-input" type="tel" placeholder="Phone number" value={registerForm.phone} onChange={(e) => updateRegisterForm('phone', e.target.value)} disabled={registerOtpSent} required />
+                  <input className="form-input" type="tel" placeholder="Phone number" value={registerForm.phone} onChange={(e) => updateRegisterForm('phone', e.target.value)} disabled={registerLoading} required />
                 </div>
 
                 <div className="form-group">
                   <label>Password</label>
-                  <input className="form-input" type="password" placeholder="Password" value={registerForm.password} onChange={(e) => updateRegisterForm('password', e.target.value)} disabled={registerOtpSent} required />
+                  <input className="form-input" type="password" placeholder="Password" value={registerForm.password} onChange={(e) => updateRegisterForm('password', e.target.value)} disabled={registerLoading} required />
                 </div>
 
                 <div className="form-group">
                   <label>Resume</label>
-                  <input className="form-input" type="file" accept="application/pdf,.pdf" onChange={(e) => updateRegisterForm('resume', e.target.files[0] || null)} disabled={registerOtpSent} required />
+                  <input className="form-input" type="file" accept="application/pdf,.pdf" onChange={(e) => updateRegisterForm('resume', e.target.files[0] || null)} disabled={registerLoading} required />
                 </div>
 
                 <div className="form-group full-width">
                   <label>Skills</label>
-                  <textarea className="form-input" placeholder="React, Node.js, RF survey, telecom tools..." value={registerForm.skills} onChange={(e) => updateRegisterForm('skills', e.target.value)} disabled={registerOtpSent} required />
+                  <textarea className="form-input" placeholder="React, Node.js, RF survey, telecom tools..." value={registerForm.skills} onChange={(e) => updateRegisterForm('skills', e.target.value)} disabled={registerLoading} required />
                 </div>
-
-                {registerOtpSent && (
-                  <div className="form-group full-width">
-                    <label>Email OTP</label>
-                    <input
-                      className="form-input"
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={6}
-                      placeholder="Enter 6-digit code"
-                      value={registerForm.otp}
-                      onChange={(e) => updateRegisterForm('otp', e.target.value.replace(/\D/g, '').slice(0, 6))}
-                      required
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      style={{ marginTop: '0.75rem', width: 'fit-content' }}
-                      disabled={registerLoading}
-                      onClick={async () => {
-                        setRegisterLoading(true);
-                        setRegisterError('');
-                        setRegisterSuccess('');
-                        try {
-                          await requestRegisterOtp();
-                          updateRegisterForm('otp', '');
-                        } catch (err) {
-                          setRegisterError(err.message || 'Failed to resend email OTP.');
-                        } finally {
-                          setRegisterLoading(false);
-                        }
-                      }}
-                    >
-                      Resend OTP
-                    </button>
-                  </div>
-                )}
               </div>
 
               <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.85rem 1rem', fontSize: '1rem' }} disabled={registerLoading}>
-                {registerLoading ? (registerOtpSent ? 'Verifying...' : 'Sending OTP...') : (registerOtpSent ? 'Verify Email & Register' : 'Send Email OTP')}
+                {registerLoading ? 'Sending OTP...' : 'Send Email OTP'}
               </button>
             </form>
           </div>

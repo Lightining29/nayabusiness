@@ -8,6 +8,7 @@ import SoftwareServices from './pages/SoftwareServices';
 import Blog from './pages/Blog';
 import Contact from './pages/Contact';
 import Register from './pages/Register';
+import VerifyOtp from './pages/VerifyOtp';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import Jobs from './pages/Jobs';
@@ -45,6 +46,7 @@ function AppLayout() {
           <Route path="/blog" element={<Blog />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify-otp" element={<VerifyOtp />} />
           <Route path="/jobs" element={<Jobs />} />
           <Route path="/login" element={<Login />} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

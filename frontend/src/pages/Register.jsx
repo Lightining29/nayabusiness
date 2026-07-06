@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AlertCircle, CheckCircle, Briefcase, MapPin, Clock, DollarSign, MailCheck, UserCheck } from 'lucide-react';
 
 export default function Register() {
+  const navigate = useNavigate();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -12,8 +14,6 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [skills, setSkills] = useState('');
   const [selectedJob, setSelectedJob] = useState('General Application');
-  const [otp, setOtp] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
@@ -46,8 +46,6 @@ export default function Register() {
     setPassword('');
     setSkills('');
     setSelectedJob('General Application');
-    setOtp('');
-    setOtpSent(false);
   };
 
   const validateRegistrationFields = () => {
@@ -74,36 +72,21 @@ export default function Register() {
       throw new Error(data.error || 'Failed to send email OTP.');
     }
 
-    setOtpSent(true);
-    setSuccess(data.message || 'Verification code sent to your email.');
-  };
-
-  const submitVerifiedRegistration = async () => {
-    const formData = new FormData();
-    formData.append('first_name', firstName);
-    formData.append('last_name', lastName);
-    formData.append('email', email);
-    formData.append('mobno', mobno);
-    formData.append('qualification', qualification);
-    formData.append('city', city);
-    formData.append('resume', resume);
-    formData.append('password', password);
-    formData.append('skills', skills);
-    formData.append('job_title', selectedJob);
-    formData.append('otp', otp.trim());
-
-    const res = await fetch('/api/register', {
-      method: 'POST',
-      body: formData
+    // Redirect to the OTP verification page with the registration details
+    navigate('/verify-otp', {
+      state: {
+        first_name: firstName,
+        last_name: lastName,
+        email,
+        mobno,
+        qualification,
+        city,
+        resume,
+        password,
+        skills,
+        job_title: selectedJob
+      }
     });
-
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || 'Failed to submit application.');
-    }
-
-    setSuccess(data.message || 'Email verified and registration submitted successfully.');
-    resetForm();
   };
 
   const handleRegister = async (e) => {
@@ -114,21 +97,12 @@ export default function Register() {
       return;
     }
 
-    if (otpSent && !otp.trim()) {
-      setError('Please enter the OTP sent to your email.');
-      return;
-    }
-
     setLoading(true);
     setError(null);
     setSuccess(null);
 
     try {
-      if (!otpSent) {
-        await requestEmailOtp();
-      } else {
-        await submitVerifiedRegistration();
-      }
+      await requestEmailOtp();
     } catch (err) {
       setError(err.message || 'Server connection error. Please try again.');
     } finally {
@@ -218,25 +192,13 @@ export default function Register() {
         )}
 
         <form onSubmit={handleRegister}>
-          {otpSent && (
-            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start', background: 'rgba(14, 165, 233, 0.08)', border: '1px solid rgba(14, 165, 233, 0.18)', borderRadius: '8px', padding: '1rem', marginBottom: '1.5rem', color: '#0f172a' }}>
-              <MailCheck size={22} style={{ color: 'var(--primary)', flexShrink: 0, marginTop: '0.1rem' }} />
-              <div>
-                <strong>Check your email</strong>
-                <p style={{ margin: '0.25rem 0 0', color: '#4b5563', fontSize: '0.92rem' }}>
-                  Enter the 6-digit OTP sent to {email}. Your application will be saved only after verification.
-                </p>
-              </div>
-            </div>
-          )}
-
           <div className="form-group">
             <label style={{ color: '#000000' }}>Position Applied For</label>
             <select
               className="form-input"
               value={selectedJob}
               onChange={(e) => setSelectedJob(e.target.value)}
-              disabled={otpSent}
+              disabled={loading}
             >
               <option value="General Application">General Application (No Specific Job)</option>
               {jobs.map(job => (
@@ -257,7 +219,7 @@ export default function Register() {
                 required
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                disabled={otpSent}
+                disabled={loading}
               />
             </div>
 
@@ -270,7 +232,7 @@ export default function Register() {
                 required
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                disabled={otpSent}
+                disabled={loading}
               />
             </div>
           </div>
@@ -284,7 +246,7 @@ export default function Register() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              disabled={otpSent}
+              disabled={loading}
             />
           </div>
 
@@ -297,7 +259,7 @@ export default function Register() {
               required
               value={mobno}
               onChange={(e) => setMobno(e.target.value)}
-              disabled={otpSent}
+              disabled={loading}
             />
           </div>
 
@@ -310,7 +272,7 @@ export default function Register() {
               required
               value={qualification}
               onChange={(e) => setQualification(e.target.value)}
-              disabled={otpSent}
+              disabled={loading}
             />
           </div>
 
@@ -323,7 +285,7 @@ export default function Register() {
               required
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              disabled={otpSent}
+              disabled={loading}
             />
           </div>
 
@@ -335,7 +297,7 @@ export default function Register() {
               onChange={(e) => setResume(e.target.files[0] || null)}
               className="form-input"
               required
-              disabled={otpSent}
+              disabled={loading}
             />
           </div>
 
@@ -348,7 +310,7 @@ export default function Register() {
               placeholder="Create a password"
               className="form-input"
               required
-              disabled={otpSent}
+              disabled={loading}
             />
           </div>
 
@@ -360,46 +322,9 @@ export default function Register() {
               placeholder="List your technical skills, frameworks, and tools..."
               className="form-textarea"
               rows={4}
-              disabled={otpSent}
+              disabled={loading}
             />
           </div>
-
-          {otpSent && (
-            <div className="form-group">
-              <label style={{ color: '#000000' }}>Email OTP</label>
-              <input
-                type="text"
-                inputMode="numeric"
-                maxLength={6}
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                placeholder="Enter 6-digit code"
-                className="form-input"
-                required
-              />
-              <button
-                type="button"
-                className="btn btn-secondary"
-                style={{ marginTop: '0.75rem', width: 'fit-content' }}
-                disabled={loading}
-                onClick={async () => {
-                  setLoading(true);
-                  setError(null);
-                  setSuccess(null);
-                  try {
-                    await requestEmailOtp();
-                    setOtp('');
-                  } catch (err) {
-                    setError(err.message || 'Failed to resend email OTP.');
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
-              >
-                Resend OTP
-              </button>
-            </div>
-          )}
 
           <button
             type="submit"
@@ -407,7 +332,7 @@ export default function Register() {
             style={{ width: '100%', padding: '0.85rem 1rem', fontSize: '1rem', marginTop: '1rem' }}
             disabled={loading}
           >
-            {loading ? (otpSent ? 'Verifying...' : 'Sending OTP...') : (otpSent ? 'Verify Email & Register' : 'Send Email OTP')}
+            {loading ? 'Sending OTP...' : 'Send Email OTP'}
           </button>
 
         </form>

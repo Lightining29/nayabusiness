@@ -145,7 +145,7 @@ export default function AdminDashboard() {
   };
 
   const openResume = async (application) => {
-    if (!application.resumeFileName) {
+    if (!application.hasResume && !application.resumeFileName) {
       toast.error('No resume PDF is available for this application.');
       return;
     }
@@ -535,8 +535,8 @@ export default function AdminDashboard() {
                           type="button"
                           className="resume-btn"
                           onClick={() => openResume(app)}
-                          disabled={!app.resumeFileName}
-                          title={app.resumeFileName ? `Open ${app.resumeFileName}` : 'No resume uploaded'}
+                          disabled={!app.hasResume && !app.resumeFileName}
+                          title={app.hasResume || app.resumeFileName ? `Open ${app.resumeFileName || 'resume'}` : 'No resume uploaded'}
                         >
                           <FileText size={15} /> View PDF
                         </button>

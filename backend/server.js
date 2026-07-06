@@ -552,6 +552,7 @@ app.post('/api/register', resumeUpload.single('resume'), async (req, res) => {
       mobno,
       qualification,
       city,
+      resume: req.file?.buffer,
       resumeFileName: req.file?.originalname,
       resumeContentType: req.file?.mimetype,
       password: '[hidden]',
@@ -629,32 +630,55 @@ app.post('/api/admin/login', (req, res) => {
 app.get('/api/admin/applications', async (req, res) => {
   if (mongoose.connection.readyState === 1) {
     try {
-      const applications = await Registration.find().select('-resume -password').sort({ createdAt: -1 });
-      return res.status(200).json(applications);
+      const applications = await Registration.find()
+        .select('-resume -password')
+        .sort({ createdAt: -1 });
+
+      // Add a hasResume boolean so the frontend can reliably enable the View PDF button
+      const result = applications.map(app => {
+        const obj = app.toObject();
+        obj.hasResume = !!(obj.resumeFileName || obj.resumeContentType);
+        return obj;
+      });
+
+      return res.status(200).json(result);
     } catch (err) {
       console.error(err);
       return res.status(500).json({ error: 'Failed to fetch applications' });
     }
   } else {
-    return res.status(200).json(registrationInMemoryDb);
+    return res.status(200).json(registrationInMemoryDb.map(r => ({ ...r, hasResume: !!r.resumeFileName })));
   }
 });
 
 app.get('/api/admin/applications/:id/resume', async (req, res) => {
-  if (mongoose.connection.readyState !== 1) {
-    return res.status(404).json({ error: 'Resume unavailable in demo mode' });
-  }
-
   try {
-    const application = await Registration.findById(req.params.id);
+    let application;
+    
+    if (mongoose.connection.readyState === 1) {
+      application = await Registration.findById(req.params.id);
+    } else {
+      // Demo mode: find in memory database
+      application = registrationInMemoryDb.find(reg => reg._id === req.params.id);
+    }
+    
     if (!application || !application.resume) {
       return res.status(404).json({ error: 'Resume not found' });
     }
 
     // Mongoose stores Buffer fields as Binary objects – extract the raw buffer
-    const rawBuffer = application.resume instanceof Buffer
-      ? application.resume
-      : Buffer.from(application.resume.buffer || application.resume);
+    let rawBuffer;
+    if (application.resume instanceof Buffer) {
+      rawBuffer = application.resume;
+    } else if (application.resume.buffer) {
+      rawBuffer = Buffer.from(application.resume.buffer);
+    } else if (typeof application.resume === 'string') {
+      rawBuffer = Buffer.from(application.resume, 'binary');
+    } else if (application.resume.data) {
+      rawBuffer = Buffer.from(application.resume.data);
+    } else {
+      rawBuffer = Buffer.from(application.resume);
+    }
 
     const fileName = (application.resumeFileName || 'resume.pdf').replace(/"/g, '');
 

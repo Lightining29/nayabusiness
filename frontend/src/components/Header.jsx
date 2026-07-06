@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
-import { AlertCircle, CheckCircle, Cpu, Menu, X, ChevronDown, LogIn, UserPlus, UserRound } from 'lucide-react';
+import { AlertCircle, CheckCircle, Cpu, Menu, X, ChevronDown, LogIn, UserPlus, UserRound, ShieldCheck, Mail, Lock, Phone, MapPin } from 'lucide-react';
 import { Moon, Sun } from "lucide-react";
 
 
@@ -23,6 +23,134 @@ export default function Header() {
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState('');
   const [loginError, setLoginError] = useState('');
+
+  // Header Google Login states
+  const [showHeaderGoogleRegisterModal, setShowHeaderGoogleRegisterModal] = useState(false);
+  const [headerGoogleRegisterData, setHeaderGoogleRegisterData] = useState({
+    credential: '',
+    email: '',
+    name: '',
+    password: '',
+    phone: '',
+    city: ''
+  });
+
+  const processHeaderGoogleLogin = async (credential) => {
+    setLoginLoading(true);
+    setLoginError('');
+    setLoginSuccess('');
+    try {
+      const res = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Google login failed');
+
+      if (data.registerRequired) {
+        setHeaderGoogleRegisterData({
+          credential,
+          email: data.email,
+          name: data.name,
+          password: '',
+          phone: '',
+          city: ''
+        });
+        setLoginModalOpen(false); // Close login modal to show registration modal
+        setShowHeaderGoogleRegisterModal(true);
+      } else {
+        localStorage.setItem('token', data.token);
+        window.dispatchEvent(new Event('auth-change'));
+        setIsAuth(true);
+        setLoginSuccess('Logged in with Google successfully!');
+        setTimeout(() => {
+          setLoginModalOpen(false);
+          navigate('/profile');
+        }, 500);
+      }
+    } catch (err) {
+      setLoginError(err.message);
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleHeaderGoogleRegisterSubmit = async (e) => {
+    e.preventDefault();
+    const { credential, password, phone, city } = headerGoogleRegisterData;
+    if (!password) {
+      setLoginError('Password is required for registration.');
+      return;
+    }
+
+    setLoginLoading(true);
+    setLoginError('');
+    setLoginSuccess('');
+    try {
+      const res = await fetch('/api/auth/google/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential, password, phone, city })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Google registration failed');
+
+      setShowHeaderGoogleRegisterModal(false);
+      localStorage.setItem('token', data.token);
+      window.dispatchEvent(new Event('auth-change'));
+      setIsAuth(true);
+      setLoginSuccess('Google account registered and logged in successfully!');
+      setTimeout(() => navigate('/profile'), 1000);
+    } catch (err) {
+      setLoginError(err.message);
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleHeaderMockGoogleLogin = () => {
+    const testEmail = prompt("Enter a test email for Mock Google Login:", "test-header-user@gmail.com");
+    if (!testEmail) return;
+    const testName = prompt("Enter a test name for Mock Google Login:", "Header Test User");
+    if (!testName) return;
+
+    const payload = {
+      iss: "https://accounts.google.com",
+      email: testEmail,
+      name: testName,
+      sub: "mock-google-id-" + Date.now()
+    };
+    const header = { alg: "HS256", typ: "JWT" };
+    
+    const base64UrlEncode = (obj) => {
+      const str = JSON.stringify(obj);
+      return btoa(unescape(encodeURIComponent(str)))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=/g, '');
+    };
+    
+    const credential = `${base64UrlEncode(header)}.${base64UrlEncode(payload)}.signature`;
+    processHeaderGoogleLogin(credential);
+  };
+
+  useEffect(() => {
+    if (loginModalOpen && window.google) {
+      const initGoogleHeader = () => {
+        window.google.accounts.id.initialize({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || "1028472934-mockclientid.apps.googleusercontent.com",
+          callback: (response) => processHeaderGoogleLogin(response.credential)
+        });
+        window.google.accounts.id.renderButton(
+          document.getElementById("google-header-signin-btn"),
+          { theme: "outline", size: "large", width: 280 }
+        );
+      };
+      setTimeout(initGoogleHeader, 200);
+    }
+  }, [loginModalOpen]);
+
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
   const [registerForm, setRegisterForm] = useState({
     firstName: '',
@@ -546,6 +674,45 @@ export default function Header() {
                 {loginLoading ? 'Signing in...' : 'Login'}
               </button>
             </form>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', margin: '1.25rem 0' }}>
+              <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }}></div>
+              <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>or sign in with</span>
+              <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }}></div>
+            </div>
+
+            {/* Google sign-in container */}
+            <div id="google-header-signin-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}></div>
+
+            {/* Mock Google login bypass */}
+            <button
+              type="button"
+              onClick={handleHeaderMockGoogleLogin}
+              className="btn btn-secondary"
+              disabled={loginLoading}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.4rem',
+                background: '#f8fafc',
+                color: '#334155',
+                border: '1px solid #cbd5e1',
+                width: '100%',
+                padding: '0.55rem 0.75rem',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+              </svg>
+              Google Login (Demo Mock)
+            </button>
           </div>
         </div>
       )}
@@ -654,6 +821,113 @@ export default function Header() {
 
               <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.85rem 1rem', fontSize: '1rem' }} disabled={registerLoading}>
                 {registerLoading ? 'Sending OTP...' : 'Send Email OTP'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Google Registration Modal for First-time Sign-in */}
+      {showHeaderGoogleRegisterModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          padding: '1rem'
+        }}>
+          <div className="form-card glass" style={{
+            background: 'white',
+            maxWidth: '440px',
+            width: '100%',
+            padding: '2.25rem',
+            borderRadius: '14px',
+            boxShadow: '0 20px 25px -5px rgba(0,0,0,0.15), 0 10px 10px -5px rgba(0,0,0,0.04)',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setShowHeaderGoogleRegisterModal(false)}
+              style={{
+                position: 'absolute',
+                top: '1rem',
+                right: '1rem',
+                border: 'none',
+                background: 'transparent',
+                cursor: 'pointer',
+                color: '#9ca3af'
+              }}
+            >
+              <X size={20} />
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', justifyContent: 'center', marginBottom: '1.25rem' }}>
+              <ShieldCheck size={28} style={{ color: 'var(--secondary)' }} />
+              <h2 style={{ color: '#000000', fontSize: '1.3rem', fontWeight: 800, margin: 0 }}>Complete Your Profile</h2>
+            </div>
+            
+            <p style={{ textAlign: 'center', color: '#4b5563', fontSize: '0.85rem', marginBottom: '1.25rem', lineHeight: '1.4' }}>
+              Welcome <strong>{headerGoogleRegisterData.name}</strong>! Since this is your first time signing in with Google, please set a password and phone number to secure your account.
+            </p>
+
+            <form onSubmit={handleHeaderGoogleRegisterSubmit}>
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label style={{ fontSize: '0.85rem', color: '#374151', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <Mail size={14} /> Email
+                </label>
+                <input type="text" className="form-input" value={headerGoogleRegisterData.email} disabled style={{ background: '#f3f4f6' }} />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label style={{ fontSize: '0.85rem', color: '#374151', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <Lock size={14} /> Create Password
+                </label>
+                <input
+                  type="password"
+                  className="form-input"
+                  placeholder="Enter a secure password"
+                  required
+                  value={headerGoogleRegisterData.password}
+                  onChange={e => setHeaderGoogleRegisterData({ ...headerGoogleRegisterData, password: e.target.value })}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label style={{ fontSize: '0.85rem', color: '#374151', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <Phone size={14} /> Phone Number
+                </label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Enter mobile number"
+                  required
+                  value={headerGoogleRegisterData.phone}
+                  onChange={e => setHeaderGoogleRegisterData({ ...headerGoogleRegisterData, phone: e.target.value })}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                <label style={{ fontSize: '0.85rem', color: '#374151', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <MapPin size={14} /> City
+                </label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Enter your city"
+                  required
+                  value={headerGoogleRegisterData.city}
+                  onChange={e => setHeaderGoogleRegisterData({ ...headerGoogleRegisterData, city: e.target.value })}
+                />
+              </div>
+
+              <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.85rem' }} disabled={loginLoading}>
+                {loginLoading ? 'Saving Profile...' : 'Complete & Sign In'}
               </button>
             </form>
           </div>

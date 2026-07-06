@@ -1,4 +1,11 @@
 const nodemailer = require('nodemailer');
+const dns = require('dns');
+
+// Force DNS lookup to prioritize IPv4 over IPv6. 
+// This fixes connect ENETUNREACH IPv6 errors on cloud platforms like Render.
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
 
 let transporter;
 

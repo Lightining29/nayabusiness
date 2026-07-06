@@ -285,7 +285,7 @@ export default function Login() {
             </div>
             
             <p style={{ textAlign: 'center', color: '#4b5563', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: '1.4' }}>
-              Welcome <strong>{googleRegisterData.name}</strong>! Since this is your first time signing in with Google, please set a password and phone number to secure your account.
+              Welcome <strong>{googleRegisterData.name}</strong>! Your Google account is verified. Set a password so you can also log in with email in future.
             </p>
 
             <form onSubmit={handleGoogleRegisterSubmit}>

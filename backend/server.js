@@ -147,7 +147,7 @@ app.post('/api/auth/google', async (req, res) => {
 
 // Google first-time registration endpoint (requires password)
 app.post('/api/auth/google/register', async (req, res) => {
-  const { credential, password, phone, city } = req.body;
+  const { credential, password, phone, city, firstName, lastName, qualification, skills, job_title } = req.body;
   if (!credential || !password) {
     return res.status(400).json({ error: 'Google credential and password are required.' });
   }
@@ -166,39 +166,47 @@ app.post('/api/auth/google/register', async (req, res) => {
       return res.status(400).json({ error: 'Email already registered.' });
     }
 
-    // Create the User (it will auto-hash password via Schema pre-save)
+    // Derive name: prefer explicitly passed first/last, fall back to Google name
+    const googleNameParts = (payload.name || '').split(' ');
+    const resolvedFirstName = firstName || googleNameParts[0] || 'Google';
+    const resolvedLastName = lastName || googleNameParts.slice(1).join(' ') || 'User';
+    const fullName = `${resolvedFirstName} ${resolvedLastName}`.trim();
+
+    const skillsArray = skills
+      ? skills.split(',').map(s => s.trim()).filter(Boolean)
+      : [];
+
+    // Create the User
     const user = new User({
-      name: payload.name || 'Google User',
+      name: fullName,
       email: normalizedEmail,
-      password: password, // will be auto-hashed by User model pre-save hook
+      password,
       phone: phone || '',
       city: city || '',
+      skills: skillsArray,
       emailVerified: true,
       emailVerifiedAt: new Date()
     });
 
     await user.save();
 
-    // Save corresponding Registration document
-    const names = (payload.name || '').split(' ');
-    const firstName = names[0] || 'Google';
-    const lastName = names.slice(1).join(' ') || 'User';
-
+    // Save corresponding Registration document (candidate table)
     const registration = new Registration({
-      first_name: firstName,
-      last_name: lastName,
+      first_name: resolvedFirstName,
+      last_name: resolvedLastName,
       email: normalizedEmail,
       mobno: phone || '',
       city: city || '',
-      password: await bcrypt.hash(password, 10), // hash for candidate table
-      job_title: 'General Application',
+      qualification: qualification || '',
+      skills: skills || '',
+      password: await bcrypt.hash(password, 10),
+      job_title: job_title || 'General Application',
       emailVerified: true,
       emailVerifiedAt: new Date()
     });
 
     await registration.save();
 
-    // Log user in and return JWT token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'fallback-secret', { expiresIn: '7d' });
     return res.status(201).json({
       token,

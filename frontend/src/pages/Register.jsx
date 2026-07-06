@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, CheckCircle, Briefcase, MapPin, Clock, DollarSign, MailCheck, UserCheck } from 'lucide-react';
+import { AlertCircle, CheckCircle, Briefcase, MapPin, Clock, DollarSign, MailCheck, UserCheck, X, ShieldCheck, Lock, Phone, Mail } from 'lucide-react';
 import { apiRequest } from '../utils/api';
+import { canUseDemoGoogleLogin, createMockGoogleCredential, renderGoogleSignInButton } from '../utils/googleAuth';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -19,6 +20,22 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
+
+  // Google OAuth states for register
+  const [showGoogleRegisterModal, setShowGoogleRegisterModal] = useState(false);
+  const [googleRegisterData, setGoogleRegisterData] = useState({
+    credential: '',
+    email: '',
+    name: '',
+    firstName: '',
+    lastName: '',
+    password: '',
+    phone: '',
+    city: '',
+    qualification: '',
+    skills: '',
+    job_title: 'General Application'
+  });
 
   // Jobs state
   const [jobs, setJobs] = useState([]);
@@ -85,6 +102,82 @@ export default function Register() {
     });
   };
 
+  const processGoogleRegister = async (credential) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await apiRequest('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential })
+      });
+
+      if (data.token) {
+        // Already registered — log them in
+        localStorage.setItem('token', data.token);
+        window.dispatchEvent(new Event('auth-change'));
+        setSuccess('Already registered! Logging you in...');
+        setTimeout(() => navigate('/profile'), 1000);
+      } else if (data.registerRequired) {
+        // Split name into first/last
+        const parts = (data.name || '').trim().split(' ');
+        setGoogleRegisterData({
+          credential,
+          email: data.email,
+          name: data.name,
+          firstName: parts[0] || '',
+          lastName: parts.slice(1).join(' ') || '',
+          password: '',
+          phone: '',
+          city: '',
+          qualification: '',
+          skills: '',
+          job_title: selectedJob
+        });
+        setShowGoogleRegisterModal(true);
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleRegisterSubmit = async (e) => {
+    e.preventDefault();
+    const { credential, firstName, lastName, password, phone, city, qualification, skills, job_title } = googleRegisterData;
+    if (!password || !phone || !city) {
+      setError('Password, phone and city are required.');
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await apiRequest('/api/auth/google/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential, password, phone, city, firstName, lastName, qualification, skills, job_title })
+      });
+      setShowGoogleRegisterModal(false);
+      localStorage.setItem('token', data.token);
+      window.dispatchEvent(new Event('auth-change'));
+      setSuccess('Registered with Google successfully! Redirecting...');
+      setTimeout(() => navigate('/profile'), 1000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMockGoogleRegister = () => {
+    const testEmail = prompt('Enter a test email:', 'test-user@gmail.com');
+    if (!testEmail) return;
+    const testName = prompt('Enter a test name:', 'Test User');
+    if (!testName) return;
+    processGoogleRegister(createMockGoogleCredential(testEmail, testName));
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
     const validationError = validateRegistrationFields();
@@ -105,6 +198,21 @@ export default function Register() {
       setLoading(false);
     }
   };
+
+  // Render Google Sign-In button for Register page
+  useEffect(() => {
+    let cancelled = false;
+    renderGoogleSignInButton({
+      elementId: 'google-register-btn',
+      onCredential: (credential) => { if (!cancelled) processGoogleRegister(credential); },
+      onError: (message) => { if (!cancelled) setError(message); }
+    });
+    return () => {
+      cancelled = true;
+      const el = document.getElementById('google-register-btn');
+      if (el) el.innerHTML = '';
+    };
+  }, []);
 
   return (
     <div className="container-width animate-fade-in" style={{ paddingTop: '4rem' }}>
@@ -332,7 +440,166 @@ export default function Register() {
           </button>
 
         </form>
+
+        {/* Google Sign-Up divider */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', margin: '1.5rem 0' }}>
+          <div style={{ flex: 1, height: '1px', background: '#e5e7eb' }}></div>
+          <span style={{ fontSize: '0.85rem', color: '#6b7280', fontWeight: 500 }}>or register with Google</span>
+          <div style={{ flex: 1, height: '1px', background: '#e5e7eb' }}></div>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'center', minHeight: '44px' }}>
+          <div id="google-register-btn" style={{ width: '100%', maxWidth: '400px' }}></div>
+        </div>
+
+        {canUseDemoGoogleLogin && (
+          <button
+            type="button"
+            onClick={handleMockGoogleRegister}
+            disabled={loading}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+              width: '100%', marginTop: '0.75rem', padding: '11px 16px', borderRadius: '12px',
+              border: '1.5px dashed #cbd5e1', background: '#f8fafc',
+              cursor: loading ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
+              fontSize: '0.9rem', fontWeight: 600, color: '#475569',
+              transition: 'all 0.2s ease', opacity: loading ? 0.6 : 1
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.borderColor = '#94a3b8'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
+          >
+            <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+            </svg>
+            Demo Google Register (Dev only)
+          </button>
+        )}
+
       </div>
+
+      {/* Google Registration Modal */}
+      {showGoogleRegisterModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 9999, padding: '1rem', overflowY: 'auto'
+        }}>
+          <div style={{
+            background: 'white', maxWidth: '500px', width: '100%', padding: '2.5rem',
+            borderRadius: '16px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.15)',
+            position: 'relative', margin: 'auto'
+          }}>
+            <button onClick={() => setShowGoogleRegisterModal(false)} style={{
+              position: 'absolute', top: '1rem', right: '1rem',
+              border: 'none', background: 'transparent', cursor: 'pointer', color: '#9ca3af'
+            }}>
+              <X size={20} />
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', justifyContent: 'center', marginBottom: '0.75rem' }}>
+              <ShieldCheck size={28} style={{ color: 'var(--secondary)' }} />
+              <h2 style={{ color: '#000000', fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>Complete Your Application</h2>
+            </div>
+            <p style={{ textAlign: 'center', color: '#4b5563', fontSize: '0.88rem', marginBottom: '1.5rem', lineHeight: '1.5' }}>
+              Welcome <strong>{googleRegisterData.name}</strong>! Your Google email is verified. Please fill in your job application details below.
+            </p>
+
+            {error && (
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', color: '#f87171', background: 'rgba(239,68,68,0.1)', padding: '0.85rem', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.2)', marginBottom: '1rem', fontSize: '0.88rem', fontWeight: 600 }}>
+                <AlertCircle size={16} /><span>{error}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleGoogleRegisterSubmit}>
+              {/* Google-verified email (read-only) */}
+              <div className="form-group" style={{ marginBottom: '0.85rem' }}>
+                <label style={{ fontSize: '0.83rem', color: '#374151', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <Mail size={13} /> Email (Google verified)
+                </label>
+                <input type="text" className="form-input" value={googleRegisterData.email} disabled style={{ background: '#f3f4f6', color: '#6b7280' }} />
+              </div>
+
+              {/* Position */}
+              <div className="form-group" style={{ marginBottom: '0.85rem' }}>
+                <label style={{ fontSize: '0.83rem', color: '#374151', fontWeight: 600 }}>Position Applied For</label>
+                <select className="form-input" value={googleRegisterData.job_title}
+                  onChange={e => setGoogleRegisterData({ ...googleRegisterData, job_title: e.target.value })}>
+                  <option value="General Application">General Application (No Specific Job)</option>
+                  {jobs.map(job => (
+                    <option key={job._id} value={job.title}>{job.title} ({job.department} - {job.location})</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Name row */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.85rem' }}>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label style={{ fontSize: '0.83rem', color: '#374151', fontWeight: 600 }}>First Name</label>
+                  <input type="text" className="form-input" placeholder="First Name" required
+                    value={googleRegisterData.firstName}
+                    onChange={e => setGoogleRegisterData({ ...googleRegisterData, firstName: e.target.value })} />
+                </div>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label style={{ fontSize: '0.83rem', color: '#374151', fontWeight: 600 }}>Last Name</label>
+                  <input type="text" className="form-input" placeholder="Last Name" required
+                    value={googleRegisterData.lastName}
+                    onChange={e => setGoogleRegisterData({ ...googleRegisterData, lastName: e.target.value })} />
+                </div>
+              </div>
+
+              {/* Phone + City row */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.85rem' }}>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label style={{ fontSize: '0.83rem', color: '#374151', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Phone size={13} /> Phone</label>
+                  <input type="text" className="form-input" placeholder="Mobile number" required
+                    value={googleRegisterData.phone}
+                    onChange={e => setGoogleRegisterData({ ...googleRegisterData, phone: e.target.value })} />
+                </div>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label style={{ fontSize: '0.83rem', color: '#374151', fontWeight: 600 }}>City</label>
+                  <input type="text" className="form-input" placeholder="Your city" required
+                    value={googleRegisterData.city}
+                    onChange={e => setGoogleRegisterData({ ...googleRegisterData, city: e.target.value })} />
+                </div>
+              </div>
+
+              {/* Qualification */}
+              <div className="form-group" style={{ marginBottom: '0.85rem' }}>
+                <label style={{ fontSize: '0.83rem', color: '#374151', fontWeight: 600 }}>Highest Qualification</label>
+                <input type="text" className="form-input" placeholder="e.g. B.Tech ECE, MCA"
+                  value={googleRegisterData.qualification}
+                  onChange={e => setGoogleRegisterData({ ...googleRegisterData, qualification: e.target.value })} />
+              </div>
+
+              {/* Skills */}
+              <div className="form-group" style={{ marginBottom: '0.85rem' }}>
+                <label style={{ fontSize: '0.83rem', color: '#374151', fontWeight: 600 }}>Skills</label>
+                <textarea className="form-textarea" rows={3} placeholder="List your skills..."
+                  value={googleRegisterData.skills}
+                  onChange={e => setGoogleRegisterData({ ...googleRegisterData, skills: e.target.value })} />
+              </div>
+
+              {/* Password */}
+              <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                <label style={{ fontSize: '0.83rem', color: '#374151', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <Lock size={13} /> Create Password <span style={{ color: '#9ca3af', fontWeight: 400, fontSize: '0.78rem' }}>(for email/password login)</span>
+                </label>
+                <input type="password" className="form-input" placeholder="Create a secure password" required
+                  value={googleRegisterData.password}
+                  onChange={e => setGoogleRegisterData({ ...googleRegisterData, password: e.target.value })} />
+              </div>
+
+              <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.85rem' }} disabled={loading}>
+                {loading ? 'Submitting...' : 'Complete Registration'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );

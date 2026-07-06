@@ -41,22 +41,19 @@ function getAdminApp() {
 }
 
 // ─── Save / refresh FCM token ─────────────────────────────────────────────────
-// POST /api/notifications/token
 router.post('/token', async (req, res) => {
   const { token, userId, topics } = req.body;
   if (!token) return res.status(400).json({ error: 'FCM token is required.' });
 
   try {
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      return res.json({ success: true, message: 'Token received (demo mode).' });
+    }
     await FcmToken.findOneAndUpdate(
       { token },
-      {
-        token,
-        userId: userId || null,
-        userAgent: req.headers['user-agent'] || '',
-        topics: topics || ['all'],
-        active: true,
-        lastSeenAt: new Date()
-      },
+      { token, userId: userId || null, userAgent: req.headers['user-agent'] || '',
+        topics: topics || ['all'], active: true, lastSeenAt: new Date() },
       { upsert: true, new: true }
     );
     return res.json({ success: true, message: 'Token saved.' });
@@ -83,10 +80,15 @@ router.delete('/token', async (req, res) => {
 // GET /api/notifications/stats
 router.get('/stats', async (req, res) => {
   try {
-    const total  = await FcmToken.countDocuments({ active: true });
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      return res.json({ total: 0, note: 'demo-mode' });
+    }
+    const total = await FcmToken.countDocuments({ active: true });
     return res.json({ total });
   } catch (err) {
-    return res.status(500).json({ error: 'Failed to fetch stats.' });
+    console.error('[FCM] Stats error:', err.message);
+    return res.json({ total: 0 });
   }
 });
 

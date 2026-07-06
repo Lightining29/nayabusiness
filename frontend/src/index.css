@@ -1557,3 +1557,89 @@ textarea.form-input {
   box-shadow:
     0 0 25px rgba(56,189,248,0.25);
 }
+
+/* ── Spin animation for loading states ────────────────────────── */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── SweetAlert2 custom theme to match site design ────────────── */
+.swal2-popup {
+  border-radius: 18px !important;
+  font-family: var(--font-body) !important;
+  padding: 2rem !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.18) !important;
+}
+.swal2-title {
+  font-family: var(--font-heading) !important;
+  font-size: 1.4rem !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+}
+.swal2-html-container {
+  font-size: 0.95rem !important;
+  color: #475569 !important;
+  line-height: 1.6 !important;
+}
+.swal2-confirm {
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  font-family: var(--font-body) !important;
+  padding: 0.65rem 1.75rem !important;
+  font-size: 0.95rem !important;
+  box-shadow: none !important;
+}
+.swal2-cancel {
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  font-family: var(--font-body) !important;
+  padding: 0.65rem 1.75rem !important;
+  font-size: 0.95rem !important;
+}
+.swal2-icon {
+  border-width: 3px !important;
+  width: 64px !important;
+  height: 64px !important;
+}
+.swal2-icon.swal2-success {
+  border-color: #10b981 !important;
+  color: #10b981 !important;
+}
+.swal2-icon.swal2-success .swal2-success-ring {
+  border-color: rgba(16,185,129,0.25) !important;
+}
+.swal2-icon.swal2-error {
+  border-color: #ef4444 !important;
+  color: #ef4444 !important;
+}
+.swal2-icon.swal2-warning {
+  border-color: #f59e0b !important;
+  color: #f59e0b !important;
+}
+.swal2-icon.swal2-info {
+  border-color: #0ea5e9 !important;
+  color: #0ea5e9 !important;
+}
+.swal2-timer-progress-bar {
+  background: linear-gradient(90deg, #0ea5e9, #06b6d4) !important;
+  border-radius: 4px !important;
+}
+.swal2-loader {
+  border-color: #0ea5e9 transparent #0ea5e9 transparent !important;
+}
+
+/* Dark mode Swal */
+.dark .swal2-popup {
+  background: #1e293b !important;
+  border: 1px solid rgba(56,189,248,0.15) !important;
+}
+.dark .swal2-title { color: #ffffff !important; }
+.dark .swal2-html-container { color: #cbd5e1 !important; }
+
+/* ── NotificationBell tooltip z-index fix ─────────────────────── */
+.notif-tooltip-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 998;
+}

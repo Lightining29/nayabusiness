@@ -418,7 +418,7 @@ export default function Header() {
           </Link>
 
           {/* Mobile Menu Button */}
-          <button className="menu-btn" onClick={toggleMenu} aria-label="Toggle menu">
+          <button className="menu-btn"  style={{ marginLeft: "10px" }} onClick={toggleMenu} aria-label="Toggle menu">
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
 

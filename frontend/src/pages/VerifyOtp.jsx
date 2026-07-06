@@ -160,6 +160,11 @@ export default function VerifyOtp() {
                 <p style={{ margin: '0.25rem 0 0', color: '#4b5563', fontSize: '0.9rem', lineHeight: '1.4' }}>
                   Enter the 6-digit OTP code sent to <strong>{email}</strong>.
                 </p>
+                {import.meta.env.DEV && (
+                  <p style={{ margin: '0.5rem 0 0', color: '#8b5cf6', fontSize: '0.8rem', fontWeight: 600 }}>
+                    💡 Dev Mode: You can also use the master OTP <code>123456</code> to verify.
+                  </p>
+                )}
               </div>
             </div>
 

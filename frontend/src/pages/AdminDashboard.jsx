@@ -145,37 +145,38 @@ export default function AdminDashboard() {
   };
 
   const openResume = async (application) => {
-    if (!application.hasResume && !application.resumeFileName) {
-      toast.error('No resume PDF is available for this application.');
+    if (!application.hasResume) {
+      toast.error('No resume uploaded for this application.');
       return;
     }
 
-    const toastId = toast.loading('Opening resume...');
+    const toastId = toast.loading('Loading resume...');
     try {
       const res = await fetch(`/api/admin/applications/${application._id}/resume`);
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || 'Failed to load resume');
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server returned ${res.status}`);
       }
 
       const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
+      if (blob.size === 0) throw new Error('Resume file is empty.');
 
-      // Open in a new tab using a blob URL — avoids popup blockers and binary corruption
+      const blobUrl = URL.createObjectURL(blob);
       const tab = window.open(blobUrl, '_blank');
       if (!tab) {
-        // Fallback: trigger a download if popup was blocked
+        // Popup blocked — fall back to download
         const a = document.createElement('a');
         a.href = blobUrl;
         a.download = application.resumeFileName || 'resume.pdf';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+        toast.success('Resume downloaded (popup was blocked)', { id: toastId });
+      } else {
+        toast.success('Resume opened in new tab', { id: toastId });
       }
 
-      // Revoke blob URL after a short delay to free memory
       setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
-      toast.success('Resume opened', { id: toastId });
     } catch (err) {
       toast.error(err.message || 'Could not open resume', { id: toastId });
     }
@@ -535,10 +536,11 @@ export default function AdminDashboard() {
                           type="button"
                           className="resume-btn"
                           onClick={() => openResume(app)}
-                          disabled={!app.hasResume && !app.resumeFileName}
-                          title={app.hasResume || app.resumeFileName ? `Open ${app.resumeFileName || 'resume'}` : 'No resume uploaded'}
+                          disabled={!app.hasResume}
+                          title={app.hasResume ? `View ${app.resumeFileName || 'resume.pdf'}` : 'No resume uploaded'}
                         >
-                          <FileText size={15} /> View PDF
+                          <FileText size={15} />
+                          {app.hasResume ? 'View PDF' : 'No Resume'}
                         </button>
                       </td>
                       <td style={{ fontSize: '0.85rem', color: '#666666' }}>{new Date(app.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</td>

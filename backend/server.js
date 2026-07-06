@@ -12,6 +12,7 @@ const Blog = require('./models/Blog');
 const Job = require('./models/Job');
 const User = require('./models/User');
 const EmailVerification = require('./models/EmailVerification');
+const ResumeData = require('./models/ResumeData');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { sendOtpEmail } = require('./utils/mailer');
@@ -501,6 +502,8 @@ app.post('/api/register', resumeUpload.single('resume'), async (req, res) => {
 
     if (mongoose.connection.readyState === 1) {
       const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Save Registration (no binary resume here — stored separately)
       const newRegistration = new Registration({
         first_name,
         last_name,
@@ -512,49 +515,59 @@ app.post('/api/register', resumeUpload.single('resume'), async (req, res) => {
         skills,
         job_title: job_title || 'General Application',
         emailVerified: true,
-        emailVerifiedAt: verifiedAt
+        emailVerifiedAt: verifiedAt,
+        // Store only metadata, not the binary
+        resumeFileName: req.file ? req.file.originalname : undefined,
+        resumeContentType: req.file ? req.file.mimetype : undefined
       });
 
-      if (req.file) {
-        newRegistration.resume = req.file.buffer;
-        newRegistration.resumeContentType = req.file.mimetype;
-        newRegistration.resumeFileName = req.file.originalname;
+      await newRegistration.save();
+
+      // Save resume binary in its own collection
+      if (req.file && req.file.buffer && req.file.buffer.length > 0) {
+        await ResumeData.findOneAndUpdate(
+          { registrationId: newRegistration._id },
+          {
+            registrationId: newRegistration._id,
+            data: req.file.buffer,
+            contentType: req.file.mimetype,
+            fileName: req.file.originalname,
+            size: req.file.buffer.length,
+            uploadedAt: new Date()
+          },
+          { upsert: true, new: true }
+        );
+        console.log(`[Register] Resume saved for ${normalizedEmail}, size=${req.file.buffer.length} bytes`);
       }
 
+      // Also create User record
       const user = new User({
         name: `${first_name} ${last_name}`.trim(),
         email: normalizedEmail,
         password,
         phone: mobno,
         city,
-        skills: skills ? skills.split(',').map(skill => skill.trim()).filter(Boolean) : [],
+        skills: skills ? skills.split(',').map(s => s.trim()).filter(Boolean) : [],
         emailVerified: true,
-        emailVerifiedAt: verifiedAt
+        emailVerifiedAt: verifiedAt,
+        resumeFileName: req.file ? req.file.originalname : undefined,
+        resumeContentType: req.file ? req.file.mimetype : undefined
       });
-
-      if (req.file) {
-        user.resume = req.file.buffer;
-        user.resumeContentType = req.file.mimetype;
-        user.resumeFileName = req.file.originalname;
-      }
-
-      await newRegistration.save();
       await user.save();
 
       return res.status(201).json({ message: 'Email verified and career registration saved. You can now login and apply for jobs.' });
     }
 
+    // Demo / in-memory mode
+    const mockId = Date.now().toString();
     const mockRegistration = {
-      _id: Date.now().toString(),
-      first_name,
-      last_name,
+      _id: mockId,
+      first_name, last_name,
       email: normalizedEmail,
-      mobno,
-      qualification,
-      city,
-      resume: req.file?.buffer,
+      mobno, qualification, city,
       resumeFileName: req.file?.originalname,
       resumeContentType: req.file?.mimetype,
+      hasResume: !!req.file,
       password: '[hidden]',
       skills,
       job_title: job_title || 'General Application',
@@ -562,11 +575,20 @@ app.post('/api/register', resumeUpload.single('resume'), async (req, res) => {
       emailVerifiedAt: verifiedAt,
       createdAt: new Date()
     };
+    // Store resume binary separately even in demo mode
+    if (req.file) {
+      registrationInMemoryDb._resumes = registrationInMemoryDb._resumes || {};
+      registrationInMemoryDb._resumes[mockId] = {
+        data: req.file.buffer,
+        contentType: req.file.mimetype,
+        fileName: req.file.originalname
+      };
+    }
     registrationInMemoryDb.push(mockRegistration);
-    console.log('Demo Mode: Verified career registration submitted', mockRegistration);
-    return res.status(201).json({ message: 'Email verified and registration saved in demo memory. Connect MongoDB to save it permanently.' });
+    return res.status(201).json({ message: 'Email verified and registration saved. Connect MongoDB to persist permanently.' });
+
   } catch (err) {
-    console.error('Registration verification error:', err);
+    console.error('Registration error:', err);
     if (err.code === 11000) {
       return res.status(400).json({ error: 'Email already registered. Please login.' });
     }
@@ -627,19 +649,34 @@ app.post('/api/admin/login', (req, res) => {
 });
 
 // 6. Get all job applications (registrations)
+// 6. Get all job applications (registrations)
 app.get('/api/admin/applications', async (req, res) => {
   if (mongoose.connection.readyState === 1) {
     try {
       const applications = await Registration.find()
-        .select('-resume -password')
-        .sort({ createdAt: -1 });
+        .select('-password')
+        .sort({ createdAt: -1 })
+        .lean();
 
-      // Add a hasResume boolean so the frontend can reliably enable the View PDF button
-      const result = applications.map(app => {
-        const obj = app.toObject();
-        obj.hasResume = !!(obj.resumeFileName || obj.resumeContentType);
-        return obj;
+      // For each application, check if a resume binary exists in ResumeData
+      const ids = applications.map(a => a._id);
+      const resumeRecords = await ResumeData.find({ registrationId: { $in: ids } })
+        .select('registrationId fileName size')
+        .lean();
+
+      const resumeMap = {};
+      resumeRecords.forEach(r => {
+        resumeMap[r.registrationId.toString()] = {
+          fileName: r.fileName,
+          size: r.size
+        };
       });
+
+      const result = applications.map(app => ({
+        ...app,
+        hasResume: !!(resumeMap[app._id.toString()] || app.resumeFileName),
+        resumeFileName: resumeMap[app._id.toString()]?.fileName || app.resumeFileName || null
+      }));
 
       return res.status(200).json(result);
     } catch (err) {
@@ -647,7 +684,9 @@ app.get('/api/admin/applications', async (req, res) => {
       return res.status(500).json({ error: 'Failed to fetch applications' });
     }
   } else {
-    return res.status(200).json(registrationInMemoryDb.map(r => ({ ...r, hasResume: !!r.resumeFileName })));
+    return res.status(200).json(
+      registrationInMemoryDb.map(r => ({ ...r, hasResume: !!r.resumeFileName }))
+    );
   }
 });
 
@@ -655,17 +694,15 @@ app.get('/api/admin/applications', async (req, res) => {
 app.get('/api/admin/applications/:id/debug', async (req, res) => {
   if (process.env.NODE_ENV === 'production') return res.status(404).end();
   try {
-    const application = await Registration.findById(req.params.id).select('-password');
+    const application = await Registration.findById(req.params.id).select('-password').lean();
     if (!application) return res.status(404).json({ error: 'Not found' });
-    const obj = application.toObject();
+    const resumeDoc = await ResumeData.findOne({ registrationId: req.params.id }).select('-data').lean();
     res.json({
-      _id: obj._id,
-      email: obj.email,
-      resumeFileName: obj.resumeFileName,
-      resumeContentType: obj.resumeContentType,
-      hasResumeBuffer: !!obj.resume,
-      resumeBufferType: obj.resume ? Object.prototype.toString.call(obj.resume) : null,
-      resumeBufferLength: obj.resume ? (obj.resume.length || obj.resume.buffer?.byteLength || 0) : 0
+      _id: application._id,
+      email: application.email,
+      resumeFileName: application.resumeFileName,
+      resumeContentType: application.resumeContentType,
+      resumeDoc: resumeDoc || null
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -674,51 +711,51 @@ app.get('/api/admin/applications/:id/debug', async (req, res) => {
 
 app.get('/api/admin/applications/:id/resume', async (req, res) => {
   try {
-    let application;
-
     if (mongoose.connection.readyState === 1) {
-      // Explicitly include the resume field (it's excluded by default in listing queries)
-      application = await Registration.findById(req.params.id).select('+resume +resumeContentType +resumeFileName');
+      // Look up resume in the dedicated ResumeData collection
+      const resumeDoc = await ResumeData.findOne({ registrationId: req.params.id });
+
+      if (!resumeDoc || !resumeDoc.data) {
+        // Fallback: try old-style binary on Registration document itself
+        const reg = await Registration.findById(req.params.id).select('resume resumeContentType resumeFileName');
+        if (!reg || !reg.resume) {
+          return res.status(404).json({ error: 'No resume found for this application.' });
+        }
+        // Serve from legacy field
+        const rawBuffer = Buffer.isBuffer(reg.resume) ? reg.resume : Buffer.from(reg.resume.buffer || reg.resume);
+        const fileName = (reg.resumeFileName || 'resume.pdf').replace(/[^\w.\-]/g, '_');
+        res.setHeader('Content-Type', reg.resumeContentType || 'application/pdf');
+        res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
+        res.setHeader('Content-Length', rawBuffer.length);
+        return res.send(rawBuffer);
+      }
+
+      const rawBuffer = Buffer.isBuffer(resumeDoc.data)
+        ? resumeDoc.data
+        : Buffer.from(resumeDoc.data.buffer || resumeDoc.data);
+
+      const fileName = (resumeDoc.fileName || 'resume.pdf').replace(/[^\w.\-]/g, '_');
+
+      console.log(`[Resume] Serving ${fileName} (${rawBuffer.length} bytes) for id=${req.params.id}`);
+
+      res.setHeader('Content-Type', resumeDoc.contentType || 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
+      res.setHeader('Content-Length', rawBuffer.length);
+      return res.send(rawBuffer);
+
     } else {
-      application = registrationInMemoryDb.find(reg => reg._id === req.params.id);
+      // Demo mode
+      const resumes = registrationInMemoryDb._resumes || {};
+      const resumeEntry = resumes[req.params.id];
+      if (!resumeEntry) {
+        return res.status(404).json({ error: 'Resume unavailable in demo mode.' });
+      }
+      const fileName = (resumeEntry.fileName || 'resume.pdf').replace(/[^\w.\-]/g, '_');
+      res.setHeader('Content-Type', resumeEntry.contentType || 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
+      res.setHeader('Content-Length', resumeEntry.data.length);
+      return res.send(resumeEntry.data);
     }
-
-    console.log(`[Resume] id=${req.params.id} found=${!!application} hasResume=${!!application?.resume} fileName=${application?.resumeFileName} type=${application?.resumeContentType}`);
-
-    if (!application) {
-      return res.status(404).json({ error: 'Application not found' });
-    }
-
-    if (!application.resume) {
-      return res.status(404).json({ error: 'No resume PDF found for this application. The candidate may not have uploaded one.' });
-    }
-
-    // Unwrap Mongoose Binary / Buffer to plain Buffer
-    let rawBuffer;
-    if (application.resume instanceof Buffer) {
-      rawBuffer = application.resume;
-    } else if (application.resume.buffer instanceof ArrayBuffer) {
-      rawBuffer = Buffer.from(application.resume.buffer);
-    } else if (application.resume.buffer) {
-      rawBuffer = Buffer.from(application.resume.buffer);
-    } else if (application.resume.data) {
-      rawBuffer = Buffer.from(application.resume.data);
-    } else {
-      rawBuffer = Buffer.from(application.resume);
-    }
-
-    console.log(`[Resume] rawBuffer.length=${rawBuffer.length}`);
-
-    if (rawBuffer.length === 0) {
-      return res.status(404).json({ error: 'Resume file is empty.' });
-    }
-
-    const fileName = (application.resumeFileName || 'resume.pdf').replace(/[^a-zA-Z0-9.\-_]/g, '_');
-
-    res.setHeader('Content-Type', application.resumeContentType || 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
-    res.setHeader('Content-Length', rawBuffer.length);
-    return res.send(rawBuffer);
   } catch (err) {
     console.error('[Resume] fetch error:', err);
     return res.status(500).json({ error: 'Failed to fetch resume: ' + err.message });

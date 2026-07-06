@@ -30,15 +30,14 @@ const registrationSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
-  resume: {
-    type: Buffer
-  },
-  resumeContentType: {
-    type: String
-  },
+  // Resume binary is stored in the ResumeData collection (linked by _id)
+  // Only metadata is kept here so the Registration document stays small
   resumeFileName: {
     type: String,
     trim: true
+  },
+  resumeContentType: {
+    type: String
   },
   password: {
     type: String

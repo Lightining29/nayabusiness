@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import { AlertCircle, CheckCircle, Cpu, Menu, X, ChevronDown, LogIn, UserPlus, UserRound, ShieldCheck, Mail, Lock, Phone, MapPin } from 'lucide-react';
 import { Moon, Sun } from "lucide-react";
+import { getGoogleClientId } from '../utils/googleAuth';
 
 
 
@@ -136,19 +137,41 @@ export default function Header() {
   };
 
   useEffect(() => {
+    let cancelled = false;
     if (loginModalOpen && window.google) {
-      const initGoogleHeader = () => {
-        window.google.accounts.id.initialize({
-          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || "1028472934-mockclientid.apps.googleusercontent.com",
-          callback: (response) => processHeaderGoogleLogin(response.credential)
-        });
-        window.google.accounts.id.renderButton(
-          document.getElementById("google-header-signin-btn"),
-          { theme: "outline", size: "large", width: 280 }
-        );
+      const initGoogleHeader = async () => {
+        try {
+          const clientId = await getGoogleClientId();
+          if (cancelled) return;
+          if (!clientId) {
+            console.warn('Google Client ID is not configured.');
+            return;
+          }
+          window.google.accounts.id.initialize({
+            client_id: clientId,
+            callback: (response) => {
+              if (!cancelled) processHeaderGoogleLogin(response.credential);
+            }
+          });
+          const btnEl = document.getElementById("google-header-signin-btn");
+          if (btnEl) {
+            window.google.accounts.id.renderButton(btnEl, {
+              theme: "outline",
+              size: "large",
+              width: 280
+            });
+          }
+        } catch (error) {
+          console.error('Failed to initialize Google login in header:', error);
+        }
       };
       setTimeout(initGoogleHeader, 200);
     }
+    return () => {
+      cancelled = true;
+      const btnEl = document.getElementById("google-header-signin-btn");
+      if (btnEl) btnEl.innerHTML = '';
+    };
   }, [loginModalOpen]);
 
   const [registerModalOpen, setRegisterModalOpen] = useState(false);

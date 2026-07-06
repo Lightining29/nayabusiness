@@ -651,44 +651,77 @@ app.get('/api/admin/applications', async (req, res) => {
   }
 });
 
+// Debug: check what's stored for an application (no PDF data, just metadata)
+app.get('/api/admin/applications/:id/debug', async (req, res) => {
+  if (process.env.NODE_ENV === 'production') return res.status(404).end();
+  try {
+    const application = await Registration.findById(req.params.id).select('-password');
+    if (!application) return res.status(404).json({ error: 'Not found' });
+    const obj = application.toObject();
+    res.json({
+      _id: obj._id,
+      email: obj.email,
+      resumeFileName: obj.resumeFileName,
+      resumeContentType: obj.resumeContentType,
+      hasResumeBuffer: !!obj.resume,
+      resumeBufferType: obj.resume ? Object.prototype.toString.call(obj.resume) : null,
+      resumeBufferLength: obj.resume ? (obj.resume.length || obj.resume.buffer?.byteLength || 0) : 0
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/api/admin/applications/:id/resume', async (req, res) => {
   try {
     let application;
-    
+
     if (mongoose.connection.readyState === 1) {
-      application = await Registration.findById(req.params.id);
+      // Explicitly include the resume field (it's excluded by default in listing queries)
+      application = await Registration.findById(req.params.id).select('+resume +resumeContentType +resumeFileName');
     } else {
-      // Demo mode: find in memory database
       application = registrationInMemoryDb.find(reg => reg._id === req.params.id);
     }
-    
-    if (!application || !application.resume) {
-      return res.status(404).json({ error: 'Resume not found' });
+
+    console.log(`[Resume] id=${req.params.id} found=${!!application} hasResume=${!!application?.resume} fileName=${application?.resumeFileName} type=${application?.resumeContentType}`);
+
+    if (!application) {
+      return res.status(404).json({ error: 'Application not found' });
     }
 
-    // Mongoose stores Buffer fields as Binary objects – extract the raw buffer
+    if (!application.resume) {
+      return res.status(404).json({ error: 'No resume PDF found for this application. The candidate may not have uploaded one.' });
+    }
+
+    // Unwrap Mongoose Binary / Buffer to plain Buffer
     let rawBuffer;
     if (application.resume instanceof Buffer) {
       rawBuffer = application.resume;
+    } else if (application.resume.buffer instanceof ArrayBuffer) {
+      rawBuffer = Buffer.from(application.resume.buffer);
     } else if (application.resume.buffer) {
       rawBuffer = Buffer.from(application.resume.buffer);
-    } else if (typeof application.resume === 'string') {
-      rawBuffer = Buffer.from(application.resume, 'binary');
     } else if (application.resume.data) {
       rawBuffer = Buffer.from(application.resume.data);
     } else {
       rawBuffer = Buffer.from(application.resume);
     }
 
-    const fileName = (application.resumeFileName || 'resume.pdf').replace(/"/g, '');
+    console.log(`[Resume] rawBuffer.length=${rawBuffer.length}`);
+
+    if (rawBuffer.length === 0) {
+      return res.status(404).json({ error: 'Resume file is empty.' });
+    }
+
+    const fileName = (application.resumeFileName || 'resume.pdf').replace(/[^a-zA-Z0-9.\-_]/g, '_');
 
     res.setHeader('Content-Type', application.resumeContentType || 'application/pdf');
     res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
     res.setHeader('Content-Length', rawBuffer.length);
     return res.send(rawBuffer);
   } catch (err) {
-    console.error('Resume fetch error:', err);
-    return res.status(500).json({ error: 'Failed to fetch resume' });
+    console.error('[Resume] fetch error:', err);
+    return res.status(500).json({ error: 'Failed to fetch resume: ' + err.message });
   }
 });
 

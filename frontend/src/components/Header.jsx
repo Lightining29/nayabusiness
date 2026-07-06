@@ -3,6 +3,7 @@ import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import { AlertCircle, CheckCircle, Cpu, Menu, X, ChevronDown, LogIn, UserPlus, UserRound, ShieldCheck, Mail, Lock, Phone, MapPin } from 'lucide-react';
 import { Moon, Sun } from "lucide-react";
 import { getGoogleClientId } from '../utils/googleAuth';
+import NotificationBell from './NotificationBell';
 
 
 
@@ -509,7 +510,12 @@ export default function Header() {
                   Jobs
                 </NavLink>
               </li>
-             
+
+              {/* Notification Bell */}
+              <li style={{ display: 'flex', alignItems: 'center' }}>
+                <NotificationBell />
+              </li>
+
               {/* Auth Buttons */}
               <li className="nav-auth">
                 {!isAuth ? (

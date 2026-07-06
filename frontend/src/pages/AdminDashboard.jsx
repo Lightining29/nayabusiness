@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
-import { Briefcase, Users, Mail, PlusCircle, Trash2, ToggleLeft, ToggleRight, LogOut, CheckCircle, AlertCircle, ChevronUp, MapPin, Clock, DollarSign, Edit, FileText } from 'lucide-react';
+import { Briefcase, Users, Mail, PlusCircle, Trash2, ToggleLeft, ToggleRight, LogOut, CheckCircle, AlertCircle, ChevronUp, MapPin, Clock, DollarSign, Edit, FileText, Bell } from 'lucide-react';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -31,6 +31,57 @@ export default function AdminDashboard() {
   const [showEditForm, setShowEditForm] = useState(false);
   const [editJobLoading, setEditJobLoading] = useState(false);
   const [editJobMsg, setEditJobMsg] = useState(null);
+
+  // Push notification state
+  const [notifForm, setNotifForm] = useState({
+    title: 'Rancom Technologies',
+    body: '',
+    icon: '/favicon.svg',
+    url: 'https://www.rancomtechnologies.com/',
+    topic: 'all'
+  });
+  const [notifLoading, setNotifLoading] = useState(false);
+  const [notifResult, setNotifResult] = useState(null);
+  const [subscriberCount, setSubscriberCount] = useState(null);
+
+  const fetchSubscriberCount = async () => {
+    try {
+      const res = await fetch('/api/notifications/stats');
+      const data = await res.json();
+      setSubscriberCount(data.total ?? 0);
+    } catch { setSubscriberCount(0); }
+  };
+
+  const handleSendNotification = async (e) => {
+    e.preventDefault();
+    if (!notifForm.body.trim()) {
+      toast.error('Notification body is required.');
+      return;
+    }
+    setNotifLoading(true);
+    setNotifResult(null);
+    try {
+      const res = await fetch('/api/notifications/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-token': sessionStorage.getItem('adminPassword') || 'rancom@2026'
+        },
+        body: JSON.stringify(notifForm)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Send failed');
+      setNotifResult({ type: 'success', text: data.message });
+      toast.success(data.message);
+      setNotifForm(f => ({ ...f, body: '' }));
+      fetchSubscriberCount();
+    } catch (err) {
+      setNotifResult({ type: 'error', text: err.message });
+      toast.error(err.message);
+    } finally {
+      setNotifLoading(false);
+    }
+  };
   const [showJobForm, setShowJobForm] = useState(false);
   const [jobForm, setJobForm] = useState({
     title: '', department: '', location: '', type: 'Full-Time',
@@ -75,6 +126,7 @@ export default function AdminDashboard() {
     fetchJobs();
     fetchApplications();
     fetchContacts();
+    fetchSubscriberCount();
   }, []);
 
   // Create job
@@ -189,9 +241,10 @@ export default function AdminDashboard() {
   };
 
   const tabs = [
-    { id: 'jobs', label: 'Job Postings', icon: <Briefcase size={18} />, count: jobs.length },
-    { id: 'applications', label: 'Applications', icon: <Users size={18} />, count: applications.length },
-    { id: 'contacts', label: 'Contact Messages', icon: <Mail size={18} />, count: contacts.length }
+    { id: 'jobs',          label: 'Job Postings',       icon: <Briefcase size={18} />, count: jobs.length },
+    { id: 'applications',  label: 'Applications',       icon: <Users size={18} />,     count: applications.length },
+    { id: 'contacts',      label: 'Contact Messages',   icon: <Mail size={18} />,      count: contacts.length },
+    { id: 'notifications', label: 'Push Notifications', icon: <Bell size={18} />,      count: null }
   ];
 
   return (
@@ -273,9 +326,10 @@ export default function AdminDashboard() {
       {/* Stats Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
         {[
-          { label: 'Active Jobs', value: jobs.filter(j => j.isActive).length, color: 'var(--accent)' },
-          { label: 'Total Applications', value: applications.length, color: 'var(--primary)' },
-          { label: 'Contact Messages', value: contacts.length, color: 'var(--secondary)' }
+          { label: 'Active Jobs',         value: jobs.filter(j => j.isActive).length, color: 'var(--accent)'     },
+          { label: 'Total Applications',  value: applications.length,                  color: 'var(--primary)'   },
+          { label: 'Contact Messages',    value: contacts.length,                      color: 'var(--secondary)' },
+          { label: 'Push Subscribers',    value: subscriberCount ?? '…',               color: '#f59e0b'          }
         ].map((stat, i) => (
           <div key={i} className="glass" style={{ padding: '1.5rem', borderRadius: '12px', borderLeft: `3px solid ${stat.color}`, background: 'white' }}>
             <p style={{ color: '#666666', fontSize: '0.85rem', marginBottom: '0.25rem' }}>{stat.label}</p>
@@ -594,6 +648,120 @@ export default function AdminDashboard() {
               </table>
             </div>
           )}
+        </div>
+      )}
+
+      {/* ==================== NOTIFICATIONS TAB ==================== */}
+      {activeTab === 'notifications' && (
+        <div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'start' }}>
+
+            {/* Send Notification Form */}
+            <div className="glass" style={{ padding: '2rem', borderRadius: '16px', background: 'white', border: '1px solid var(--border-color)' }}>
+              <h3 style={{ color: '#000000', fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Bell size={20} style={{ color: 'var(--primary)' }} /> Send Push Notification
+              </h3>
+              <p style={{ color: '#666', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
+                Sends to all <strong>{subscriberCount ?? '…'}</strong> active browser subscribers — even when their site is closed.
+              </p>
+
+              {notifResult && (
+                <div style={{
+                  display: 'flex', gap: '0.5rem', alignItems: 'center', padding: '0.85rem 1rem',
+                  borderRadius: '8px', marginBottom: '1.25rem', fontSize: '0.9rem', fontWeight: 600,
+                  color: notifResult.type === 'success' ? 'var(--accent)' : '#f87171',
+                  background: notifResult.type === 'success' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
+                  border: `1px solid ${notifResult.type === 'success' ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}`
+                }}>
+                  {notifResult.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
+                  <span>{notifResult.text}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSendNotification}>
+                <div className="form-group">
+                  <label style={{ color: '#000' }}>Notification Title</label>
+                  <input className="form-input" placeholder="e.g. New Job Opening!" value={notifForm.title}
+                    onChange={e => setNotifForm(f => ({ ...f, title: e.target.value }))} />
+                </div>
+                <div className="form-group">
+                  <label style={{ color: '#000' }}>Message Body *</label>
+                  <textarea className="form-input" required rows={3}
+                    placeholder="e.g. We're hiring a MERN Stack Developer. Apply now!"
+                    style={{ minHeight: '90px' }}
+                    value={notifForm.body}
+                    onChange={e => setNotifForm(f => ({ ...f, body: e.target.value }))} />
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label style={{ color: '#000' }}>Click URL</label>
+                    <input className="form-input" placeholder="https://www.rancomtechnologies.com/jobs"
+                      value={notifForm.url}
+                      onChange={e => setNotifForm(f => ({ ...f, url: e.target.value }))} />
+                  </div>
+                  <div className="form-group">
+                    <label style={{ color: '#000' }}>Send To</label>
+                    <select className="form-input" value={notifForm.topic}
+                      onChange={e => setNotifForm(f => ({ ...f, topic: e.target.value }))}>
+                      <option value="all">All Subscribers</option>
+                      <option value="jobs">Jobs Topic</option>
+                      <option value="blog">Blog Topic</option>
+                    </select>
+                  </div>
+                </div>
+                <button type="submit" className="btn btn-primary"
+                  style={{ width: '100%', padding: '0.8rem', marginTop: '0.5rem' }}
+                  disabled={notifLoading}>
+                  {notifLoading ? 'Sending…' : `🔔 Send to ${subscriberCount ?? '…'} Subscribers`}
+                </button>
+              </form>
+            </div>
+
+            {/* Info panel */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              {/* Stats */}
+              <div className="glass" style={{ padding: '1.75rem', borderRadius: '16px', background: 'white', border: '1px solid var(--border-color)' }}>
+                <h4 style={{ color: '#000', fontWeight: 700, marginBottom: '1rem' }}>📊 Subscriber Stats</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  {[
+                    ['Active Subscribers', subscriberCount ?? '…', '#10b981'],
+                    ['Delivery Method', 'FCM / WebPush', '#0ea5e9'],
+                    ['Works When Closed', 'Yes', '#10b981'],
+                    ['Provider', 'Firebase (Google)', '#f59e0b'],
+                  ].map(([label, value, color]) => (
+                    <div key={label} style={{ background: '#f8fafc', borderRadius: '10px', padding: '0.85rem', border: '1px solid #e2e8f0' }}>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.2rem' }}>{label}</div>
+                      <div style={{ fontSize: '1rem', fontWeight: 800, color }}>{value}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Setup guide */}
+              <div className="glass" style={{ padding: '1.75rem', borderRadius: '16px', background: 'white', border: '1px solid var(--border-color)' }}>
+                <h4 style={{ color: '#000', fontWeight: 700, marginBottom: '1rem' }}>⚙️ Setup Required</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {[
+                    ['1', 'Add Firebase config env vars to frontend (.env)', 'VITE_FIREBASE_API_KEY, VITE_FIREBASE_PROJECT_ID, etc.'],
+                    ['2', 'Add Firebase Admin env vars to backend (.env)', 'FIREBASE_SERVICE_ACCOUNT (JSON string from Firebase Console)'],
+                    ['3', 'Download Service Account Key', 'Firebase Console → Project Settings → Service Accounts → Generate new private key'],
+                    ['4', 'Visitors click the 🔔 bell in the header', 'They grant permission → FCM token saved automatically'],
+                  ].map(([num, title, desc]) => (
+                    <div key={num} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                      <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(14,165,233,0.1)',
+                        color: 'var(--primary)', fontWeight: 800, fontSize: '0.75rem',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{num}</div>
+                      <div>
+                        <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.85rem' }}>{title}</div>
+                        <div style={{ color: '#64748b', fontSize: '0.78rem', marginTop: '0.1rem', fontFamily: 'monospace' }}>{desc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
       )}
 

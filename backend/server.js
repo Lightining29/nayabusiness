@@ -20,6 +20,7 @@ const { sendOtpEmail } = require('./utils/mailer');
 // Import route files
 const authRoutes = require('./routes/auth');
 const jobRoutes = require('./routes/jobs');
+const notificationRoutes = require('./routes/notifications');
 
 // Admin credentials (use env vars in production)
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
@@ -66,6 +67,7 @@ app.get('/health', (req, res) => { res.status(200).send('OK'); });
 // Mount route files
 app.use('/api/auth', authRoutes);
 app.use('/api', jobRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // User login endpoint (used by Login.jsx)
 app.post('/api/login', async (req, res) => {

@@ -20,3 +20,13 @@ services:
         value: rancom@2026
       - key: PRODUCTION_DOMAIN
         value: www.rancomtechnologies.com
+      - key: FIREBASE_PROJECT_ID
+        value: rancom-technologies
+      - key: FIREBASE_CLIENT_EMAIL
+        value: firebase-adminsdk-fbsvc@rancom-technologies.iam.gserviceaccount.com
+      - key: FIREBASE_PRIVATE_KEY_ID
+        value: f58b2acfc62bf3bc05963a180c62f7a5c1e212a0
+      - key: FIREBASE_CLIENT_ID
+        value: "101595837038229513090"
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false

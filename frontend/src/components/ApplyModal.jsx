@@ -1,11 +1,47 @@
-import { useState } from 'react';
-import { X, Briefcase, MapPin, Clock, DollarSign, Send, Loader, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { X, Briefcase, MapPin, Clock, DollarSign, Send, Loader, CheckCircle, AlertCircle, FileText, ArrowRight } from 'lucide-react';
 
 export default function ApplyModal({ job, onClose }) {
   const [coverLetter, setCoverLetter] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [charCount, setCharCount] = useState(0);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [hasResume, setHasResume] = useState(false);
+
+  useEffect(() => {
+    const checkProfileStatus = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setIsLoggedIn(false);
+        setProfileLoading(false);
+        return;
+      }
+      try {
+        const res = await fetch('/api/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setIsLoggedIn(true);
+          setHasResume(!!data.hasResume);
+        } else {
+          setIsLoggedIn(false);
+        }
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+        setIsLoggedIn(true); // Default to logged in so backend error is shown if it is a transient error
+        setHasResume(false);
+      } finally {
+        setProfileLoading(false);
+      }
+    };
+    checkProfileStatus();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -162,130 +198,235 @@ export default function ApplyModal({ job, onClose }) {
           )}
         </div>
 
-        {/* Messages */}
-        {result && (
+        {/* Profile Validation States */}
+        {profileLoading ? (
           <div style={{
-            padding: '1rem',
-            borderRadius: '10px',
-            marginBottom: '1.5rem',
-            fontSize: '0.95rem',
-            fontWeight: 600,
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
-            gap: '0.75rem',
-            ...(result.type === 'success' ? {
-              color: '#10b981',
-              background: 'rgba(16, 185, 129, 0.1)',
-              border: '1px solid rgba(16, 185, 129, 0.3)',
-            } : {
-              color: '#f87171',
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-            }),
+            justifyContent: 'center',
+            padding: '3rem 1rem',
+            textAlign: 'center'
           }}>
-            {result.type === 'success' ? <CheckCircle size={18} /> : <X size={18} />}
-            {result.text}
+            <Loader size={36} style={{ animation: 'spin 1s linear infinite', color: '#0ea5e9', marginBottom: '1rem' }} />
+            <p style={{ color: '#4b5563', fontSize: '1rem', fontWeight: 500, margin: 0 }}>Checking application requirements...</p>
           </div>
-        )}
-
-        {/* Form */}
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-              <label style={{
-                display: 'block',
-                color: '#000000',
-                fontSize: '0.95rem',
-                fontWeight: 600,
-              }}>
-                Cover Letter (optional)
-              </label>
-              <span style={{ color: '#4b5563', fontSize: '0.85rem' }}>
-                {charCount} / 1000
-              </span>
-            </div>
-            <textarea
-              maxLength={1000}
-              rows="6"
-              placeholder="Tell us why you're a great fit for this role..."
-              value={coverLetter}
-              onChange={handleLetterChange}
+        ) : !isLoggedIn ? (
+          <div style={{
+            padding: '2.5rem 1.5rem',
+            background: 'rgba(239, 68, 68, 0.03)',
+            border: '1px solid rgba(239, 68, 68, 0.15)',
+            borderRadius: '12px',
+            textAlign: 'center',
+            marginBottom: '1rem',
+            animation: 'fadeIn 0.3s ease'
+          }}>
+            <AlertCircle size={44} style={{ color: '#ef4444', marginBottom: '1.25rem' }} />
+            <h4 style={{ color: '#0f172a', fontSize: '1.25rem', fontWeight: 700, margin: '0 0 0.75rem 0' }}>Login Required</h4>
+            <p style={{ color: '#4b5563', fontSize: '0.975rem', margin: '0 0 1.75rem 0', lineHeight: 1.6 }}>
+              You need to sign in to your account before you can apply for career positions.
+            </p>
+            <Link
+              to="/login"
               style={{
-                width: '100%',
-                padding: '0.875rem 1rem',
-                background: 'white',
-                border: '1px solid rgba(14, 165, 233, 0.2)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.85rem 1.75rem',
+                background: 'linear-gradient(135deg, #0ea5e9, #0284c7)',
+                color: 'white',
                 borderRadius: '10px',
-                color: '#000000',
-                fontSize: '0.95rem',
-                fontFamily: 'inherit',
-                outline: 'none',
-                resize: 'vertical',
-                transition: 'all 0.2s ease',
-                boxSizing: 'border-box',
+                fontWeight: 600,
+                textDecoration: 'none',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 12px rgba(14, 165, 233, 0.2)'
               }}
-              onFocus={(e) => {
-                e.target.style.borderColor = 'rgba(14, 165, 233, 0.5)';
-                e.target.style.background = '#f0f7ff';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = 'rgba(14, 165, 233, 0.2)';
-                e.target.style.background = 'white';
-              }}
-            />
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '0.85rem 1.5rem',
-              fontSize: '1rem',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.5rem',
-              background: loading
-                ? 'rgba(14, 165, 233, 0.5)'
-                : 'linear-gradient(135deg, #0ea5e9, #0284c7)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '10px',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'all 0.3s ease',
-              opacity: loading ? 0.7 : 1,
-            }}
-            onMouseEnter={(e) => {
-              if (!loading) {
+              onMouseEnter={(e) => {
                 e.target.style.background = 'linear-gradient(135deg, #0284c7, #0369a1)';
                 e.target.style.transform = 'translateY(-2px)';
                 e.target.style.boxShadow = '0 10px 20px rgba(14, 165, 233, 0.3)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!loading) {
+              }}
+              onMouseLeave={(e) => {
                 e.target.style.background = 'linear-gradient(135deg, #0ea5e9, #0284c7)';
                 e.target.style.transform = 'translateY(0)';
                 e.target.style.boxShadow = 'none';
-              }
-            }}
-          >
-            {loading ? (
-              <>
-                <Loader size={18} style={{ animation: 'spin 1s linear infinite' }} />
-                Submitting...
-              </>
-            ) : (
-              <>
-                <Send size={18} />
-                Submit Application
-              </>
+              }}
+            >
+              Go to Login <ArrowRight size={16} />
+            </Link>
+          </div>
+        ) : !hasResume ? (
+          <div style={{
+            padding: '2.5rem 1.5rem',
+            background: 'rgba(249, 115, 22, 0.03)',
+            border: '1px solid rgba(249, 115, 22, 0.15)',
+            borderRadius: '12px',
+            textAlign: 'center',
+            marginBottom: '1rem',
+            animation: 'fadeIn 0.3s ease'
+          }}>
+            <FileText size={44} style={{ color: '#f97316', marginBottom: '1.25rem' }} />
+            <h4 style={{ color: '#0f172a', fontSize: '1.25rem', fontWeight: 700, margin: '0 0 0.75rem 0' }}>Resume Required</h4>
+            <p style={{ color: '#4b5563', fontSize: '0.975rem', margin: '0 0 1.75rem 0', lineHeight: 1.6 }}>
+              Please upload or update your resume in the profile section before submitting your application.
+            </p>
+            <Link
+              to="/profile"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.85rem 1.75rem',
+                background: 'linear-gradient(135deg, #f97316, #ea580c)',
+                color: 'white',
+                borderRadius: '10px',
+                fontWeight: 600,
+                textDecoration: 'none',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 12px rgba(249, 115, 22, 0.2)'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'linear-gradient(135deg, #ea580c, #c2410c)';
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 10px 20px rgba(249, 115, 22, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'linear-gradient(135deg, #f97316, #ea580c)';
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = 'none';
+              }}
+            >
+              Go to Profile <ArrowRight size={16} />
+            </Link>
+          </div>
+        ) : (
+          <>
+            {/* Messages */}
+            {result && (
+              <div style={{
+                padding: '1rem',
+                borderRadius: '10px',
+                marginBottom: '1.5rem',
+                fontSize: '0.95rem',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                ...(result.type === 'success' ? {
+                  color: '#10b981',
+                  background: 'rgba(16, 185, 129, 0.1)',
+                  border: '1px solid rgba(16, 185, 129, 0.3)',
+                } : {
+                  color: '#f87171',
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                }),
+              }}>
+                {result.type === 'success' ? <CheckCircle size={18} /> : <X size={18} />}
+                {result.text}
+              </div>
             )}
-          </button>
-        </form>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit}>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                  <label style={{
+                    display: 'block',
+                    color: '#000000',
+                    fontSize: '0.95rem',
+                    fontWeight: 600,
+                  }}>
+                    Cover Letter (optional)
+                  </label>
+                  <span style={{ color: '#4b5563', fontSize: '0.85rem' }}>
+                    {charCount} / 1000
+                  </span>
+                </div>
+                <textarea
+                  maxLength={1000}
+                  rows="6"
+                  placeholder="Tell us why you're a great fit for this role..."
+                  value={coverLetter}
+                  onChange={handleLetterChange}
+                  style={{
+                    width: '100%',
+                    padding: '0.875rem 1rem',
+                    background: 'white',
+                    border: '1px solid rgba(14, 165, 233, 0.2)',
+                    borderRadius: '10px',
+                    color: '#000000',
+                    fontSize: '0.95rem',
+                    fontFamily: 'inherit',
+                    outline: 'none',
+                    resize: 'vertical',
+                    transition: 'all 0.2s ease',
+                    boxSizing: 'border-box',
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = 'rgba(14, 165, 233, 0.5)';
+                    e.target.style.background = '#f0f7ff';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = 'rgba(14, 165, 233, 0.2)';
+                    e.target.style.background = 'white';
+                  }}
+                />
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  width: '100%',
+                  padding: '0.85rem 1.5rem',
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  background: loading
+                    ? 'rgba(14, 165, 233, 0.5)'
+                    : 'linear-gradient(135deg, #0ea5e9, #0284c7)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '10px',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.3s ease',
+                  opacity: loading ? 0.7 : 1,
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading) {
+                    e.target.style.background = 'linear-gradient(135deg, #0284c7, #0369a1)';
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 10px 20px rgba(14, 165, 233, 0.3)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!loading) {
+                    e.target.style.background = 'linear-gradient(135deg, #0ea5e9, #0284c7)';
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = 'none';
+                  }
+                }}
+              >
+                {loading ? (
+                  <>
+                    <Loader size={18} style={{ animation: 'spin 1s linear infinite' }} />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <Send size={18} />
+                    Submit Application
+                  </>
+                )}
+              </button>
+            </form>
+          </>
+        )}
       </div>
 
       <style>{`

@@ -7,6 +7,10 @@ const auth = require('../middleware/auth');
 router.post('/jobs/:id/apply', auth, async (req, res) => {
   try {
     const { coverLetter } = req.body;
+    if (!req.user.resumeContentType) {
+      return res.status(400).json({ error: 'Please upload your resume in the profile section before applying for jobs.' });
+    }
+
     const application = new Application({
       job: req.params.id,
       applicant: req.user.id,

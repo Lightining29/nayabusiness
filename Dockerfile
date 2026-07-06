@@ -20,6 +20,7 @@ COPY backend/server.js ./
 COPY backend/models/ ./models/
 COPY backend/routes/ ./routes/
 COPY backend/middleware/ ./middleware/
+COPY backend/utils/ ./utils/
 
 # Copy built client from Stage 1
 COPY --from=client-build /app/frontend/dist ../frontend/dist

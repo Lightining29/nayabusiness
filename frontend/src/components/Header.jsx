@@ -408,7 +408,7 @@ export default function Header() {
             />
             <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
               <span style={{ fontSize: '1.1rem', fontWeight: 800, letterSpacing: '-0.02em', color: '#000' }}>
-                RANCOM <span className="gradient-text-blue">TECHNOLOGIES</span>
+                RANCOM <span className="gradient-text-blue" style={{ marginLeft: "2px" }}>TECHNOLOGIES</span>
               </span>
               <span style={{ fontSize: '0.76rem', fontWeight: 500, color: '#6b7280', letterSpacing: '0.04em' ,marginTop: '2px',display: 'inline-block'}}>
                Group of <span style={{ color: '#e53e3e', fontWeight: 900 }}>Apple</span><span style={{ color: '#1d460591', fontWeight: 700 }}>tree</span> infotech
@@ -509,14 +509,7 @@ export default function Header() {
                   Jobs
                 </NavLink>
               </li>
-              <li>
-                <button
-                  className="theme-toggle"
-                  onClick={() => setDarkMode(!darkMode)}
-                >
-                  {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-                </button>
-              </li>
+             
               {/* Auth Buttons */}
               <li className="nav-auth">
                 {!isAuth ? (

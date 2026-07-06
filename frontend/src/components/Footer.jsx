@@ -39,8 +39,8 @@ export default function Footer() {
           </p>
           <div className="footer-bottom-links" style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <span style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 600 }}>Support Contacts:</span>
-            <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Email: support@rancomtechnologies.com</span>
-            <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Tel: +1 (800) 555-0199</span>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Email: hr@appletreeinfotech.in</span>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Tel: +91 7503962162</span>
           </div>
         </div>
 
@@ -70,7 +70,7 @@ export default function Footer() {
         <div className="footer-newsletter">
           <h4>Become a Member</h4>
           <p>Sign up to receive technical documentation, network billing info, and ticket system access.</p>
-          
+
           {subscribed ? (
             <div style={{ color: 'var(--accent)', fontSize: '0.9rem', fontWeight: 600, padding: '0.5rem 0' }}>
               ✓ Thank you! Credentials received.
@@ -81,9 +81,9 @@ export default function Footer() {
                 <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
                   <Mail size={16} />
                 </span>
-                <input 
-                  type="email" 
-                  placeholder="Email" 
+                <input
+                  type="email"
+                  placeholder="Email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -104,9 +104,9 @@ export default function Footer() {
                 <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
                   <Lock size={16} />
                 </span>
-                <input 
-                  type="password" 
-                  placeholder="Password" 
+                <input
+                  type="password"
+                  placeholder="Password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

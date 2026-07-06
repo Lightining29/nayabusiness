@@ -66,7 +66,7 @@ export default function Contact() {
 
   return (
     <div className="container-width animate-fade-in" style={{ paddingTop: '4rem', paddingBottom: '4rem' }}>
-      
+
       {/* Header */}
       <div style={{ marginBottom: '4rem', textAlign: 'center' }}>
         <h1 style={{
@@ -99,7 +99,7 @@ export default function Contact() {
         marginBottom: '4rem',
         alignItems: 'start',
       }}>
-        
+
         {/* Contact Info */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           {/* Office Info */}
@@ -150,7 +150,7 @@ export default function Contact() {
                     Office Address
                   </h4>
                   <p style={{ color: '#4b5563', fontSize: '0.9rem', margin: 0 }}>
-                    452 Telecom Plaza, Sector-62<br />IT Park, Noida, UP 201301, India
+                    C-60 R.K tower 3rd Floor Rdc ghaziabad
                   </p>
                 </div>
               </div>
@@ -176,7 +176,7 @@ export default function Contact() {
                     Call Us
                   </h4>
                   <p style={{ color: '#4b5563', fontSize: '0.9rem', margin: 0 }}>
-                    +91 (120) 455-8900<br />+1 (800) 555-0199
+                    +91 7503962162
                   </p>
                 </div>
               </div>
@@ -202,7 +202,7 @@ export default function Contact() {
                     Email Us
                   </h4>
                   <p style={{ color: '#4b5563', fontSize: '0.9rem', margin: 0 }}>
-                    contact@rancomtechnologies.com<br />support@rancomtechnologies.com
+                    hr@appletreeinfotech.in<br />support@rancomtechnologies.com
                   </p>
                 </div>
               </div>

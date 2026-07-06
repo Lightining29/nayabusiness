@@ -47,6 +47,20 @@ const resumeUpload = multer({
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// SEO: Set X-Robots-Tag header on every response.
+// On the custom domain → index, follow.
+// On the .onrender.com subdomain → noindex (so Render's staging URL isn't indexed).
+app.use((req, res, next) => {
+  const host = req.headers.host || '';
+  if (host.includes('onrender.com')) {
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+  } else {
+    res.setHeader('X-Robots-Tag', 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1');
+  }
+  next();
+});
+
 app.get('/health', (req, res) => { res.status(200).send('OK'); });
 
 // Mount route files

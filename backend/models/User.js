@@ -5,10 +5,12 @@ const MAX_RESUME_SIZE = 2 * 1024 * 1024; // 2 MB
 
 const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true, trim: true, lowercase: true },
   password: { type: String, required: true }, // hashed
   phone: { type: String },
   city: { type: String },
+  emailVerified: { type: Boolean, default: false },
+  emailVerifiedAt: { type: Date },
   resumeUrl: { type: String },
   skills: [{ type: String }],
   resume: { type: Buffer }, // PDF binary

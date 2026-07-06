@@ -52,6 +52,13 @@ const registrationSchema = new mongoose.Schema({
     default: 'General Application',
     trim: true
   },
+  emailVerified: {
+    type: Boolean,
+    default: false
+  },
+  emailVerifiedAt: {
+    type: Date
+  },
   createdAt: {
     type: Date,
     default: Date.now

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { AlertCircle, CheckCircle, Cpu, Menu, X, ChevronDown, LogIn, UserPlus } from 'lucide-react';
+import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
+import { AlertCircle, CheckCircle, Cpu, Menu, X, ChevronDown, LogIn, UserPlus, UserRound } from 'lucide-react';
 import { Moon, Sun } from "lucide-react";
 
 
@@ -31,17 +31,33 @@ export default function Header() {
     phone: '',
     resume: null,
     password: '',
-    skills: ''
+    skills: '',
+    otp: ''
   });
+  const [registerOtpSent, setRegisterOtpSent] = useState(false);
   const [registerLoading, setRegisterLoading] = useState(false);
   const [registerSuccess, setRegisterSuccess] = useState('');
   const [registerError, setRegisterError] = useState('');
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    setIsAuth(!!token);
+    setIsAuth(!!localStorage.getItem('token'));
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const syncAuthState = () => {
+      setIsAuth(!!localStorage.getItem('token'));
+    };
+
+    window.addEventListener('storage', syncAuthState);
+    window.addEventListener('auth-change', syncAuthState);
+
+    return () => {
+      window.removeEventListener('storage', syncAuthState);
+      window.removeEventListener('auth-change', syncAuthState);
+    };
   }, []);
   useEffect(() => {
     if (darkMode) {
@@ -56,6 +72,7 @@ export default function Header() {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    window.dispatchEvent(new Event('auth-change'));
     setIsAuth(false);
     navigate('/');
   };
@@ -106,6 +123,7 @@ export default function Header() {
       }
 
       localStorage.setItem('token', data.token);
+      window.dispatchEvent(new Event('auth-change'));
       setIsAuth(true);
       setLoginSuccess('Login successful!');
       setLoginForm({ email: '', password: '' });
@@ -123,6 +141,8 @@ export default function Header() {
   const openRegisterModal = () => {
     setRegisterError('');
     setRegisterSuccess('');
+    setRegisterOtpSent(false);
+    setRegisterForm((current) => ({ ...current, otp: '' }));
     setRegisterModalOpen(true);
     setIsOpen(false);
   };
@@ -134,14 +154,94 @@ export default function Header() {
 
   const updateRegisterForm = (field, value) => {
     setRegisterForm((current) => ({ ...current, [field]: value }));
+    if (field === 'email') {
+      setRegisterOtpSent(false);
+      setRegisterForm((current) => ({ ...current, otp: '' }));
+    }
+  };
+
+  const resetRegisterForm = () => {
+    setRegisterForm({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      resume: null,
+      password: '',
+      skills: '',
+      otp: ''
+    });
+    setRegisterOtpSent(false);
+  };
+
+  const validateRegisterForm = () => {
+    const { firstName, lastName, email, phone, resume, password, skills } = registerForm;
+
+    if (!firstName || !lastName || !email || !phone || !resume || !password || !skills) {
+      return 'Please fill in all fields.';
+    }
+    return '';
+  };
+
+  const requestRegisterOtp = async () => {
+    const { firstName, lastName, email, phone } = registerForm;
+    const res = await fetch('/api/register/request-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        first_name: firstName,
+        last_name: lastName,
+        email,
+        mobno: phone
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to send email OTP.');
+    }
+
+    setRegisterOtpSent(true);
+    setRegisterSuccess(data.message || 'Verification code sent to your email.');
+  };
+
+  const submitRegisterWithOtp = async () => {
+    const { firstName, lastName, email, phone, resume, password, skills, otp } = registerForm;
+    const formData = new FormData();
+    formData.append('first_name', firstName);
+    formData.append('last_name', lastName);
+    formData.append('email', email);
+    formData.append('mobno', phone);
+    formData.append('password', password);
+    formData.append('skills', skills);
+    formData.append('resume', resume);
+    formData.append('otp', otp.trim());
+
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Registration failed.');
+    }
+
+    setRegisterSuccess(data.message || 'Email verified and registration submitted successfully.');
+    resetRegisterForm();
   };
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
-    const { firstName, lastName, email, phone, resume, password, skills } = registerForm;
+    const validationError = validateRegisterForm();
 
-    if (!firstName || !lastName || !email || !phone || !resume || !password || !skills) {
-      setRegisterError('Please fill in all fields.');
+    if (validationError) {
+      setRegisterError(validationError);
+      return;
+    }
+
+    if (registerOtpSent && !registerForm.otp.trim()) {
+      setRegisterError('Please enter the OTP sent to your email.');
       return;
     }
 
@@ -150,35 +250,11 @@ export default function Header() {
     setRegisterSuccess('');
 
     try {
-      const formData = new FormData();
-      formData.append('first_name', firstName);
-      formData.append('last_name', lastName);
-      formData.append('email', email);
-      formData.append('mobno', phone);
-      formData.append('password', password);
-      formData.append('skills', skills);
-      formData.append('resume', resume);
-
-      const res = await fetch('/api/register', {
-        method: 'POST',
-        body: formData
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Registration failed.');
+      if (!registerOtpSent) {
+        await requestRegisterOtp();
+      } else {
+        await submitRegisterWithOtp();
       }
-
-      setRegisterSuccess(data.message || 'Registration submitted successfully!');
-      setRegisterForm({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        resume: null,
-        password: '',
-        skills: ''
-      });
     } catch (err) {
       setRegisterError(err.message || 'Server connection error. Please try again.');
     } finally {
@@ -365,35 +441,57 @@ export default function Header() {
                     </button>
                   </>
                 ) : (
-                  <button
-                    onClick={handleLogout}
-                    className="auth-btn logout-btn"
-                    style={{
-                      background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 50%, #B91C1C 100%)',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '12px',
-                      padding: '0.65rem 1.3rem',
-                      fontWeight: '700',
-                      fontSize: '0.95rem',
-                      letterSpacing: '0.3px',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease',
-                      boxShadow: '0 8px 20px rgba(239,68,68,0.35)',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-3px)';
-                      e.currentTarget.style.boxShadow =
-                        '0 15px 30px rgba(239,68,68,0.5)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow =
-                        '0 8px 20px rgba(239,68,68,0.35)';
-                    }}
-                  >
-                     Logout
-                  </button>
+                  <>
+                    <NavLink
+                      to="/profile"
+                      className="auth-btn profile-btn"
+                      onClick={() => setIsOpen(false)}
+                      style={{
+                        background: 'linear-gradient(to right, #0ea5e9, #0284c7)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '0.5rem 1rem',
+                        fontWeight: '600',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        cursor: 'pointer',
+                        marginRight: '0.5rem'
+                      }}
+                    >
+                      <UserRound size={16} /> Profile
+                    </NavLink>
+                    <button
+                      onClick={handleLogout}
+                      className="auth-btn logout-btn"
+                      style={{
+                        background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 50%, #B91C1C 100%)',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '12px',
+                        padding: '0.65rem 1.3rem',
+                        fontWeight: '700',
+                        fontSize: '0.95rem',
+                        letterSpacing: '0.3px',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        boxShadow: '0 8px 20px rgba(239,68,68,0.35)',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-3px)';
+                        e.currentTarget.style.boxShadow =
+                          '0 15px 30px rgba(239,68,68,0.5)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow =
+                          '0 8px 20px rgba(239,68,68,0.35)';
+                      }}
+                    >
+                       Logout
+                    </button>
+                  </>
                 )}
               </li>
             </ul>
@@ -546,45 +644,89 @@ export default function Header() {
             )}
 
             <form onSubmit={handleRegisterSubmit}>
+              {registerOtpSent && (
+                <div className="register-modal-alert success">
+                  <CheckCircle size={18} />
+                  <span>Enter the 6-digit OTP sent to {registerForm.email}. Registration is saved after verification.</span>
+                </div>
+              )}
+
               <div className="register-modal-grid">
                 <div className="form-group">
                   <label>First Name</label>
-                  <input className="form-input" type="text" placeholder="First name" value={registerForm.firstName} onChange={(e) => updateRegisterForm('firstName', e.target.value)} required />
+                  <input className="form-input" type="text" placeholder="First name" value={registerForm.firstName} onChange={(e) => updateRegisterForm('firstName', e.target.value)} disabled={registerOtpSent} required />
                 </div>
 
                 <div className="form-group">
                   <label>Last Name</label>
-                  <input className="form-input" type="text" placeholder="Last name" value={registerForm.lastName} onChange={(e) => updateRegisterForm('lastName', e.target.value)} required />
+                  <input className="form-input" type="text" placeholder="Last name" value={registerForm.lastName} onChange={(e) => updateRegisterForm('lastName', e.target.value)} disabled={registerOtpSent} required />
                 </div>
 
                 <div className="form-group">
                   <label>Email</label>
-                  <input className="form-input" type="email" placeholder="Email address" value={registerForm.email} onChange={(e) => updateRegisterForm('email', e.target.value)} required />
+                  <input className="form-input" type="email" placeholder="Email address" value={registerForm.email} onChange={(e) => updateRegisterForm('email', e.target.value)} disabled={registerOtpSent} required />
                 </div>
 
                 <div className="form-group">
                   <label>Phone No</label>
-                  <input className="form-input" type="tel" placeholder="Phone number" value={registerForm.phone} onChange={(e) => updateRegisterForm('phone', e.target.value)} required />
+                  <input className="form-input" type="tel" placeholder="Phone number" value={registerForm.phone} onChange={(e) => updateRegisterForm('phone', e.target.value)} disabled={registerOtpSent} required />
                 </div>
 
                 <div className="form-group">
                   <label>Password</label>
-                  <input className="form-input" type="password" placeholder="Password" value={registerForm.password} onChange={(e) => updateRegisterForm('password', e.target.value)} required />
+                  <input className="form-input" type="password" placeholder="Password" value={registerForm.password} onChange={(e) => updateRegisterForm('password', e.target.value)} disabled={registerOtpSent} required />
                 </div>
 
                 <div className="form-group">
                   <label>Resume</label>
-                  <input className="form-input" type="file" accept="application/pdf,.pdf" onChange={(e) => updateRegisterForm('resume', e.target.files[0] || null)} required />
+                  <input className="form-input" type="file" accept="application/pdf,.pdf" onChange={(e) => updateRegisterForm('resume', e.target.files[0] || null)} disabled={registerOtpSent} required />
                 </div>
 
                 <div className="form-group full-width">
                   <label>Skills</label>
-                  <textarea className="form-input" placeholder="React, Node.js, RF survey, telecom tools..." value={registerForm.skills} onChange={(e) => updateRegisterForm('skills', e.target.value)} required />
+                  <textarea className="form-input" placeholder="React, Node.js, RF survey, telecom tools..." value={registerForm.skills} onChange={(e) => updateRegisterForm('skills', e.target.value)} disabled={registerOtpSent} required />
                 </div>
+
+                {registerOtpSent && (
+                  <div className="form-group full-width">
+                    <label>Email OTP</label>
+                    <input
+                      className="form-input"
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={6}
+                      placeholder="Enter 6-digit code"
+                      value={registerForm.otp}
+                      onChange={(e) => updateRegisterForm('otp', e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      style={{ marginTop: '0.75rem', width: 'fit-content' }}
+                      disabled={registerLoading}
+                      onClick={async () => {
+                        setRegisterLoading(true);
+                        setRegisterError('');
+                        setRegisterSuccess('');
+                        try {
+                          await requestRegisterOtp();
+                          updateRegisterForm('otp', '');
+                        } catch (err) {
+                          setRegisterError(err.message || 'Failed to resend email OTP.');
+                        } finally {
+                          setRegisterLoading(false);
+                        }
+                      }}
+                    >
+                      Resend OTP
+                    </button>
+                  </div>
+                )}
               </div>
 
               <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.85rem 1rem', fontSize: '1rem' }} disabled={registerLoading}>
-                {registerLoading ? 'Submitting...' : 'Submit Registration'}
+                {registerLoading ? (registerOtpSent ? 'Verifying...' : 'Sending OTP...') : (registerOtpSent ? 'Verify Email & Register' : 'Send Email OTP')}
               </button>
             </form>
           </div>

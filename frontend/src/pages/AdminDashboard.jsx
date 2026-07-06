@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
-import { Briefcase, Users, Mail, PlusCircle, Trash2, ToggleLeft, ToggleRight, LogOut, CheckCircle, AlertCircle, ChevronUp, MapPin, Clock, DollarSign, Edit } from 'lucide-react';
+import { Briefcase, Users, Mail, PlusCircle, Trash2, ToggleLeft, ToggleRight, LogOut, CheckCircle, AlertCircle, ChevronUp, MapPin, Clock, DollarSign, Edit, FileText } from 'lucide-react';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -144,6 +144,15 @@ export default function AdminDashboard() {
     } catch (err) { console.error(err); }
   };
 
+  const openResume = (application) => {
+    if (!application.resumeFileName) {
+      toast.error('No resume PDF is available for this application.');
+      return;
+    }
+
+    window.open(`/api/admin/applications/${application._id}/resume`, '_blank', 'noopener,noreferrer');
+  };
+
   // Logout
   const handleLogout = () => {
     sessionStorage.removeItem('adminAuth');
@@ -195,6 +204,13 @@ export default function AdminDashboard() {
         }
         .action-btn:hover { background: rgba(14,165,233,0.08); }
         .action-btn.danger:hover { background: rgba(239,68,68,0.12); }
+        .resume-btn {
+          border: 1px solid rgba(14,165,233,0.25); background: rgba(14,165,233,0.08); color: var(--primary);
+          border-radius: 8px; padding: 0.45rem 0.7rem; display: inline-flex; align-items: center; gap: 0.35rem;
+          font-weight: 700; font-size: 0.82rem; cursor: pointer; white-space: nowrap;
+        }
+        .resume-btn:hover { background: rgba(14,165,233,0.15); border-color: rgba(14,165,233,0.45); }
+        .resume-btn:disabled { cursor: not-allowed; opacity: 0.55; color: #94a3b8; background: #f1f5f9; border-color: #e2e8f0; }
         .job-card {
           background: white; border: 1px solid rgba(14,165,233,0.2); border-radius: 14px;
           padding: 1.75rem; transition: all 0.2s; position: relative; overflow: hidden;
@@ -472,6 +488,7 @@ export default function AdminDashboard() {
                     <th>Mobile</th>
                     <th>Qualification</th>
                     <th>City</th>
+                    <th>Resume</th>
                     <th>Applied On</th>
                   </tr>
                 </thead>
@@ -485,6 +502,17 @@ export default function AdminDashboard() {
                       <td style={{ color: '#333333' }}>{app.mobno}</td>
                       <td style={{ color: '#333333' }}>{app.qualification}</td>
                       <td style={{ color: '#333333' }}>{app.city}</td>
+                      <td>
+                        <button
+                          type="button"
+                          className="resume-btn"
+                          onClick={() => openResume(app)}
+                          disabled={!app.resumeFileName}
+                          title={app.resumeFileName ? `Open ${app.resumeFileName}` : 'No resume uploaded'}
+                        >
+                          <FileText size={15} /> View PDF
+                        </button>
+                      </td>
                       <td style={{ fontSize: '0.85rem', color: '#666666' }}>{new Date(app.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
                     </tr>
                   ))}

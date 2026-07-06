@@ -9,6 +9,7 @@ const emptyProfile = {
   resume: null,
   hasResume: false,
   resumeFileName: '',
+  emailVerified: false,
   skills: '',
   password: ''
 };
@@ -51,6 +52,7 @@ export default function Profile() {
           resume: null,
           hasResume: !!data.hasResume,
           resumeFileName: data.resumeFileName || '',
+          emailVerified: !!data.emailVerified,
           skills: Array.isArray(data.skills) ? data.skills.join(', ') : '',
           password: ''
         });
@@ -141,6 +143,7 @@ export default function Profile() {
         resume: null,
         hasResume: data.user?.hasResume ?? current.hasResume,
         resumeFileName: data.user?.resumeFileName || current.resumeFileName,
+        emailVerified: data.user?.emailVerified ?? current.emailVerified,
         password: '',
         skills: Array.isArray(data.user?.skills) ? data.user.skills.join(', ') : current.skills
       }));
@@ -217,7 +220,7 @@ export default function Profile() {
               <div className="profile-info-item"><Mail size={18} /> <span>{profile.email || 'No email added'}</span></div>
               <div className="profile-info-item"><Phone size={18} /> <span>{profile.phone || 'No phone added'}</span></div>
               <div className="profile-info-item"><MapPin size={18} /> <span>{profile.city || 'No city added'}</span></div>
-              <div className="profile-info-item"><ShieldCheck size={18} /> <span>Protected account</span></div>
+              <div className="profile-info-item"><ShieldCheck size={18} /> <span>{profile.emailVerified ? 'Verified email' : 'Email verification pending'}</span></div>
             </div>
 
             {skillList.length > 0 && (
@@ -261,8 +264,8 @@ export default function Profile() {
                 </div>
 
                 <div className="form-group">
-                  <label>Email</label>
-                  <input className="form-input" type="email" value={profile.email} onChange={(e) => updateProfile('email', e.target.value)} required />
+                  <label>Verified Email</label>
+                  <input className="form-input" type="email" value={profile.email} readOnly required />
                 </div>
 
                 <div className="form-group">

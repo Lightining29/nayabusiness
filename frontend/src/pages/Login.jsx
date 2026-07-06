@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,9 +27,10 @@ export default function Login() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Login failed');
-      // Store token locally (you may adapt storage strategy)
       localStorage.setItem('token', data.token);
+      window.dispatchEvent(new Event('auth-change'));
       setSuccess('Login successful!');
+      setTimeout(() => navigate('/profile'), 500);
     } catch (err) {
       setError(err.message);
     } finally {

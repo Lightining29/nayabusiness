@@ -18,50 +18,24 @@ const upload = multer({
   }
 });
 
-// Register – expects multipart/form-data (resume PDF)
+// Registration must go through the career OTP flow so accounts are only created
+// after email verification.
 router.post('/register', upload.single('resume'), async (req, res) => {
-  try {
-    const { name, email, password, phone, city, skills } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'Name, email and password are required' });
-    }
-    const existing = await User.findOne({ email });
-    if (existing) return res.status(400).json({ error: 'Email already in use' });
-
-    const user = new User({
-      name,
-      email,
-      password, // pre-save hook will hash
-      phone,
-      city,
-      skills: skills ? skills.split(',').map(s => s.trim()) : [],
-    });
-
-    if (req.file) {
-      user.resume = req.file.buffer;
-      user.resumeContentType = req.file.mimetype;
-      user.resumeFileName = req.file.originalname;
-    }
-
-    await user.save();
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'fallback-secret', { expiresIn: '7d' });
-    res.status(201).json({ token, user: { id: user._id, name, email, phone, city, hasResume: !!user.resume, resumeFileName: user.resumeFileName, skills: user.skills } });
-  } catch (err) {
-    console.error('Register error:', err);
-    res.status(500).json({ error: 'Registration failed' });
-  }
+  return res.status(400).json({
+    error: 'Email verification is required. Use /api/register/request-otp first, then submit /api/register with the OTP.'
+  });
 });
 
 // Login – returns JWT
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: String(email || '').trim().toLowerCase() });
     if (!user) return res.status(400).json({ error: 'Invalid credentials' });
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'fallback-secret', { expiresIn: '7d' });
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email, phone: user.phone, city: user.city, hasResume: !!user.resume, resumeFileName: user.resumeFileName, skills: user.skills } });
+    res.json({ token, user: { id: user._id, name: user.name, email: user.email, phone: user.phone, city: user.city, hasResume: !!user.resume, resumeFileName: user.resumeFileName, skills: user.skills, emailVerified: user.emailVerified } });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Login failed' });
@@ -70,8 +44,8 @@ router.post('/login', async (req, res) => {
 
 // Get current user profile (protected)
 router.get('/me', authMiddleware, async (req, res) => {
-  const { _id, name, email, phone, city, resumeContentType, resumeFileName, skills } = req.user;
-  res.json({ id: _id, name, email, phone, city, hasResume: !!resumeContentType, resumeFileName, skills });
+  const { _id, name, email, phone, city, resumeContentType, resumeFileName, skills, emailVerified, emailVerifiedAt } = req.user;
+  res.json({ id: _id, name, email, phone, city, hasResume: !!resumeContentType, resumeFileName, skills, emailVerified, emailVerifiedAt });
 });
 
 // Update current user profile (protected)
@@ -88,15 +62,13 @@ router.put('/me', authMiddleware, upload.single('resume'), async (req, res) => {
       return res.status(400).json({ error: 'Name and email are required' });
     }
 
-    if (email !== user.email) {
-      const existing = await User.findOne({ email, _id: { $ne: user._id } });
-      if (existing) {
-        return res.status(400).json({ error: 'Email already in use' });
-      }
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+    if (normalizedEmail !== user.email) {
+      return res.status(400).json({ error: 'Verified email cannot be changed from profile.' });
     }
 
     user.name = name;
-    user.email = email;
+    user.email = normalizedEmail;
     user.phone = phone;
     user.city = city;
     user.skills = Array.isArray(skills) ? skills : String(skills || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -122,7 +94,9 @@ router.put('/me', authMiddleware, upload.single('resume'), async (req, res) => {
         city: user.city,
         hasResume: !!user.resume,
         resumeFileName: user.resumeFileName,
-        skills: user.skills
+        skills: user.skills,
+        emailVerified: user.emailVerified,
+        emailVerifiedAt: user.emailVerifiedAt
       }
     });
   } catch (err) {

@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 const multer = require('multer');
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 const Contact = require('./models/Contact');
@@ -11,8 +11,10 @@ const Registration = require('./models/Registration');
 const Blog = require('./models/Blog');
 const Job = require('./models/Job');
 const User = require('./models/User');
+const EmailVerification = require('./models/EmailVerification');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { sendOtpEmail } = require('./utils/mailer');
 
 // Import route files
 const authRoutes = require('./routes/auth');
@@ -24,6 +26,11 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'rancom@2026';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const OTP_TTL_MINUTES = Number(process.env.OTP_TTL_MINUTES || 10);
+const OTP_MAX_ATTEMPTS = Number(process.env.OTP_MAX_ATTEMPTS || 5);
+
+const normalizeEmail = (email) => String(email || '').trim().toLowerCase();
+const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 const resumeUpload = multer({
   storage: multer.memoryStorage(),
@@ -49,10 +56,11 @@ app.use('/api', jobRoutes);
 app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    let user = await User.findOne({ email });
+    const normalizedEmail = normalizeEmail(email);
+    let user = await User.findOne({ email: normalizedEmail });
 
     if (!user) {
-      const registration = await Registration.findOne({ email });
+      const registration = await Registration.findOne({ email: normalizedEmail });
       if (!registration || !registration.password) {
         return res.status(400).json({ error: 'Invalid credentials' });
       }
@@ -68,7 +76,9 @@ app.post('/api/login', async (req, res) => {
         password,
         phone: registration.mobno,
         city: registration.city,
-        skills: registration.skills ? registration.skills.split(',').map(skill => skill.trim()).filter(Boolean) : []
+        skills: registration.skills ? registration.skills.split(',').map(skill => skill.trim()).filter(Boolean) : [],
+        emailVerified: true,
+        emailVerifiedAt: registration.emailVerifiedAt || new Date()
       });
       if (registration.resume) {
         user.resume = registration.resume;
@@ -81,7 +91,7 @@ app.post('/api/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'fallback-secret', { expiresIn: '7d' });
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email, city: user.city, skills: user.skills } });
+    res.json({ token, user: { id: user._id, name: user.name, email: user.email, city: user.city, skills: user.skills, emailVerified: user.emailVerified } });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Login failed' });
@@ -141,6 +151,7 @@ async function seedBlogs() {
 // Memory fallback database for DEMO MODE (in case MongoDB is not running/configured)
 let contactInMemoryDb = [];
 let registrationInMemoryDb = [];
+let emailVerificationInMemoryDb = new Map();
 let blogInMemoryDb = [
   {
     _id: 'demo-blog-1',
@@ -167,6 +178,94 @@ let blogInMemoryDb = [
     createdAt: new Date()
   }
 ];
+
+async function storeRegistrationOtp(email, otp) {
+  const otpHash = await bcrypt.hash(otp, 10);
+  const expiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000);
+
+  if (mongoose.connection.readyState === 1) {
+    await EmailVerification.findOneAndUpdate(
+      { email },
+      { email, otpHash, attempts: 0, expiresAt, createdAt: new Date() },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+    return;
+  }
+
+  emailVerificationInMemoryDb.set(email, {
+    otpHash,
+    attempts: 0,
+    expiresAt
+  });
+}
+
+async function verifyRegistrationOtp(email, otp) {
+  if (!otp) {
+    return { ok: false, error: 'Email OTP is required.' };
+  }
+
+  if (mongoose.connection.readyState === 1) {
+    const verification = await EmailVerification.findOne({ email });
+    if (!verification) {
+      return { ok: false, error: 'Please request a new email OTP.' };
+    }
+
+    if (verification.expiresAt < new Date()) {
+      await EmailVerification.deleteOne({ email });
+      return { ok: false, error: 'Email OTP expired. Please request a new code.' };
+    }
+
+    if (verification.attempts >= OTP_MAX_ATTEMPTS) {
+      await EmailVerification.deleteOne({ email });
+      return { ok: false, error: 'Too many incorrect OTP attempts. Please request a new code.' };
+    }
+
+    const isMatch = await bcrypt.compare(String(otp), verification.otpHash);
+    if (!isMatch) {
+      verification.attempts += 1;
+      await verification.save();
+      return { ok: false, error: 'Invalid email OTP.' };
+    }
+
+    await EmailVerification.deleteOne({ email });
+    return { ok: true };
+  }
+
+  const verification = emailVerificationInMemoryDb.get(email);
+  if (!verification) {
+    return { ok: false, error: 'Please request a new email OTP.' };
+  }
+
+  if (verification.expiresAt < new Date()) {
+    emailVerificationInMemoryDb.delete(email);
+    return { ok: false, error: 'Email OTP expired. Please request a new code.' };
+  }
+
+  if (verification.attempts >= OTP_MAX_ATTEMPTS) {
+    emailVerificationInMemoryDb.delete(email);
+    return { ok: false, error: 'Too many incorrect OTP attempts. Please request a new code.' };
+  }
+
+  const isMatch = await bcrypt.compare(String(otp), verification.otpHash);
+  if (!isMatch) {
+    verification.attempts += 1;
+    emailVerificationInMemoryDb.set(email, verification);
+    return { ok: false, error: 'Invalid email OTP.' };
+  }
+
+  emailVerificationInMemoryDb.delete(email);
+  return { ok: true };
+}
+
+async function emailAlreadyRegistered(email) {
+  if (mongoose.connection.readyState !== 1) {
+    return registrationInMemoryDb.some((registration) => registration.email === email);
+  }
+
+  const existingUser = await User.findOne({ email });
+  const existingRegistration = await Registration.findOne({ email });
+  return !!(existingUser || existingRegistration);
+}
 
 // API Routes
 
@@ -195,83 +294,133 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
-// 2. Submit Career Registration
+// 2a. Send email OTP before saving a career registration
+app.post('/api/register/request-otp', async (req, res) => {
+  try {
+    const { first_name, last_name, email } = req.body;
+    const normalizedEmail = normalizeEmail(email);
+
+    if (!normalizedEmail) {
+      return res.status(400).json({ error: 'Email is required.' });
+    }
+
+    if (await emailAlreadyRegistered(normalizedEmail)) {
+      return res.status(400).json({ error: 'Email already registered. Please login.' });
+    }
+
+    const otp = generateOtp();
+    await storeRegistrationOtp(normalizedEmail, otp);
+
+    const mailResult = await sendOtpEmail({
+      to: normalizedEmail,
+      otp,
+      name: `${first_name || ''} ${last_name || ''}`.trim()
+    });
+
+    return res.status(200).json({
+      message: mailResult.devMode
+        ? 'Verification code generated. Check the backend console for the OTP in development mode.'
+        : 'Verification code sent to your email.',
+      expiresInMinutes: OTP_TTL_MINUTES
+    });
+  } catch (err) {
+    console.error('OTP send error:', err);
+    return res.status(500).json({ error: err.message || 'Failed to send email OTP.' });
+  }
+});
+
+// 2b. Verify OTP, then save career registration and login user
 app.post('/api/register', resumeUpload.single('resume'), async (req, res) => {
-  const { first_name, last_name, email, mobno, qualification, city, job_title, password, skills } = req.body;
-  if (!first_name || !last_name || !email || !mobno) {
-    return res.status(400).json({ error: 'All fields are required' });
+  const { first_name, last_name, email, mobno, qualification, city, job_title, password, skills, otp } = req.body;
+  const normalizedEmail = normalizeEmail(email);
+
+  if (!first_name || !last_name || !normalizedEmail || !mobno || !password || !otp) {
+    return res.status(400).json({ error: 'Name, email, phone, password and OTP are required.' });
   }
 
-  if (mongoose.connection.readyState === 1) {
-    try {
-      const hashedPassword = password ? await bcrypt.hash(password, 10) : undefined;
-      if (password) {
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-          return res.status(400).json({ error: 'Email already registered. Please login.' });
-        }
-      }
+  try {
+    if (await emailAlreadyRegistered(normalizedEmail)) {
+      return res.status(400).json({ error: 'Email already registered. Please login.' });
+    }
 
-      const newRegistration = new Registration({ 
-        first_name, 
-        last_name, 
-        email, 
-        mobno, 
-        qualification, 
+    const verification = await verifyRegistrationOtp(normalizedEmail, otp);
+    if (!verification.ok) {
+      return res.status(400).json({ error: verification.error });
+    }
+
+    const verifiedAt = new Date();
+
+    if (mongoose.connection.readyState === 1) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newRegistration = new Registration({
+        first_name,
+        last_name,
+        email: normalizedEmail,
+        mobno,
+        qualification,
         city,
         password: hashedPassword,
         skills,
-        job_title: job_title || 'General Application'
+        job_title: job_title || 'General Application',
+        emailVerified: true,
+        emailVerifiedAt: verifiedAt
       });
+
       if (req.file) {
         newRegistration.resume = req.file.buffer;
         newRegistration.resumeContentType = req.file.mimetype;
         newRegistration.resumeFileName = req.file.originalname;
       }
-      await newRegistration.save();
 
-      if (password) {
-        const user = new User({
-          name: `${first_name} ${last_name}`.trim(),
-          email,
-          password,
-          phone: mobno,
-          city,
-          skills: skills ? skills.split(',').map(skill => skill.trim()).filter(Boolean) : []
-        });
-        if (req.file) {
-          user.resume = req.file.buffer;
-          user.resumeContentType = req.file.mimetype;
-          user.resumeFileName = req.file.originalname;
-        }
-        await user.save();
+      const user = new User({
+        name: `${first_name} ${last_name}`.trim(),
+        email: normalizedEmail,
+        password,
+        phone: mobno,
+        city,
+        skills: skills ? skills.split(',').map(skill => skill.trim()).filter(Boolean) : [],
+        emailVerified: true,
+        emailVerifiedAt: verifiedAt
+      });
+
+      if (req.file) {
+        user.resume = req.file.buffer;
+        user.resumeContentType = req.file.mimetype;
+        user.resumeFileName = req.file.originalname;
       }
 
-      return res.status(201).json({ message: 'Career registration submitted successfully!' });
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json({ error: 'Failed to submit career registration' });
+      await newRegistration.save();
+      await user.save();
+
+      return res.status(201).json({ message: 'Email verified and career registration saved. You can now login and apply for jobs.' });
     }
-  } else {
-    // Demo mode: save to memory
-    const mockRegistration = { 
-      _id: Date.now().toString(), 
-      first_name, 
-      last_name, 
-      email, 
-      mobno, 
-      qualification, 
-      city, 
+
+    const mockRegistration = {
+      _id: Date.now().toString(),
+      first_name,
+      last_name,
+      email: normalizedEmail,
+      mobno,
+      qualification,
+      city,
       resumeFileName: req.file?.originalname,
       resumeContentType: req.file?.mimetype,
-      password: password ? '[hidden]' : undefined,
+      password: '[hidden]',
       skills,
       job_title: job_title || 'General Application',
-      createdAt: new Date() 
+      emailVerified: true,
+      emailVerifiedAt: verifiedAt,
+      createdAt: new Date()
     };
     registrationInMemoryDb.push(mockRegistration);
-    console.log('Demo Mode: Career Registration submitted', mockRegistration);
-    return res.status(201).json({ message: 'Registered successfully (Demo Mode - Saved in memory)' });
+    console.log('Demo Mode: Verified career registration submitted', mockRegistration);
+    return res.status(201).json({ message: 'Email verified and registration saved in demo memory. Connect MongoDB to save it permanently.' });
+  } catch (err) {
+    console.error('Registration verification error:', err);
+    if (err.code === 11000) {
+      return res.status(400).json({ error: 'Email already registered. Please login.' });
+    }
+    return res.status(500).json({ error: 'Failed to submit career registration' });
   }
 });
 
@@ -331,7 +480,7 @@ app.post('/api/admin/login', (req, res) => {
 app.get('/api/admin/applications', async (req, res) => {
   if (mongoose.connection.readyState === 1) {
     try {
-      const applications = await Registration.find().select('-resume').sort({ createdAt: -1 });
+      const applications = await Registration.find().select('-resume -password').sort({ createdAt: -1 });
       return res.status(200).json(applications);
     } catch (err) {
       console.error(err);
@@ -431,6 +580,31 @@ app.patch('/api/admin/jobs/:id', async (req, res) => {
   }
 });
 
+// 10b. Update a job posting
+app.put('/api/admin/jobs/:id', async (req, res) => {
+  const { title, department, location, type, experience, salary, description, requirements } = req.body;
+  if (!title || !department || !location || !description) {
+    return res.status(400).json({ error: 'Title, department, location and description are required' });
+  }
+
+  if (mongoose.connection.readyState === 1) {
+    try {
+      const updatedJob = await Job.findByIdAndUpdate(
+        req.params.id,
+        { title, department, location, type, experience, salary, description, requirements },
+        { new: true }
+      );
+      if (!updatedJob) return res.status(404).json({ error: 'Job not found' });
+      return res.status(200).json({ message: 'Job posting updated successfully!', job: updatedJob });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Failed to update job posting' });
+    }
+  } else {
+    return res.status(200).json({ message: 'Job updated (Demo Mode)' });
+  }
+});
+
 // 11. Delete a job
 app.delete('/api/admin/jobs/:id', async (req, res) => {
   if (mongoose.connection.readyState === 1) {
@@ -466,14 +640,14 @@ app.post('/api/webhook', async (req, res) => {
 // Serve frontend client static build in production
 if (process.env.NODE_ENV === 'production' || true) {
   // We'll serve the static client files if they exist
-  app.use(express.static(path.join(__dirname, 'client/dist')));
+  app.use(express.static(path.join(__dirname, '../frontend/dist')));
   
   app.get('*', (req, res) => {
     // If it's an API route that didn't match, return 404
     if (req.url.startsWith('/api')) {
       return res.status(404).json({ error: 'API route not found' });
     }
-    res.sendFile(path.join(__dirname, 'client/dist/index.html'), (err) => {
+    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'), (err) => {
       if (err) {
         // Fallback for development if index.html is missing
         res.status(200).send('Rancom Technologies API is running. Client build is currently not deployed. Run frontend server using: npm run dev');

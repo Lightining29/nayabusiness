@@ -4,6 +4,8 @@ const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Registration = require('../models/Registration');
+const ResumeData = require('../models/ResumeData');
 const authMiddleware = require('../middleware/auth');
 
 // Multer config – store file in memory (buffer) to save in DB
@@ -81,6 +83,28 @@ router.put('/me', authMiddleware, upload.single('resume'), async (req, res) => {
       user.resume = req.file.buffer;
       user.resumeContentType = req.file.mimetype;
       user.resumeFileName = req.file.originalname;
+
+      // Sync resume to ResumeData collection so admin panel can show it
+      const registration = await Registration.findOne({ email: user.email });
+      if (registration) {
+        await ResumeData.findOneAndUpdate(
+          { registrationId: registration._id },
+          {
+            registrationId: registration._id,
+            data: req.file.buffer,
+            contentType: req.file.mimetype,
+            fileName: req.file.originalname,
+            size: req.file.buffer.length,
+            uploadedAt: new Date()
+          },
+          { upsert: true, new: true }
+        );
+        // Keep metadata on Registration in sync too
+        await Registration.updateOne(
+          { _id: registration._id },
+          { resumeFileName: req.file.originalname, resumeContentType: req.file.mimetype }
+        );
+      }
     }
 
     await user.save();
@@ -113,11 +137,16 @@ router.get('/me/resume', authMiddleware, async (req, res) => {
     }
 
     // Unwrap Mongoose Binary to a plain Buffer before sending
-    const rawBuffer = user.resume instanceof Buffer
-      ? user.resume
-      : Buffer.from(user.resume.buffer || user.resume);
+    let rawBuffer;
+    if (Buffer.isBuffer(user.resume)) {
+      rawBuffer = user.resume;
+    } else if (user.resume.buffer) {
+      rawBuffer = Buffer.from(user.resume.buffer);
+    } else {
+      rawBuffer = Buffer.from(user.resume);
+    }
 
-    const fileName = (user.resumeFileName || 'resume.pdf').replace(/"/g, '');
+    const fileName = (user.resumeFileName || 'resume.pdf').replace(/[^\w.\-]/g, '_');
 
     res.setHeader('Content-Type', user.resumeContentType || 'application/pdf');
     res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);

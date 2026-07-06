@@ -450,28 +450,28 @@ app.post('/api/register/request-otp', async (req, res) => {
     const otp = generateOtp();
     await storeRegistrationOtp(normalizedEmail, otp);
 
-    try {
-      const mailResult = await sendOtpEmail({
-        to: normalizedEmail,
-        otp,
-        name: `${first_name || ''} ${last_name || ''}`.trim()
+    // Send email asynchronously in the background so the user gets an instant response
+    sendOtpEmail({
+      to: normalizedEmail,
+      otp,
+      name: `${first_name || ''} ${last_name || ''}`.trim()
+    })
+      .then((mailResult) => {
+        if (mailResult && mailResult.devMode) {
+          console.log(`[DEV MODE] Verification code generated for ${normalizedEmail}: ${otp}`);
+        } else {
+          console.log(`Verification code successfully sent to ${normalizedEmail}`);
+        }
+      })
+      .catch((mailErr) => {
+        console.error('Background OTP email send error:', mailErr);
+        console.log(`[FALLBACK] Failed to send email to ${normalizedEmail}. Generated OTP: ${otp}`);
       });
 
-      return res.status(200).json({
-        message: mailResult.devMode
-          ? 'Verification code generated. Check the backend console/logs for the OTP.'
-          : 'Verification code sent to your email.',
-        expiresInMinutes: OTP_TTL_MINUTES
-      });
-    } catch (mailErr) {
-      console.error('OTP email send error:', mailErr);
-      // Fail gracefully: log the OTP to the console/logs so it's visible on Render, and allow master OTP
-      console.log(`[FALLBACK] Failed to send email to ${normalizedEmail}. Generated OTP: ${otp}`);
-      return res.status(200).json({
-        message: 'Verification code generated. (Email sending failed; please use master OTP 123456 to verify)',
-        expiresInMinutes: OTP_TTL_MINUTES
-      });
-    }
+    return res.status(200).json({
+      message: 'Verification code generated. Please check your email.',
+      expiresInMinutes: OTP_TTL_MINUTES
+    });
   } catch (err) {
     console.error('OTP request error:', err);
     return res.status(500).json({ error: err.message || 'Failed to request email OTP.' });

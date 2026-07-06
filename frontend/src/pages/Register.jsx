@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle, CheckCircle, Briefcase, MapPin, Clock, DollarSign, MailCheck, UserCheck } from 'lucide-react';
+import { apiRequest } from '../utils/api';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -56,7 +57,7 @@ export default function Register() {
   };
 
   const requestEmailOtp = async () => {
-    const res = await fetch('/api/register/request-otp', {
+    await apiRequest('/api/register/request-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -66,11 +67,6 @@ export default function Register() {
         mobno
       })
     });
-
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || 'Failed to send email OTP.');
-    }
 
     // Redirect to the OTP verification page with the registration details
     navigate('/verify-otp', {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { AlertCircle, CheckCircle, MailCheck, ShieldCheck, ArrowLeft } from 'lucide-react';
+import { apiRequest } from '../utils/api';
 
 export default function VerifyOtp() {
   const location = useLocation();
@@ -77,15 +78,10 @@ export default function VerifyOtp() {
     formData.append('otp', otp.trim());
 
     try {
-      const res = await fetch('/api/register', {
+      const data = await apiRequest('/api/register', {
         method: 'POST',
         body: formData
       });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to verify OTP and register.');
-      }
 
       setSuccess(data.message || 'Email verified and registration submitted successfully!');
       
@@ -106,7 +102,7 @@ export default function VerifyOtp() {
     setResendMessage(null);
 
     try {
-      const res = await fetch('/api/register/request-otp', {
+      const data = await apiRequest('/api/register/request-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -116,11 +112,6 @@ export default function VerifyOtp() {
           mobno
         })
       });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to resend email OTP.');
-      }
 
       setResendMessage(data.message || 'A new verification code has been sent to your email.');
       setOtp('');

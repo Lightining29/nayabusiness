@@ -217,6 +217,13 @@ app.post('/api/auth/google/register', async (req, res) => {
   }
 });
 
+// Config endpoint – exposes non-secret public config to the frontend
+app.get('/api/config', (req, res) => {
+  res.json({
+    googleClientId: process.env.GOOGLE_CLIENT_ID || ''
+  });
+});
+
 // MongoDB Connection
 const mongoURI = process.env.MONGODB_URI;
 

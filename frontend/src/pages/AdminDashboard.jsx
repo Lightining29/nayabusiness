@@ -144,13 +144,41 @@ export default function AdminDashboard() {
     } catch (err) { console.error(err); }
   };
 
-  const openResume = (application) => {
+  const openResume = async (application) => {
     if (!application.resumeFileName) {
       toast.error('No resume PDF is available for this application.');
       return;
     }
 
-    window.open(`/api/admin/applications/${application._id}/resume`, '_blank', 'noopener,noreferrer');
+    const toastId = toast.loading('Opening resume...');
+    try {
+      const res = await fetch(`/api/admin/applications/${application._id}/resume`);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to load resume');
+      }
+
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      // Open in a new tab using a blob URL — avoids popup blockers and binary corruption
+      const tab = window.open(blobUrl, '_blank');
+      if (!tab) {
+        // Fallback: trigger a download if popup was blocked
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = application.resumeFileName || 'resume.pdf';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+
+      // Revoke blob URL after a short delay to free memory
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+      toast.success('Resume opened', { id: toastId });
+    } catch (err) {
+      toast.error(err.message || 'Could not open resume', { id: toastId });
+    }
   };
 
   // Logout

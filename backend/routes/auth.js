@@ -112,9 +112,17 @@ router.get('/me/resume', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'Resume not found' });
     }
 
+    // Unwrap Mongoose Binary to a plain Buffer before sending
+    const rawBuffer = user.resume instanceof Buffer
+      ? user.resume
+      : Buffer.from(user.resume.buffer || user.resume);
+
+    const fileName = (user.resumeFileName || 'resume.pdf').replace(/"/g, '');
+
     res.setHeader('Content-Type', user.resumeContentType || 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename="${user.resumeFileName || 'resume.pdf'}"`);
-    return res.send(user.resume);
+    res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
+    res.setHeader('Content-Length', rawBuffer.length);
+    return res.send(rawBuffer);
   } catch (err) {
     console.error('Resume fetch error:', err);
     res.status(500).json({ error: 'Failed to fetch resume' });

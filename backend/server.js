@@ -651,11 +651,19 @@ app.get('/api/admin/applications/:id/resume', async (req, res) => {
       return res.status(404).json({ error: 'Resume not found' });
     }
 
+    // Mongoose stores Buffer fields as Binary objects – extract the raw buffer
+    const rawBuffer = application.resume instanceof Buffer
+      ? application.resume
+      : Buffer.from(application.resume.buffer || application.resume);
+
+    const fileName = (application.resumeFileName || 'resume.pdf').replace(/"/g, '');
+
     res.setHeader('Content-Type', application.resumeContentType || 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename="${application.resumeFileName || 'resume.pdf'}"`);
-    return res.send(application.resume);
+    res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
+    res.setHeader('Content-Length', rawBuffer.length);
+    return res.send(rawBuffer);
   } catch (err) {
-    console.error(err);
+    console.error('Resume fetch error:', err);
     return res.status(500).json({ error: 'Failed to fetch resume' });
   }
 });

@@ -982,8 +982,8 @@ app.post('/api/admin/login', (req, res) => {
   return res.status(401).json({ error: 'Invalid credentials' });
 });
 
-// 5b. Queue interview invitation email to a candidate
-app.post('/api/admin/send-interview', (req, res) => {
+// 5b. Send interview invitation email to a candidate
+app.post('/api/admin/send-interview', async (req, res) => {
   const { to, name, position, interviewDate, interviewTime, mode, location, meetLink, interviewers, notes } = req.body;
   if (!to || !interviewDate || !interviewTime || !mode) {
     return res.status(400).json({ error: 'Email, date, time and mode are required.' });
@@ -1011,21 +1011,22 @@ app.post('/api/admin/send-interview', (req, res) => {
     notes
   };
 
-  setImmediate(() => {
-    sendInterviewEmail(payload)
-      .then((result) => {
-        console.log(`[Interview] Email sent to ${normalizedTo}${result.devMode ? ' (dev mode - logged)' : ' ✓'}`);
-      })
-      .catch((err) => {
-        console.error(`[Interview Email] Failed for ${normalizedTo}:`, err);
-      });
-  });
-
-  return res.status(202).json({
-    message: `Interview invitation is being sent to ${normalizedTo}.`,
-    queued: true,
-    devMode: !smtpReady
-  });
+  try {
+    const result = await sendInterviewEmail(payload);
+    console.log(`[Interview] Email sent to ${normalizedTo}${result.devMode ? ' (dev mode - logged)' : ' ✓'}`);
+    return res.status(200).json({
+      message: `Interview invitation was sent to ${normalizedTo}.`,
+      queued: false,
+      devMode: Boolean(result.devMode),
+      delivery: result.delivery || null
+    });
+  } catch (err) {
+    console.error(`[Interview Email] Failed for ${normalizedTo}:`, err);
+    return res.status(502).json({
+      error: 'Failed to send interview invitation.',
+      details: err.message || 'Unknown mailer error.'
+    });
+  }
 });
 
 // 6. Get all job applications (registrations)

@@ -274,7 +274,7 @@ export default function AdminDashboard() {
         })
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || data.message || 'Failed to send interview invitation.');
+      if (!res.ok) throw new Error(data.details || data.error || data.message || 'Failed to send interview invitation.');
       setInterviewModal(false);
       const isDevMode = Boolean(data.devMode);
       const isQueued = Boolean(data.queued);
@@ -283,7 +283,7 @@ export default function AdminDashboard() {
         title: isDevMode ? 'SMTP Not Configured' : (isQueued ? 'Invitation Sending' : 'Invitation Sent'),
         html: isDevMode
           ? `Interview invite was logged locally, but no email was sent to <strong>${interviewApp.email}</strong>. Configure SMTP settings to send real emails.`
-          : `Interview details are being sent to <strong>${interviewApp.email}</strong>. Check Render logs if delivery fails.`,
+          : `Interview details were sent to <strong>${interviewApp.email}</strong>. If delivery fails, check Render logs for SMTP errors.`,
         timer: 3000, showConfirmButton: false, timerProgressBar: true
       });
     } catch (err) {

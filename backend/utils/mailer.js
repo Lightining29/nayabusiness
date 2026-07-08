@@ -9,6 +9,15 @@ if (dns.setDefaultResultOrder) {
 
 let transporter = null; // reset on each server start
 
+function handleMissingMailer(logMessage) {
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(logMessage);
+    return { devMode: true };
+  }
+
+  throw new Error('Email service is not configured. Please set SMTP_HOST, SMTP_USER and SMTP_PASS.');
+}
+
 function getTransporter() {
   const host = process.env.SMTP_HOST;
   const user = process.env.SMTP_USER;
@@ -39,12 +48,7 @@ async function sendOtpEmail({ to, otp, name }) {
   const minutes = Number(process.env.OTP_TTL_MINUTES || 10);
 
   if (!mailer) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`Email verification OTP for ${to}: ${otp}`);
-      return { devMode: true };
-    }
-
-    throw new Error('Email service is not configured');
+    return handleMissingMailer(`Email verification OTP for ${to}: ${otp}`);
   }
 
   await mailer.sendMail({
@@ -128,8 +132,7 @@ async function sendInterviewEmail({ to, name, position, interviewDate, interview
   const modeLabel = { online:'Online (Video Call)', offline:'In-Person', phone:'Phone Interview' }[mode] || mode;
 
   if (!mailer) {
-    console.log(`[INTERVIEW INVITE] To: ${to} | Date: ${interviewDate} ${interviewTime} | Mode: ${mode}`);
-    return { devMode: true };
+    return handleMissingMailer(`[INTERVIEW INVITE] To: ${to} | Date: ${interviewDate} ${interviewTime} | Mode: ${mode}`);
   }
 
   await mailer.sendMail({
@@ -244,8 +247,7 @@ async function sendTestInviteEmail({ to, name, assessmentTitle, accessCode, test
   const expiryStr = expiresAt ? new Date(expiresAt).toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' }) : 'No expiry';
 
   if (!mailer) {
-    console.log(`[TEST INVITE] To: ${to} | Code: ${accessCode} | URL: ${testUrl}`);
-    return { devMode: true };
+    return handleMissingMailer(`[TEST INVITE] To: ${to} | Code: ${accessCode} | URL: ${testUrl}`);
   }
 
   await mailer.sendMail({

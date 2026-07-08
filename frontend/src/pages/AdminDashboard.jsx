@@ -273,12 +273,16 @@ export default function AdminDashboard() {
           ...interviewForm
         })
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || data.message || 'Failed to send interview invitation.');
       setInterviewModal(false);
+      const isDevMode = Boolean(data.devMode);
       Swal.fire({
-        icon: 'success', title: '📧 Invitation Sent!',
-        html: `Interview details sent to <strong>${interviewApp.email}</strong>`,
+        icon: isDevMode ? 'warning' : 'success',
+        title: isDevMode ? 'SMTP Not Configured' : '📧 Invitation Sent!',
+        html: isDevMode
+          ? `Interview invite was logged locally, but no email was sent to <strong>${interviewApp.email}</strong>. Configure SMTP settings to send real emails.`
+          : `Interview details sent to <strong>${interviewApp.email}</strong>`,
         timer: 3000, showConfirmButton: false, timerProgressBar: true
       });
     } catch (err) {

@@ -159,37 +159,51 @@ export default function Profile() {
       <style dangerouslySetInnerHTML={{__html: `
         .profile-page { padding-top: 4rem; padding-bottom: 4rem; color: #0f172a; }
         .profile-shell {
-          display: grid; grid-template-columns: 0.85fr 1.35fr; gap: 1.5rem; align-items: start;
+          display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.35fr); gap: 1.5rem; align-items: start;
         }
         .profile-hero {
           background: linear-gradient(135deg, #0f172a, #1d4ed8); color: white; border-radius: 16px;
           padding: 1.75rem; box-shadow: 0 18px 50px rgba(15, 23, 42, 0.18); position: sticky; top: 6rem;
+          min-width: 0; overflow: hidden;
         }
         .profile-avatar {
           width: 82px; height: 82px; border-radius: 18px; background: rgba(255,255,255,0.16);
           display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;
           border: 1px solid rgba(255,255,255,0.22);
         }
-        .profile-hero h1 { font-size: 1.8rem; line-height: 1.15; margin-bottom: 0.5rem; color: white; }
+        .profile-hero h1 { font-size: 1.8rem; line-height: 1.15; margin-bottom: 0.5rem; color: white; overflow-wrap: anywhere; }
         .profile-muted { color: rgba(255,255,255,0.78); line-height: 1.65; }
         .profile-info-list { display: grid; gap: 0.75rem; margin-top: 1.5rem; }
         .profile-info-item { display: flex; align-items: center; gap: 0.65rem; color: rgba(255,255,255,0.88); word-break: break-word; }
+        .profile-info-item svg { flex: 0 0 auto; }
+        .profile-info-item span { min-width: 0; overflow-wrap: anywhere; }
         .profile-card {
           background: white; border: 1px solid rgba(15, 23, 42, 0.08); border-radius: 16px;
-          box-shadow: 0 16px 45px rgba(15, 23, 42, 0.08); padding: 1.5rem;
+          box-shadow: 0 16px 45px rgba(15, 23, 42, 0.08); padding: 1.5rem; min-width: 0;
         }
         .profile-card-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
         .profile-card-title { display: flex; align-items: center; gap: 0.55rem; color: #0f172a; font-size: 1.35rem; font-weight: 800; }
         .profile-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
         .profile-grid .full-width { grid-column: 1 / -1; }
         .profile-page label { color: #0f172a; display: block; font-weight: 700; margin-bottom: 0.45rem; }
+        .profile-page .form-group { min-width: 0; margin-bottom: 0; }
+        .profile-page .form-input { width: 100%; min-width: 0; }
+        .profile-page input[type="file"] { font-size: 0.88rem; line-height: 1.35; }
         .profile-page textarea { min-height: 110px; resize: vertical; }
         .profile-skill-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.8rem; }
-        .profile-skill { background: #eef6ff; color: #1d4ed8; border: 1px solid rgba(29, 78, 216, 0.16); border-radius: 999px; padding: 0.35rem 0.65rem; font-size: 0.82rem; font-weight: 700; }
+        .profile-skill {
+          max-width: 100%; background: #eef6ff; color: #1d4ed8;
+          border: 1px solid rgba(29, 78, 216, 0.16); border-radius: 999px;
+          padding: 0.35rem 0.65rem; font-size: 0.82rem; font-weight: 700;
+          overflow-wrap: anywhere;
+        }
         .profile-alert {
           display: flex; align-items: center; gap: 0.5rem; padding: 0.9rem 1rem; border-radius: 8px;
           margin-bottom: 1rem; font-weight: 600; font-size: 0.92rem;
         }
+        .profile-alert svg { flex: 0 0 auto; }
+        .profile-alert span { min-width: 0; overflow-wrap: anywhere; }
+        .profile-file-note { color: #64748b; font-size: 0.85rem; margin-top: 0.4rem; overflow-wrap: anywhere; }
         .profile-alert.success { color: #047857; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.22); }
         .profile-alert.error { color: #dc2626; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.22); }
         .profile-loading { background: white; border-radius: 16px; padding: 2rem; text-align: center; box-shadow: 0 16px 45px rgba(15, 23, 42, 0.08); }
@@ -198,10 +212,29 @@ export default function Profile() {
           .profile-hero { position: static; }
         }
         @media (max-width: 640px) {
-          .profile-page { padding-top: 2rem; }
+          .profile-page { padding-top: 1.5rem; padding-bottom: 2.5rem; }
+          .profile-shell { gap: 1rem; }
           .profile-grid { grid-template-columns: 1fr; }
           .profile-card, .profile-hero { padding: 1.15rem; border-radius: 12px; }
-          .profile-card-header { align-items: flex-start; flex-direction: column; }
+          .profile-avatar { width: 64px; height: 64px; border-radius: 14px; margin-bottom: 1rem; }
+          .profile-avatar svg { width: 34px; height: 34px; }
+          .profile-hero h1 { font-size: 1.45rem; }
+          .profile-muted { font-size: 0.92rem; line-height: 1.55; }
+          .profile-info-list { gap: 0.65rem; margin-top: 1rem; }
+          .profile-info-item { align-items: flex-start; font-size: 0.9rem; }
+          .profile-card-header { align-items: stretch; flex-direction: column; gap: 0.75rem; }
+          .profile-card-header .btn { width: 100%; }
+          .profile-card-title { font-size: 1.15rem; }
+          .profile-page label { font-size: 0.9rem; }
+          .profile-page .form-input { padding: 0.75rem 0.85rem; font-size: 0.92rem; }
+          .profile-page input[type="file"] { padding-left: 0.75rem; padding-right: 0.75rem; }
+          .profile-alert { align-items: flex-start; font-size: 0.86rem; padding: 0.8rem; }
+          .profile-save-btn { min-height: 46px; }
+        }
+        @media (max-width: 420px) {
+          .profile-page { padding-left: 0.75rem; padding-right: 0.75rem; }
+          .profile-card, .profile-hero { padding: 1rem; }
+          .profile-skill { font-size: 0.78rem; }
         }
       `}} />
 
@@ -282,7 +315,7 @@ export default function Profile() {
                   <label>Resume PDF</label>
                   <input className="form-input" type="file" accept="application/pdf,.pdf" onChange={(e) => updateProfile('resume', e.target.files[0] || null)} />
                   {profile.resumeFileName && (
-                    <p style={{ color: '#64748b', fontSize: '0.85rem', marginTop: '0.4rem' }}>
+                    <p className="profile-file-note">
                       Current file: {profile.resumeFileName}
                     </p>
                   )}
@@ -306,7 +339,7 @@ export default function Profile() {
                 </div>
               </div>
 
-              <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.9rem 1rem', marginTop: '0.75rem' }} disabled={saving}>
+              <button type="submit" className="btn btn-primary profile-save-btn" style={{ width: '100%', padding: '0.9rem 1rem', marginTop: '0.75rem' }} disabled={saving}>
                 <Save size={18} /> {saving ? 'Saving Changes...' : 'Save Changes'}
               </button>
             </form>

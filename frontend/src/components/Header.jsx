@@ -136,6 +136,12 @@ export default function Header() {
   useEffect(() => { setMobileOpen(false); setTelecomOpen(false); setSoftwareOpen(false); }, [location.pathname]);
 
   const closeAll = () => { setTelecomOpen(false); setSoftwareOpen(false); };
+  const toggleMobileMenu = () => {
+    const nextOpen = !mobileOpen;
+    setMobileOpen(nextOpen);
+    setTelecomOpen(false);
+    setSoftwareOpen(false);
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -260,13 +266,13 @@ export default function Header() {
 
     .hdr-dropdown-panel {
       position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%) translateY(8px);
-      background: white; border: 1px solid rgba(14,165,233,0.18); border-radius: 14px;
+      background: white; border: 1px solid rgba(27, 152, 211, 0.18); border-radius: 14px;
       box-shadow: 0 16px 48px rgba(0,0,0,0.12); min-width: 220px; max-width: 420px;
       opacity: 0; visibility: hidden; transition: all 0.2s ease;
       max-height: 70vh; overflow-y: auto; z-index: 300;
     }
     .dark .hdr-dropdown-panel { background: #1e293b; border-color: rgba(56,189,248,0.15); }
-    .hdr-dropdown-panel a { color: #334155 !important; }
+    .hdr-dropdown-panel a { color: #090c11 !important; }
     .dark .hdr-dropdown-panel a { color: #cbd5e1 !important; }
 
     /* right side icons */
@@ -329,7 +335,17 @@ export default function Header() {
     .dark .hdr-mobile-link { color: #cbd5e1; }
     .dark .hdr-mobile-link:hover { color: #38bdf8; background: rgba(56,189,248,0.1); }
     .hdr-mobile-divider { height: 1px; background: rgba(14,165,233,0.1); margin: 0.5rem 0; }
-    .hdr-mobile-section { font-size: 0.68rem; font-weight: 800; color: #94a3b8; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.5rem 0.85rem 0.25rem; }
+    .hdr-mobile-section {
+      width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+      border: none; background: transparent; cursor: pointer; border-radius: 9px;
+      font-size: 0.68rem; font-weight: 800; color: #000000; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 0.6rem 0.85rem;
+    }
+    .hdr-mobile-section:hover { color: var(--primary); background: rgba(14,165,233,0.08); }
+    .dark .hdr-mobile-section:hover { color: #38bdf8; background: rgba(56,189,248,0.1); }
+    .hdr-mobile-section svg { flex-shrink: 0; transition: transform 0.18s ease; }
+    .hdr-mobile-section.open svg { transform: rotate(180deg); }
+    .hdr-mobile-submenu { display: flex; flex-direction: column; gap: 2px; }
     .hdr-mobile-auth { display: flex; gap: 0.5rem; padding: 0.5rem 0.25rem 0; flex-wrap: wrap; }
 
     /* modal backdrop */
@@ -349,7 +365,7 @@ export default function Header() {
       position: absolute; top: 1rem; right: 1rem; width: 30px; height: 30px; border-radius: 8px;
       border: none; background: #f1f5f9; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center;
     }
-    .dark .hdr-modal-close { background: #334155; color: #94a3b8; }
+    .dark .hdr-modal-close { background: #334155; color: #010202; }
     .hdr-modal-input {
       width: 100%; box-sizing: border-box; padding: 0.75rem 1rem;
       border: 1.5px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 0.92rem;
@@ -479,7 +495,7 @@ export default function Header() {
             )}
 
             {/* Hamburger */}
-            <button className="hdr-hamburger" onClick={() => setMobileOpen(o => !o)} aria-label="Menu">
+            <button className="hdr-hamburger" onClick={toggleMobileMenu} aria-label="Menu">
               {mobileOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
@@ -491,18 +507,42 @@ export default function Header() {
           <NavLink to="/about" className={({ isActive }) => `hdr-mobile-link${isActive ? ' active' : ''}`}>About</NavLink>
 
           <div className="hdr-mobile-divider" />
-          <div className="hdr-mobile-section">🗼 Telecom Services</div>
-          {telecomLinks.map(l => (
-            <NavLink key={l.path} to={l.path} className={({ isActive }) => `hdr-mobile-link${isActive ? ' active' : ''}`}
-              style={{ paddingLeft: '1.25rem', fontSize: '0.85rem' }}>{l.name}</NavLink>
-          ))}
+          <button
+            type="button"
+            className={`hdr-mobile-section${telecomOpen ? ' open' : ''}`}
+            onClick={() => setTelecomOpen(open => !open)}
+            aria-expanded={telecomOpen}
+          >
+            <span>Telecom Services</span>
+            <ChevronDown size={15} />
+          </button>
+          {telecomOpen && (
+            <div className="hdr-mobile-submenu">
+              {telecomLinks.map(l => (
+                <NavLink key={l.path} to={l.path} className={({ isActive }) => `hdr-mobile-link${isActive ? ' active' : ''}`}
+                  style={{ paddingLeft: '1.25rem', fontSize: '0.85rem' }}>{l.name}</NavLink>
+              ))}
+            </div>
+          )}
 
           <div className="hdr-mobile-divider" />
-          <div className="hdr-mobile-section">💻 Software Services</div>
-          {softwareLinks.map(l => (
-            <NavLink key={l.path} to={l.path} className={({ isActive }) => `hdr-mobile-link${isActive ? ' active' : ''}`}
-              style={{ paddingLeft: '1.25rem', fontSize: '0.85rem' }}>{l.name}</NavLink>
-          ))}
+          <button
+            type="button"
+            className={`hdr-mobile-section${softwareOpen ? ' open' : ''}`}
+            onClick={() => setSoftwareOpen(open => !open)}
+            aria-expanded={softwareOpen}
+          >
+            <span>Software Services</span>
+            <ChevronDown size={15} />
+          </button>
+          {softwareOpen && (
+            <div className="hdr-mobile-submenu">
+              {softwareLinks.map(l => (
+                <NavLink key={l.path} to={l.path} className={({ isActive }) => `hdr-mobile-link${isActive ? ' active' : ''}`}
+                  style={{ paddingLeft: '1.25rem', fontSize: '0.85rem' }}>{l.name}</NavLink>
+              ))}
+            </div>
+          )}
 
           <div className="hdr-mobile-divider" />
           <NavLink to="/blog" className={({ isActive }) => `hdr-mobile-link${isActive ? ' active' : ''}`}>Blog</NavLink>

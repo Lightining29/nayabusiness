@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const multer = require('multer');
 const crypto = require('crypto');
+const dns = require('dns');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
@@ -253,22 +254,85 @@ app.get('/api/config', (req, res) => {
   });
 });
 
-// MongoDB Connection
 const mongoURI = process.env.MONGODB_URI;
 
-mongoose.connect(mongoURI)
-  .then(async () => {
+const DEFAULT_MONGODB_DNS_SERVERS = ['1.1.1.1', '8.8.8.8'];
+
+function parseDnsServers(value) {
+  return String(value || '')
+    .split(',')
+    .map(server => server.trim())
+    .filter(Boolean);
+}
+
+function getMongoSrvRecordName(uri) {
+  try {
+    const parsed = new URL(uri);
+    if (parsed.protocol !== 'mongodb+srv:' || !parsed.hostname) return null;
+    return `_mongodb._tcp.${parsed.hostname}`;
+  } catch {
+    return null;
+  }
+}
+
+function setMongoDnsServers(servers, source) {
+  if (!servers.length) return false;
+
+  try {
+    dns.setServers(servers);
+    console.log(`MongoDB DNS resolvers set from ${source}: ${servers.join(', ')}`);
+    return true;
+  } catch (err) {
+    console.warn(`Invalid MongoDB DNS resolver config from ${source}: ${err.message}`);
+    return false;
+  }
+}
+
+async function configureMongoDns(uri) {
+  const configuredServers = parseDnsServers(process.env.MONGODB_DNS_SERVERS);
+  if (configuredServers.length) {
+    setMongoDnsServers(configuredServers, 'MONGODB_DNS_SERVERS');
+    return;
+  }
+
+  const srvRecord = getMongoSrvRecordName(uri);
+  if (!srvRecord) return;
+
+  try {
+    await dns.promises.resolveSrv(srvRecord);
+  } catch (err) {
+    if (['ECONNREFUSED', 'ETIMEOUT', 'ESERVFAIL'].includes(err.code)) {
+      console.warn(`Default DNS resolver failed for MongoDB SRV lookup (${err.code}). Retrying with fallback DNS resolvers.`);
+      setMongoDnsServers(DEFAULT_MONGODB_DNS_SERVERS, 'fallback');
+    }
+  }
+}
+
+async function connectMongo() {
+  if (!mongoURI) {
+    console.warn('\n======================================================');
+    console.warn('WARNING: MONGODB_URI is not configured.');
+    console.warn('The application is running in "DEMO MODE" (using temporary memory storage).');
+    console.warn('======================================================\n');
+    return;
+  }
+
+  try {
+    await configureMongoDns(mongoURI);
+    await mongoose.connect(mongoURI);
     console.log('Successfully connected to MongoDB.');
     await seedBlogs();
-  })
-  .catch(err => {
+  } catch (err) {
     console.error('MongoDB connection error details:', err.message);
     console.warn('\n======================================================');
     console.warn('WARNING: Could not connect to MongoDB Atlas/Local.');
     console.warn('The application is running in "DEMO MODE" (using temporary memory storage).');
-    console.warn('Please update the MONGODB_URI in your .env file with valid credentials.');
+    console.warn('Please check MONGODB_URI and, for mongodb+srv DNS errors, set MONGODB_DNS_SERVERS=1.1.1.1,8.8.8.8.');
     console.warn('======================================================\n');
-  });
+  }
+}
+
+connectMongo();
 
 // Seed default blogs if database is empty
 async function seedBlogs() {

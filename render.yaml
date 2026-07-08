@@ -8,6 +8,8 @@ services:
     envVars:
       - key: MONGODB_URI
         sync: false
+      - key: MONGODB_DNS_SERVERS
+        value: 1.1.1.1,8.8.8.8
       - key: NODE_ENV
         value: production
       - key: PORT
@@ -20,6 +22,18 @@ services:
         value: rancom@2026
       - key: PRODUCTION_DOMAIN
         value: www.rancomtechnologies.com
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURE
+        value: "false"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
       - key: FIREBASE_PROJECT_ID
         value: rancom-technologies
       - key: FIREBASE_CLIENT_EMAIL

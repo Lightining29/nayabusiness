@@ -10,29 +10,29 @@ import NotificationBell from './NotificationBell';
 
 /* ── data ─────────────────────────────────────────────────────── */
 const telecomLinks = [
-  { name: 'LOS Survey',             path: '/telecom/los'       },
-  { name: 'RF Survey',               path: '/telecom/rf'        },
-  { name: 'EMF Survey',              path: '/telecom/emf'       },
-  { name: 'BTS Installation',        path: '/telecom/bts'       },
-  { name: 'Router Installation',     path: '/telecom/router'    },
-  { name: 'Network Testing',         path: '/telecom/network'   },
-  { name: 'Microwave Installation',  path: '/telecom/microwave' },
-  { name: 'SCFT Testing',            path: '/telecom/scft'      },
+  { name: 'LOS Survey', path: '/telecom/los' },
+  { name: 'RF Survey', path: '/telecom/rf' },
+  { name: 'EMF Survey', path: '/telecom/emf' },
+  { name: 'BTS Installation', path: '/telecom/bts' },
+  { name: 'Router Installation', path: '/telecom/router' },
+  { name: 'Network Testing', path: '/telecom/network' },
+  { name: 'Microwave Installation', path: '/telecom/microwave' },
+  { name: 'SCFT Testing', path: '/telecom/scft' },
 ];
 
 const softwareLinks = [
-  { name: 'Software Development',   path: '/services/software-company' },
-  { name: 'Custom Software',        path: '/services/custom-software'  },
-  { name: 'Web Development',        path: '/services/web-development'  },
-  { name: 'MERN Stack',             path: '/services/mern-stack'       },
-  { name: 'Java Development',       path: '/services/java-development' },
-  { name: 'Mobile App',             path: '/services/mobile-app'       },
-  { name: 'ERP Software',           path: '/services/erp-software'     },
-  { name: 'HRMS Software',          path: '/services/hrms-software'    },
-  { name: 'E-commerce',             path: '/services/ecommerce'        },
-  { name: 'SaaS Development',       path: '/services/saas-development' },
-  { name: 'Cloud Solutions',        path: '/services/cloud-solutions'  },
-  { name: 'UI/UX Design',           path: '/services/ui-ux-design'     },
+  { name: 'Software Development', path: '/services/software-company' },
+  { name: 'Custom Software', path: '/services/custom-software' },
+  { name: 'Web Development', path: '/services/web-development' },
+  { name: 'MERN Stack', path: '/services/mern-stack' },
+  { name: 'Java Development', path: '/services/java-development' },
+  { name: 'Mobile App', path: '/services/mobile-app' },
+  { name: 'ERP Software', path: '/services/erp-software' },
+  { name: 'HRMS Software', path: '/services/hrms-software' },
+  { name: 'E-commerce', path: '/services/ecommerce' },
+  { name: 'SaaS Development', path: '/services/saas-development' },
+  { name: 'Cloud Solutions', path: '/services/cloud-solutions' },
+  { name: 'UI/UX Design', path: '/services/ui-ux-design' },
 ];
 
 /* ── Dropdown ─────────────────────────────────────────────────── */
@@ -93,21 +93,21 @@ function Dropdown({ label, icon, links, mobileOpen, onMobileToggle, onClose }) {
 
 /* ── Main Header ──────────────────────────────────────────────── */
 export default function Header() {
-  const navigate   = useNavigate();
-  const location   = useLocation();
-  const [mobileOpen,   setMobileOpen]   = useState(false);
-  const [telecomOpen,  setTelecomOpen]  = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [telecomOpen, setTelecomOpen] = useState(false);
   const [softwareOpen, setSoftwareOpen] = useState(false);
-  const [darkMode,     setDarkMode]     = useState(() => localStorage.getItem('theme') === 'dark');
-  const [isAuth,       setIsAuth]       = useState(false);
-  const [scrolled,     setScrolled]     = useState(false);
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
+  const [isAuth, setIsAuth] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   /* login modal */
-  const [loginOpen,    setLoginOpen]    = useState(false);
-  const [loginEmail,   setLoginEmail]   = useState('');
-  const [loginPass,    setLoginPass]    = useState('');
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPass, setLoginPass] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
-  const [loginError,   setLoginError]   = useState('');
+  const [loginError, setLoginError] = useState('');
   const [loginSuccess, setLoginSuccess] = useState('');
 
   /* dark mode */
@@ -189,7 +189,7 @@ export default function Header() {
         });
         const el = document.getElementById('hdr-google-btn');
         if (el) window.google.accounts.id.renderButton(el, { theme: 'outline', size: 'large', width: 300, shape: 'rectangular' });
-      } catch {}
+      } catch { }
     }, 200);
     return () => { cancelled = true; };
   }, [loginOpen]);
@@ -392,24 +392,24 @@ export default function Header() {
 
           {/* Logo */}
           <Link to="/" className="hdr-logo">
-            
+
             <img src="/rancom.png" alt="Rancom Technologies" className="hdr-logo-img"
-              style={{ marginLeft:'-6px', border:'2px solid rgba(14,165,233,0.3)' }}
-              onError={e => { e.target.style.display='none'; }} />
+              style={{ marginLeft: '-6px', border: '2px solid rgba(14,165,233,0.3)' }}
+              onError={e => { e.target.style.display = 'none'; }} />
             <div className="hdr-logo-text">
               <span className="hdr-logo-main">
-                RANCOM <span style={{ background:'linear-gradient(135deg,#0ea5e9,#06b6d4)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>TECH</span>
+                RANCOM <span style={{ background: 'linear-gradient(135deg,#0ea5e9,#06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>TECH</span>
               </span>
               <span className="hdr-logo-sub">
-                Pvt. Ltd · <span style={{ color:'#e53e3e' }}>apple</span><span style={{ color:'#38a169' }}>tree</span> infotech
+                Pvt. Ltd  <span style={{ color: '#e53e3e' }}>apple</span><span style={{ color: '#38a169' }}>tree</span> infotech
               </span>
             </div>
           </Link>
 
           {/* Desktop nav */}
           <nav className="hdr-nav" aria-label="Main navigation">
-            <NavLink to="/" className={({isActive}) => `hdr-link${isActive?' active':''}`} end>Home</NavLink>
-            <NavLink to="/about" className={({isActive}) => `hdr-link${isActive?' active':''}`}>About</NavLink>
+            <NavLink to="/" className={({ isActive }) => `hdr-link${isActive ? ' active' : ''}`} end>Home</NavLink>
+            <NavLink to="/about" className={({ isActive }) => `hdr-link${isActive ? ' active' : ''}`}>About</NavLink>
 
             {/* Telecom dropdown */}
             <div className="hdr-dropdown-wrap">
@@ -417,12 +417,12 @@ export default function Header() {
                 <Radio size={14} />Telecom <ChevronDown size={13} />
               </button>
               <div className="hdr-dropdown-panel">
-                <div style={{ padding:'0.5rem', display:'flex', flexDirection:'column' }}>
+                <div style={{ padding: '0.5rem', display: 'flex', flexDirection: 'column' }}>
                   {telecomLinks.map(l => (
                     <Link key={l.path} to={l.path}
-                      style={{ padding:'0.5rem 0.85rem', borderRadius:'7px', fontSize:'0.85rem', fontWeight:500, display:'block' }}
-                      onMouseEnter={e => { e.currentTarget.style.background='rgba(14,165,233,0.08)'; e.currentTarget.style.color='var(--primary)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.background=''; e.currentTarget.style.color=''; }}>
+                      style={{ padding: '0.5rem 0.85rem', borderRadius: '7px', fontSize: '0.85rem', fontWeight: 500, display: 'block' }}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(14,165,233,0.08)'; e.currentTarget.style.color = 'var(--primary)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = ''; e.currentTarget.style.color = ''; }}>
                       {l.name}
                     </Link>
                   ))}
@@ -436,12 +436,12 @@ export default function Header() {
                 <Code size={14} />Services <ChevronDown size={13} />
               </button>
               <div className="hdr-dropdown-panel">
-                <div style={{ padding:'0.5rem', display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1px' }}>
+                <div style={{ padding: '0.5rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px' }}>
                   {softwareLinks.map(l => (
                     <Link key={l.path} to={l.path}
-                      style={{ padding:'0.5rem 0.85rem', borderRadius:'7px', fontSize:'0.82rem', fontWeight:500, display:'block', whiteSpace:'nowrap' }}
-                      onMouseEnter={e => { e.currentTarget.style.background='rgba(14,165,233,0.08)'; e.currentTarget.style.color='var(--primary)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.background=''; e.currentTarget.style.color=''; }}>
+                      style={{ padding: '0.5rem 0.85rem', borderRadius: '7px', fontSize: '0.82rem', fontWeight: 500, display: 'block', whiteSpace: 'nowrap' }}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(14,165,233,0.08)'; e.currentTarget.style.color = 'var(--primary)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = ''; e.currentTarget.style.color = ''; }}>
                       {l.name}
                     </Link>
                   ))}
@@ -449,15 +449,15 @@ export default function Header() {
               </div>
             </div>
 
-            <NavLink to="/blog" className={({isActive}) => `hdr-link${isActive?' active':''}`}>Blog</NavLink>
-            <NavLink to="/jobs" className={({isActive}) => `hdr-link${isActive?' active':''}`}>Jobs</NavLink>
+            <NavLink to="/blog" className={({ isActive }) => `hdr-link${isActive ? ' active' : ''}`}>Blog</NavLink>
+            <NavLink to="/jobs" className={({ isActive }) => `hdr-link${isActive ? ' active' : ''}`}>Jobs</NavLink>
             <NavLink to="/apply" className="hdr-apply">Apply Now</NavLink>
           </nav>
 
           {/* Right actions */}
           <div className="hdr-actions">
             {/* Dark mode */}
-         
+
 
             {/* Notification bell */}
             <NotificationBell />
@@ -487,40 +487,40 @@ export default function Header() {
 
         {/* Mobile drawer */}
         <div className={`hdr-mobile${mobileOpen ? ' open' : ''}`}>
-          <NavLink to="/" className={({isActive}) => `hdr-mobile-link${isActive?' active':''}`} end>Home</NavLink>
-          <NavLink to="/about" className={({isActive}) => `hdr-mobile-link${isActive?' active':''}`}>About</NavLink>
+          <NavLink to="/" className={({ isActive }) => `hdr-mobile-link${isActive ? ' active' : ''}`} end>Home</NavLink>
+          <NavLink to="/about" className={({ isActive }) => `hdr-mobile-link${isActive ? ' active' : ''}`}>About</NavLink>
 
           <div className="hdr-mobile-divider" />
           <div className="hdr-mobile-section">🗼 Telecom Services</div>
           {telecomLinks.map(l => (
-            <NavLink key={l.path} to={l.path} className={({isActive}) => `hdr-mobile-link${isActive?' active':''}`}
-              style={{ paddingLeft:'1.25rem', fontSize:'0.85rem' }}>{l.name}</NavLink>
+            <NavLink key={l.path} to={l.path} className={({ isActive }) => `hdr-mobile-link${isActive ? ' active' : ''}`}
+              style={{ paddingLeft: '1.25rem', fontSize: '0.85rem' }}>{l.name}</NavLink>
           ))}
 
           <div className="hdr-mobile-divider" />
           <div className="hdr-mobile-section">💻 Software Services</div>
           {softwareLinks.map(l => (
-            <NavLink key={l.path} to={l.path} className={({isActive}) => `hdr-mobile-link${isActive?' active':''}`}
-              style={{ paddingLeft:'1.25rem', fontSize:'0.85rem' }}>{l.name}</NavLink>
+            <NavLink key={l.path} to={l.path} className={({ isActive }) => `hdr-mobile-link${isActive ? ' active' : ''}`}
+              style={{ paddingLeft: '1.25rem', fontSize: '0.85rem' }}>{l.name}</NavLink>
           ))}
 
           <div className="hdr-mobile-divider" />
-          <NavLink to="/blog" className={({isActive}) => `hdr-mobile-link${isActive?' active':''}`}>Blog</NavLink>
-          <NavLink to="/jobs" className={({isActive}) => `hdr-mobile-link${isActive?' active':''}`}>Jobs</NavLink>
-          <NavLink to="/apply" className="hdr-mobile-link" style={{ color:'#059669', fontWeight:700 }}>🚀 Apply Now</NavLink>
+          <NavLink to="/blog" className={({ isActive }) => `hdr-mobile-link${isActive ? ' active' : ''}`}>Blog</NavLink>
+          <NavLink to="/jobs" className={({ isActive }) => `hdr-mobile-link${isActive ? ' active' : ''}`}>Jobs</NavLink>
+          <NavLink to="/apply" className="hdr-mobile-link" style={{ color: '#059669', fontWeight: 700 }}>🚀 Apply Now</NavLink>
 
           <div className="hdr-mobile-auth">
             {isAuth ? (
               <>
-                <Link to="/profile" className="hdr-profile-btn" style={{ flex:1, justifyContent:'center', textDecoration:'none' }}>
+                <Link to="/profile" className="hdr-profile-btn" style={{ flex: 1, justifyContent: 'center', textDecoration: 'none' }}>
                   <UserRound size={15} /> Profile
                 </Link>
-                <button className="hdr-logout-btn" style={{ flex:1, justifyContent:'center' }} onClick={handleLogout}>
+                <button className="hdr-logout-btn" style={{ flex: 1, justifyContent: 'center' }} onClick={handleLogout}>
                   <LogOut size={14} /> Logout
                 </button>
               </>
             ) : (
-              <button className="hdr-login-btn" style={{ flex:1, justifyContent:'center' }}
+              <button className="hdr-login-btn" style={{ flex: 1, justifyContent: 'center' }}
                 onClick={() => { setMobileOpen(false); setLoginOpen(true); }}>
                 <LogIn size={15} /> Login
               </button>
@@ -535,37 +535,37 @@ export default function Header() {
           <div className="hdr-modal" onClick={e => e.stopPropagation()}>
             <button className="hdr-modal-close" onClick={() => setLoginOpen(false)}><X size={15} /></button>
 
-            <div style={{ textAlign:'center', marginBottom:'1.5rem' }}>
-              <div style={{ width:'48px', height:'48px', borderRadius:'14px', background:'linear-gradient(135deg,#0ea5e9,#0369a1)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 0.75rem' }}>
+            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'linear-gradient(135deg,#0ea5e9,#0369a1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.75rem' }}>
                 <LogIn size={22} color="white" />
               </div>
-              <h2 style={{ fontSize:'1.3rem', fontWeight:800, color:'#0f172a', margin:0 }}>Welcome back</h2>
-              <p style={{ color:'#64748b', fontSize:'0.85rem', margin:'0.25rem 0 0' }}>Sign in to your Rancom Technologies account</p>
+              <h2 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>Welcome back</h2>
+              <p style={{ color: '#64748b', fontSize: '0.85rem', margin: '0.25rem 0 0' }}>Sign in to your Rancom Technologies account</p>
             </div>
 
             {loginSuccess && (
-              <div style={{ display:'flex', gap:'0.5rem', alignItems:'center', padding:'0.75rem 1rem', background:'rgba(16,185,129,0.1)', border:'1px solid rgba(16,185,129,0.25)', borderRadius:'9px', marginBottom:'1rem', color:'#047857', fontSize:'0.88rem', fontWeight:600 }}>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', padding: '0.75rem 1rem', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)', borderRadius: '9px', marginBottom: '1rem', color: '#047857', fontSize: '0.88rem', fontWeight: 600 }}>
                 <CheckCircle size={16} />{loginSuccess}
               </div>
             )}
             {loginError && (
-              <div style={{ display:'flex', gap:'0.5rem', alignItems:'center', padding:'0.75rem 1rem', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)', borderRadius:'9px', marginBottom:'1rem', color:'#dc2626', fontSize:'0.88rem', fontWeight:600 }}>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', padding: '0.75rem 1rem', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '9px', marginBottom: '1rem', color: '#dc2626', fontSize: '0.88rem', fontWeight: 600 }}>
                 <AlertCircle size={16} />{loginError}
               </div>
             )}
 
             <form onSubmit={handleLogin}>
-              <div style={{ position:'relative', marginBottom:'0.75rem' }}>
-                <Mail size={15} style={{ position:'absolute', left:'0.85rem', top:'50%', transform:'translateY(-50%)', color:'#94a3b8' }} />
+              <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
+                <Mail size={15} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                 <input type="email" required placeholder="Email address" value={loginEmail}
                   onChange={e => setLoginEmail(e.target.value)} className="hdr-modal-input"
-                  style={{ paddingLeft:'2.4rem', marginBottom:0 }} />
+                  style={{ paddingLeft: '2.4rem', marginBottom: 0 }} />
               </div>
-              <div style={{ position:'relative', marginBottom:'1rem' }}>
-                <Lock size={15} style={{ position:'absolute', left:'0.85rem', top:'50%', transform:'translateY(-50%)', color:'#94a3b8' }} />
+              <div style={{ position: 'relative', marginBottom: '1rem' }}>
+                <Lock size={15} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                 <input type="password" required placeholder="Password" value={loginPass}
                   onChange={e => setLoginPass(e.target.value)} className="hdr-modal-input"
-                  style={{ paddingLeft:'2.4rem', marginBottom:0 }} />
+                  style={{ paddingLeft: '2.4rem', marginBottom: 0 }} />
               </div>
               <button type="submit" className="hdr-modal-btn" disabled={loginLoading}>
                 {loginLoading ? '⏳ Signing in…' : 'Sign In'}
@@ -578,11 +578,11 @@ export default function Header() {
               <div className="hdr-divider-line" />
             </div>
 
-            <div id="hdr-google-btn" style={{ display:'flex', justifyContent:'center', minHeight:'40px' }} />
+            <div id="hdr-google-btn" style={{ display: 'flex', justifyContent: 'center', minHeight: '40px' }} />
 
-            <p style={{ textAlign:'center', fontSize:'0.82rem', color:'#64748b', marginTop:'1.25rem', marginBottom:0 }}>
+            <p style={{ textAlign: 'center', fontSize: '0.82rem', color: '#64748b', marginTop: '1.25rem', marginBottom: 0 }}>
               Don't have an account?{' '}
-              <Link to="/apply" onClick={() => setLoginOpen(false)} style={{ color:'var(--primary)', fontWeight:700 }}>Apply now</Link>
+              <Link to="/apply" onClick={() => setLoginOpen(false)} style={{ color: 'var(--primary)', fontWeight: 700 }}>Apply now</Link>
             </p>
           </div>
         </div>

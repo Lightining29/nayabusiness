@@ -17,6 +17,7 @@ const ResumeData = require('./models/ResumeData');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { sendOtpEmail } = require('./utils/mailer');
+const { sendInterviewEmail } = require('./utils/mailer');
 
 // Import route files
 const authRoutes = require('./routes/auth');
@@ -918,7 +919,21 @@ app.post('/api/admin/login', (req, res) => {
   return res.status(401).json({ error: 'Invalid credentials' });
 });
 
-// 6. Get all job applications (registrations)
+// 5b. Send interview invitation email to a candidate
+app.post('/api/admin/send-interview', async (req, res) => {
+  const { to, name, position, interviewDate, interviewTime, mode, location, meetLink, interviewers, notes } = req.body;
+  if (!to || !interviewDate || !interviewTime || !mode) {
+    return res.status(400).json({ error: 'Email, date, time and mode are required.' });
+  }
+  try {
+    const result = await sendInterviewEmail({ to, name, position, interviewDate, interviewTime, mode, location, meetLink, interviewers, notes });
+    return res.json({ message: `Interview invitation sent to ${to}.`, devMode: result.devMode });
+  } catch (err) {
+    console.error('[Interview Email] Error:', err.message);
+    return res.status(500).json({ error: 'Failed to send interview email: ' + err.message });
+  }
+});
+
 // 6. Get all job applications (registrations)
 app.get('/api/admin/applications', async (req, res) => {
   if (mongoose.connection.readyState === 1) {

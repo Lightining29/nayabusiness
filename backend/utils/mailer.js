@@ -117,7 +117,124 @@ async function sendOtpEmail({ to, otp, name }) {
   return { devMode: false };
 }
 
-module.exports = { sendOtpEmail, sendTestInviteEmail };
+module.exports = { sendOtpEmail, sendTestInviteEmail, sendInterviewEmail };
+
+async function sendInterviewEmail({ to, name, position, interviewDate, interviewTime, mode, location, meetLink, interviewers, notes }) {
+  const mailer = getTransporter();
+  const displayName = name || 'Candidate';
+  const dateStr = interviewDate ? new Date(interviewDate).toLocaleDateString('en-IN', { weekday:'long', year:'numeric', month:'long', day:'numeric' }) : interviewDate;
+  const modeLabel = { online:'Online (Video Call)', offline:'In-Person', phone:'Phone Interview' }[mode] || mode;
+
+  if (!mailer) {
+    console.log(`[INTERVIEW INVITE] To: ${to} | Date: ${interviewDate} ${interviewTime} | Mode: ${mode}`);
+    return { devMode: true };
+  }
+
+  await mailer.sendMail({
+    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    to,
+    subject: `Interview Invitation — ${position} | Rancom Technologies`,
+    text: `Hello ${displayName},\n\nYou are invited for an interview at Rancom Technologies.\n\nPosition: ${position}\nDate: ${dateStr}\nTime: ${interviewTime}\nMode: ${modeLabel}\n${location ? `Location: ${location}\n` : ''}${meetLink ? `Meeting Link: ${meetLink}\n` : ''}${interviewers ? `Interviewer(s): ${interviewers}\n` : ''}${notes ? `Notes: ${notes}\n` : ''}\nBest regards,\nHR Team — Rancom Technologies Pvt Ltd`,
+    html: `
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#f6f9fc;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout:fixed;">
+<tr><td align="center" style="padding:40px 12px;background:#f6f9fc;">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(15,23,42,0.1);border:1px solid #e2e8f0;">
+
+  <!-- Header -->
+  <tr><td style="background:linear-gradient(135deg,#0f172a 0%,#1e40af 60%,#0ea5e9 100%);padding:36px 32px;text-align:center;">
+    <h1 style="color:#fff;margin:0;font-size:22px;font-weight:800;">Rancom Technologies</h1>
+    <p style="color:rgba(255,255,255,0.8);margin:6px 0 0;font-size:13px;font-weight:500;">Human Resources · Recruitment</p>
+  </td></tr>
+
+  <!-- Congratulations banner -->
+  <tr><td style="background:linear-gradient(135deg,#fdf4ff,#fae8ff);padding:18px 32px;border-bottom:1px solid #e9d5ff;">
+    <p style="margin:0;font-size:15px;font-weight:800;color:#6b21a8;">🎉 Congratulations, ${displayName}!</p>
+    <p style="margin:6px 0 0;font-size:13px;color:#7c3aed;">You have been shortlisted for an interview at Rancom Technologies Pvt Ltd.</p>
+  </td></tr>
+
+  <!-- Body -->
+  <tr><td style="padding:32px 32px 28px;">
+    <p style="color:#1e293b;font-size:14px;line-height:22px;margin:0 0 24px;">
+      We are pleased to invite you for the <strong>${position}</strong> interview. Please find the details below:
+    </p>
+
+    <!-- Interview details card -->
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:20px;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;">
+      <tr><td style="background:#f8fafc;padding:14px 20px;border-bottom:1px solid #e2e8f0;">
+        <p style="margin:0;font-size:11px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:0.1em;">📋 Position</p>
+        <p style="margin:4px 0 0;font-size:16px;font-weight:800;color:#0f172a;">${position}</p>
+      </td></tr>
+      <tr><td style="padding:0;">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+          <tr>
+            <td width="50%" style="padding:14px 20px;border-right:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;">
+              <p style="margin:0;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;">📅 Date</p>
+              <p style="margin:4px 0 0;font-size:13px;font-weight:700;color:#0f172a;">${dateStr}</p>
+            </td>
+            <td width="50%" style="padding:14px 20px;border-bottom:1px solid #e2e8f0;">
+              <p style="margin:0;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;">⏰ Time</p>
+              <p style="margin:4px 0 0;font-size:13px;font-weight:700;color:#0f172a;">${interviewTime}</p>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2" style="padding:14px 20px;${(location || meetLink) ? 'border-bottom:1px solid #e2e8f0;' : ''}">
+              <p style="margin:0;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;">💻 Mode</p>
+              <p style="margin:4px 0 0;font-size:13px;font-weight:700;color:#0f172a;">${modeLabel}</p>
+            </td>
+          </tr>
+          ${location ? `<tr><td colspan="2" style="padding:14px 20px;${meetLink ? 'border-bottom:1px solid #e2e8f0;' : ''}">
+            <p style="margin:0;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;">📍 Location</p>
+            <p style="margin:4px 0 0;font-size:13px;font-weight:700;color:#0f172a;">${location}</p>
+          </td></tr>` : ''}
+          ${meetLink ? `<tr><td colspan="2" style="padding:14px 20px;">
+            <p style="margin:0;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;">🔗 Meeting Link</p>
+            <a href="${meetLink}" style="display:inline-block;margin-top:6px;padding:8px 18px;background:linear-gradient(135deg,#0ea5e9,#0369a1);color:white;font-size:13px;font-weight:700;text-decoration:none;border-radius:8px;">Join Meeting</a>
+          </td></tr>` : ''}
+        </table>
+      </td></tr>
+    </table>
+
+    ${interviewers ? `<table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:16px;"><tr><td style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 20px;">
+      <p style="margin:0;font-size:11px;font-weight:700;color:#166534;text-transform:uppercase;">👤 Interviewer(s)</p>
+      <p style="margin:4px 0 0;font-size:13px;font-weight:700;color:#14532d;">${interviewers}</p>
+    </td></tr></table>` : ''}
+
+    ${notes ? `<table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:20px;"><tr><td style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:14px 20px;">
+      <p style="margin:0;font-size:11px;font-weight:700;color:#c2410c;text-transform:uppercase;">📝 Additional Notes</p>
+      <p style="margin:6px 0 0;font-size:13px;color:#7c2d12;line-height:20px;">${notes}</p>
+    </td></tr></table>` : ''}
+
+    <!-- Tips -->
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:16px;"><tr><td style="background:#f1f5f9;border-radius:10px;padding:16px 20px;">
+      <p style="margin:0 0 8px;font-size:12px;font-weight:800;color:#475569;text-transform:uppercase;">💡 Preparation Tips</p>
+      <ul style="margin:0;padding-left:18px;color:#475569;font-size:13px;line-height:22px;">
+        <li>Research Rancom Technologies and our services</li>
+        <li>Review your resume and be ready to discuss your experience</li>
+        <li>${mode === 'online' ? 'Test your camera, microphone, and internet connection before the call' : 'Arrive 10 minutes early at the venue'}</li>
+        <li>Prepare questions to ask the interviewer</li>
+      </ul>
+    </td></tr></table>
+
+    <p style="color:#64748b;font-size:13px;line-height:20px;margin:0;">
+      To confirm or reschedule, reply to this email or contact HR at
+      <a href="mailto:${process.env.SMTP_USER}" style="color:#0ea5e9;font-weight:600;">${process.env.SMTP_USER}</a>.
+    </p>
+  </td></tr>
+
+  <!-- Footer -->
+  <tr><td align="center" style="padding:20px 32px;background:#f8fafc;border-top:1px solid #f1f5f9;">
+    <p style="color:#94a3b8;font-size:11px;margin:0;line-height:18px;">
+      © 2026 Rancom Technologies Pvt Ltd · Group of Appletree Infotech<br>
+      This is an automated HR email. Please do not reply directly to this address.
+    </p>
+  </td></tr>
+</table></td></tr></table>
+</body></html>`
+  });
+  return { devMode: false };
+}
 
 async function sendTestInviteEmail({ to, name, assessmentTitle, accessCode, testUrl, duration, expiresAt }) {
   const mailer = getTransporter();

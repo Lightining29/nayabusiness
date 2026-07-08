@@ -241,7 +241,51 @@ export default function AdminDashboard() {
     }
   };
 
-  // Logout
+  // Interview invite state
+  const [interviewModal, setInterviewModal]   = useState(false);
+  const [interviewApp,   setInterviewApp]     = useState(null); // selected application
+  const [interviewForm,  setInterviewForm]    = useState({
+    position: '', interviewDate: '', interviewTime: '', mode: 'online',
+    location: '', meetLink: '', interviewers: '', notes: ''
+  });
+  const [interviewLoading, setInterviewLoading] = useState(false);
+
+  const openInterviewModal = (app) => {
+    setInterviewApp(app);
+    setInterviewForm({
+      position: app.job_title || 'General Application',
+      interviewDate: '', interviewTime: '', mode: 'online',
+      location: '', meetLink: '', interviewers: '', notes: ''
+    });
+    setInterviewModal(true);
+  };
+
+  const handleSendInterview = async (e) => {
+    e.preventDefault();
+    setInterviewLoading(true);
+    try {
+      const res = await fetch('/api/admin/send-interview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to:   interviewApp.email,
+          name: `${interviewApp.first_name} ${interviewApp.last_name}`.trim(),
+          ...interviewForm
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setInterviewModal(false);
+      Swal.fire({
+        icon: 'success', title: '📧 Invitation Sent!',
+        html: `Interview details sent to <strong>${interviewApp.email}</strong>`,
+        timer: 3000, showConfirmButton: false, timerProgressBar: true
+      });
+    } catch (err) {
+      Swal.fire({ icon: 'error', title: 'Failed', text: err.message, confirmButtonColor: '#ef4444' });
+    } finally { setInterviewLoading(false); }
+  };
+
   const handleLogout = () => {
     sessionStorage.removeItem('adminAuth');
     navigate('/admin');
@@ -255,6 +299,7 @@ export default function AdminDashboard() {
   ];
 
   return (
+    <>
     <div className="container-width animate-fade-in" style={{ paddingTop: '2.5rem', paddingBottom: '4rem' }}>
       
       <style dangerouslySetInnerHTML={{__html: `
@@ -593,6 +638,14 @@ export default function AdminDashboard() {
                           <FileText size={15} />
                           {app.hasResume ? 'View PDF' : 'No Resume'}
                         </button>
+                        <button
+                          type="button"
+                          onClick={() => openInterviewModal(app)}
+                          style={{ marginLeft:'0.5rem', padding:'0.4rem 0.75rem', border:'1px solid rgba(139,92,246,0.3)', background:'rgba(139,92,246,0.08)', color:'#7c3aed', borderRadius:'8px', fontWeight:700, fontSize:'0.8rem', cursor:'pointer', display:'inline-flex', alignItems:'center', gap:'0.3rem', whiteSpace:'nowrap' }}
+                          title="Schedule interview & send email"
+                        >
+                          📅 Interview
+                        </button>
                       </td>
                       <td style={{ fontSize: '0.85rem', color: '#666666' }}>{new Date(app.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
                     </tr>
@@ -879,6 +932,113 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {/* ── Interview Invitation Modal ── */}
+      {interviewModal && interviewApp && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(15,23,42,0.65)', backdropFilter:'blur(4px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:'1rem', overflowY:'auto' }}>
+          <div style={{ background:'white', maxWidth:'540px', width:'100%', borderRadius:'20px', padding:'2rem', boxShadow:'0 24px 64px rgba(0,0,0,0.18)', position:'relative', margin:'auto' }}>
+
+            {/* Header */}
+            <div style={{ display:'flex', alignItems:'center', gap:'0.75rem', marginBottom:'1.5rem', padding:'1rem 1.25rem', background:'linear-gradient(135deg,#fdf4ff,#fae8ff)', borderRadius:'12px', border:'1px solid rgba(139,92,246,0.2)' }}>
+              <div style={{ width:'44px', height:'44px', borderRadius:'12px', background:'linear-gradient(135deg,#8b5cf6,#6d28d9)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:'1.3rem' }}>📅</div>
+              <div>
+                <div style={{ fontWeight:800, fontSize:'1.05rem', color:'#0f172a' }}>Schedule Interview</div>
+                <div style={{ fontSize:'0.8rem', color:'#7c3aed', marginTop:'0.1rem' }}>
+                  {interviewApp.first_name} {interviewApp.last_name} — {interviewApp.email}
+                </div>
+              </div>
+              <button onClick={() => setInterviewModal(false)} style={{ marginLeft:'auto', border:'none', background:'#f1f5f9', borderRadius:'8px', width:'32px', height:'32px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1.1rem', color:'#64748b', flexShrink:0 }}>✕</button>
+            </div>
+
+            <form onSubmit={handleSendInterview}>
+              {/* Position */}
+              <div className="form-group" style={{ marginBottom:'1rem' }}>
+                <label style={{ fontSize:'0.8rem', fontWeight:700, color:'#374151', textTransform:'uppercase', letterSpacing:'0.06em' }}>Position Applied For</label>
+                <input className="form-input" value={interviewForm.position} onChange={e => setInterviewForm(f=>({...f,position:e.target.value}))} placeholder="e.g. MERN Stack Developer" />
+              </div>
+
+              {/* Date + Time */}
+              <div className="form-row" style={{ marginBottom:'1rem' }}>
+                <div className="form-group" style={{ marginBottom:0 }}>
+                  <label style={{ fontSize:'0.8rem', fontWeight:700, color:'#374151', textTransform:'uppercase', letterSpacing:'0.06em' }}>Interview Date *</label>
+                  <input type="date" className="form-input" required value={interviewForm.interviewDate} onChange={e => setInterviewForm(f=>({...f,interviewDate:e.target.value}))} min={new Date().toISOString().split('T')[0]} />
+                </div>
+                <div className="form-group" style={{ marginBottom:0 }}>
+                  <label style={{ fontSize:'0.8rem', fontWeight:700, color:'#374151', textTransform:'uppercase', letterSpacing:'0.06em' }}>Interview Time *</label>
+                  <input type="time" className="form-input" required value={interviewForm.interviewTime} onChange={e => setInterviewForm(f=>({...f,interviewTime:e.target.value}))} />
+                </div>
+              </div>
+
+              {/* Mode */}
+              <div className="form-group" style={{ marginBottom:'1rem' }}>
+                <label style={{ fontSize:'0.8rem', fontWeight:700, color:'#374151', textTransform:'uppercase', letterSpacing:'0.06em' }}>Interview Mode *</label>
+                <div style={{ display:'flex', gap:'0.5rem', marginTop:'0.25rem' }}>
+                  {[['online','💻 Online'],['offline','🏢 In-Person'],['phone','📞 Phone']].map(([val, label]) => (
+                    <button key={val} type="button" onClick={() => setInterviewForm(f=>({...f,mode:val}))}
+                      style={{ flex:1, padding:'0.6rem', borderRadius:'9px', border:'1.5px solid', cursor:'pointer', fontFamily:'inherit', fontWeight:700, fontSize:'0.82rem', transition:'all 0.18s',
+                        borderColor: interviewForm.mode===val ? '#8b5cf6':'#e2e8f0',
+                        background: interviewForm.mode===val ? 'rgba(139,92,246,0.1)':'#f8fafc',
+                        color: interviewForm.mode===val ? '#6d28d9':'#475569' }}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Location / Meet Link */}
+              {interviewForm.mode === 'offline' && (
+                <div className="form-group" style={{ marginBottom:'1rem' }}>
+                  <label style={{ fontSize:'0.8rem', fontWeight:700, color:'#374151', textTransform:'uppercase', letterSpacing:'0.06em' }}>Venue / Address</label>
+                  <input className="form-input" value={interviewForm.location} onChange={e => setInterviewForm(f=>({...f,location:e.target.value}))} placeholder="e.g. Sector 62, Noida, UP" />
+                </div>
+              )}
+              {interviewForm.mode === 'online' && (
+                <div className="form-group" style={{ marginBottom:'1rem' }}>
+                  <label style={{ fontSize:'0.8rem', fontWeight:700, color:'#374151', textTransform:'uppercase', letterSpacing:'0.06em' }}>Meeting Link (Google Meet / Zoom)</label>
+                  <input type="url" className="form-input" value={interviewForm.meetLink} onChange={e => setInterviewForm(f=>({...f,meetLink:e.target.value}))} placeholder="https://meet.google.com/..." />
+                </div>
+              )}
+              {interviewForm.mode === 'phone' && (
+                <div className="form-group" style={{ marginBottom:'1rem' }}>
+                  <label style={{ fontSize:'0.8rem', fontWeight:700, color:'#374151', textTransform:'uppercase', letterSpacing:'0.06em' }}>Phone Number to Call</label>
+                  <input className="form-input" value={interviewForm.location} onChange={e => setInterviewForm(f=>({...f,location:e.target.value}))} placeholder="+91 XXXXXXXXXX" />
+                </div>
+              )}
+
+              {/* Interviewers */}
+              <div className="form-group" style={{ marginBottom:'1rem' }}>
+                <label style={{ fontSize:'0.8rem', fontWeight:700, color:'#374151', textTransform:'uppercase', letterSpacing:'0.06em' }}>Interviewer(s)</label>
+                <input className="form-input" value={interviewForm.interviewers} onChange={e => setInterviewForm(f=>({...f,interviewers:e.target.value}))} placeholder="e.g. Rahul Sharma (Tech), Priya Verma (HR)" />
+              </div>
+
+              {/* Notes */}
+              <div className="form-group" style={{ marginBottom:'1.5rem' }}>
+                <label style={{ fontSize:'0.8rem', fontWeight:700, color:'#374151', textTransform:'uppercase', letterSpacing:'0.06em' }}>Additional Notes / Instructions</label>
+                <textarea className="form-input" rows={3} style={{ minHeight:'75px', resize:'vertical' }} value={interviewForm.notes} onChange={e => setInterviewForm(f=>({...f,notes:e.target.value}))} placeholder="e.g. Bring original documents. Dress code: formal." />
+              </div>
+
+              {/* Preview strip */}
+              {interviewForm.interviewDate && interviewForm.interviewTime && (
+                <div style={{ background:'rgba(139,92,246,0.06)', border:'1px solid rgba(139,92,246,0.2)', borderRadius:'10px', padding:'0.85rem 1rem', marginBottom:'1.25rem', fontSize:'0.85rem', color:'#4c1d95' }}>
+                  <strong>📧 Email preview:</strong> Interview for <em>{interviewForm.position || 'the position'}</em> on <em>{new Date(interviewForm.interviewDate).toLocaleDateString('en-IN',{weekday:'short',day:'2-digit',month:'short'})}</em> at <em>{interviewForm.interviewTime}</em> via <em>{interviewForm.mode}</em> will be sent to <strong>{interviewApp.email}</strong>.
+                </div>
+              )}
+
+              <div style={{ display:'flex', gap:'0.75rem' }}>
+                <button type="submit" disabled={interviewLoading}
+                  style={{ flex:1, padding:'0.85rem', borderRadius:'12px', border:'none', cursor: interviewLoading ? 'not-allowed':'pointer', background:'linear-gradient(135deg,#8b5cf6,#6d28d9)', color:'white', fontWeight:800, fontSize:'0.95rem', fontFamily:'inherit', transition:'all 0.2s', opacity: interviewLoading ? 0.7:1, boxShadow:'0 4px 16px rgba(139,92,246,0.35)' }}>
+                  {interviewLoading ? '⏳ Sending…' : '📧 Send Interview Invitation'}
+                </button>
+                <button type="button" onClick={() => setInterviewModal(false)}
+                  style={{ padding:'0.85rem 1.25rem', borderRadius:'12px', border:'1.5px solid #e2e8f0', background:'white', color:'#475569', fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
+    </>
   );
 }

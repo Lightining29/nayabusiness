@@ -1643,3 +1643,164 @@ textarea.form-input {
   inset: 0;
   z-index: 998;
 }
+
+
+/* ============================================================
+   COMPREHENSIVE MOBILE RESPONSIVENESS
+   Breakpoints: 768px (tablet), 640px (phone), 480px (small phone)
+   ============================================================ */
+
+/* ── Container & Section Spacing ─────────────────────────── */
+@media (max-width: 768px) {
+  .container-width {
+    padding: 0 1rem;
+  }
+
+  .section-spacing {
+    padding: 3rem 0;
+  }
+
+  .section-title {
+    font-size: 1.75rem;
+  }
+
+  .section-subtitle {
+    font-size: 1rem;
+    margin-bottom: 2.5rem;
+  }
+}
+
+/* ── Hero Section ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 4rem 0;
+  }
+
+  .hero-description {
+    font-size: 1rem;
+  }
+
+  .hero-buttons {
+    gap: 1rem;
+  }
+
+  .hero-image-wrapper {
+    max-height: 220px;
+  }
+
+  .hero-image {
+    max-height: 220px;
+    object-fit: cover;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+
+  .hero-section {
+    padding: 3rem 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .hero-description {
+    font-size: 0.95rem;
+  }
+
+  .hero-buttons {
+    gap: 0.75rem;
+  }
+}
+
+/* ── Cards Grid ───────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .cards-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+/* ── Form Card ────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .form-card {
+    padding: 1.25rem;
+    border-radius: 14px;
+  }
+
+  .form-group-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+/* ── Footer ───────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  footer {
+    padding: 3rem 1rem 1.5rem;
+  }
+}
+
+/* ── Admin Data Table — horizontal scroll ─────────────────── */
+.data-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+  .data-table {
+    min-width: 640px;
+  }
+}
+
+/* ── Blog Layout — stack on mobile ───────────────────────── */
+@media (max-width: 640px) {
+  .blog-layout {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+}
+
+/* ── Profile Shell — stack on mobile ─────────────────────── */
+@media (max-width: 640px) {
+  .profile-shell {
+    grid-template-columns: 1fr !important;
+  }
+
+  .profile-hero {
+    position: static !important;
+  }
+}
+
+/* ── About Split — stack on mobile ───────────────────────── */
+@media (max-width: 768px) {
+  .about-split {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+}
+
+/* ── Misc: prevent horizontal overflow globally ───────────── */
+@media (max-width: 768px) {
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}

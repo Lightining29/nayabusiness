@@ -7,12 +7,13 @@ if (dns.setDefaultResultOrder) {
   dns.setDefaultResultOrder('ipv4first');
 }
 
-let transporter;
+let transporter = null; // reset on each server start
 
 function getTransporter() {
   const host = process.env.SMTP_HOST;
   const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
+  // Strip spaces from Gmail App Password (e.g. "yfdi eyxh hngp wfnw" → "yfdieyxhhngpwfnw")
+  const pass = (process.env.SMTP_PASS || '').replace(/\s/g, '');
 
   if (!host || !user || !pass) {
     return null;
@@ -24,7 +25,8 @@ function getTransporter() {
       host,
       port,
       secure: process.env.SMTP_SECURE === 'true' || port === 465,
-      auth: { user, pass }
+      auth: { user, pass },
+      tls: { rejectUnauthorized: false }  // allow self-signed on dev
     });
   }
 

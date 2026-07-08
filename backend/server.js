@@ -927,9 +927,10 @@ app.post('/api/admin/send-interview', async (req, res) => {
   }
   try {
     const result = await sendInterviewEmail({ to, name, position, interviewDate, interviewTime, mode, location, meetLink, interviewers, notes });
-    return res.json({ message: `Interview invitation sent to ${to}.`, devMode: result.devMode });
+    console.log(`[Interview] Email sent to ${to}${result.devMode ? ' (dev mode - logged)' : ' ✓'}`);
+    return res.json({ message: `Interview invitation sent to ${to}.`, devMode: !!result.devMode });
   } catch (err) {
-    console.error('[Interview Email] Error:', err.message);
+    console.error('[Interview Email] Error:', err);
     return res.status(500).json({ error: 'Failed to send interview email: ' + err.message });
   }
 });

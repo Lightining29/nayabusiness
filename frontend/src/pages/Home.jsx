@@ -264,7 +264,7 @@ export default function Home() {
               <p style={{ color: '#333333', marginBottom: '1.5rem', fontSize: '1.05rem', lineHeight: '1.8' }}>
                 We believe in providing dynamic and responsive telecom and software frameworks in a systematic way. Our focus is to deliver best-in-class configurations with clean documentation and complete security, giving our clients a distinct edge in competitive markets.
               </p>
-              <div style={{ display: 'flex', gap: '2rem', marginTop: '2rem' }}>
+              <div style={{ display: 'flex', gap: '2rem', marginTop: '2rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                 <div>
                   <h4 style={{ color: '#000000', fontSize: '2rem', fontWeight: 800 }}>10+</h4>
                   <p style={{ color: '#666666', fontSize: '0.85rem' }}>Years Experience</p>
@@ -316,7 +316,7 @@ export default function Home() {
           <p className="section-subtitle text-center" style={{ marginBottom: '2.5rem' }}>
             Rancom Technologies is a full-service Software Development Company in India. Explore our specialized service areas.
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem' }}>
             {[
               { label: 'Custom Software Development', to: '/services/custom-software' },
               { label: 'Web Development Company',     to: '/services/web-development' },

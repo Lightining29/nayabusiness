@@ -92,13 +92,7 @@ export default function Contact() {
       </div>
 
       {/* Main Layout */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1.5fr',
-        gap: '3rem',
-        marginBottom: '4rem',
-        alignItems: 'start',
-      }}>
+      <div className="contact-outer-grid">
 
         {/* Contact Info */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -287,12 +281,7 @@ export default function Contact() {
           {/* Form Fields */}
           <form onSubmit={handleSubmit}>
             {/* Two Column Grid */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '1.5rem',
-              marginBottom: '1.5rem',
-            }}>
+            <div className="contact-form-row">
               {formFields.slice(0, 2).map(field => (
                 <div key={field.name}>
                   <label style={{
@@ -341,12 +330,7 @@ export default function Contact() {
             </div>
 
             {/* Full Width Fields */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '1.5rem',
-              marginBottom: '1.5rem',
-            }}>
+            <div className="contact-form-row">
               {formFields.slice(2).map(field => (
                 <div key={field.name}>
                   <label style={{
@@ -496,9 +480,29 @@ export default function Contact() {
       </div>
 
       <style>{`
-        @media (max-width: 920px) {
-          div:has(> div:nth-child(1) > div > div:nth-child(2) > div) {
+        .contact-outer-grid {
+          display: grid;
+          grid-template-columns: 1fr 1.5fr;
+          gap: 3rem;
+          margin-bottom: 4rem;
+          align-items: start;
+        }
+        .contact-form-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1.5rem;
+          margin-bottom: 1.5rem;
+        }
+        @media (max-width: 768px) {
+          .contact-outer-grid {
             grid-template-columns: 1fr !important;
+            gap: 2rem !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .contact-form-row {
+            grid-template-columns: 1fr !important;
+            gap: 1rem !important;
           }
         }
         @keyframes slideDown {

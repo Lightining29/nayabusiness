@@ -23,9 +23,14 @@ export default function Footer() {
         <div className="footer-brand">
           <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
             <img
+              src="/appletree.jpeg"
+              alt="Appletree Infotech"
+              style={{ height: '40px', width: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(14,165,233,0.3)', flexShrink: 0 }}
+            />
+            <img
               src="/rancom.png"
               alt="Rancom Technologies"
-              style={{ height: '40px', width: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(14,165,233,0.3)', flexShrink: 0 }}
+              style={{ height: '40px', width: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(14,165,233,0.3)', flexShrink: 0, marginLeft: '-8px' }}
             />
             <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
               <span style={{ fontSize: '1.15rem', fontWeight: 800, color: '#000' }}>RANCOM TECHNOLOGIES</span>

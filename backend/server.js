@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 const multer = require('multer');
+const crypto = require('crypto');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
@@ -21,6 +22,7 @@ const { sendOtpEmail } = require('./utils/mailer');
 const authRoutes = require('./routes/auth');
 const jobRoutes = require('./routes/jobs');
 const notificationRoutes = require('./routes/notifications');
+const assessmentRoutes = require('./routes/assessment');
 
 // Admin credentials (use env vars in production)
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
@@ -68,6 +70,7 @@ app.get('/health', (req, res) => { res.status(200).send('OK'); });
 app.use('/api/auth', authRoutes);
 app.use('/api', jobRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/assessment', assessmentRoutes);
 
 // User login endpoint (used by Login.jsx)
 app.post('/api/login', async (req, res) => {
@@ -1139,7 +1142,73 @@ app.delete('/api/admin/jobs/:id', async (req, res) => {
 });
 
 
-// Generic webhook proxy – forwards any POST body to the configured N8N webhook
+// Application form submission (public — no OTP required, just collects info)
+app.post('/api/apply', resumeUpload.single('resume'), async (req, res) => {
+  try {
+    const { fullName, email, phone, position, skills, city, qualification,
+            experience, noticePeriod, message, referral, linkedIn, portfolio,
+            college, passingYear, currentCTC, expectedCTC, dob, gender } = req.body;
+
+    if (!fullName || !email || !phone) {
+      return res.status(400).json({ error: 'Name, email and phone are required.' });
+    }
+
+    const normalizedEmail = normalizeEmail(email);
+
+    if (mongoose.connection.readyState === 1) {
+      // Save as a Registration record so it appears in admin Applications tab
+      const existing = await Registration.findOne({ email: normalizedEmail });
+      if (existing) {
+        // Update existing record with new application info
+        existing.job_title = position || 'General Application';
+        existing.skills    = skills || existing.skills;
+        existing.city      = city   || existing.city;
+        await existing.save();
+        return res.status(200).json({ message: 'Application updated successfully.' });
+      }
+
+      const reg = new Registration({
+        first_name: fullName.split(' ')[0] || fullName,
+        last_name:  fullName.split(' ').slice(1).join(' ') || '-',
+        email:      normalizedEmail,
+        mobno:      phone,
+        qualification: qualification || '',
+        city:       city || '',
+        skills:     skills || '',
+        job_title:  position || 'General Application',
+        emailVerified: false,
+        // Store extra info in skills field as JSON-encoded string
+        password:   await bcrypt.hash(crypto.randomBytes(8).toString('hex'), 10)
+      });
+
+      if (req.file) {
+        reg.resumeFileName    = req.file.originalname;
+        reg.resumeContentType = req.file.mimetype;
+      }
+
+      await reg.save();
+
+      if (req.file && req.file.buffer && req.file.buffer.length > 0) {
+        await ResumeData.findOneAndUpdate(
+          { registrationId: reg._id },
+          { registrationId: reg._id, data: req.file.buffer, contentType: req.file.mimetype, fileName: req.file.originalname, size: req.file.buffer.length },
+          { upsert: true, new: true }
+        );
+      }
+
+      return res.status(201).json({ message: 'Application submitted successfully.' });
+    }
+
+    // Demo mode
+    const mockReg = { _id: Date.now().toString(), first_name: fullName.split(' ')[0], last_name: fullName.split(' ').slice(1).join(' ') || '-', email: normalizedEmail, mobno: phone, qualification, city, skills, job_title: position || 'General Application', hasResume: !!req.file, createdAt: new Date() };
+    registrationInMemoryDb.push(mockReg);
+    return res.status(201).json({ message: 'Application submitted (demo mode).' });
+  } catch (err) {
+    console.error('Apply error:', err);
+    if (err.code === 11000) return res.status(400).json({ error: 'Email already registered.' });
+    return res.status(500).json({ error: 'Failed to submit application.' });
+  }
+});
 app.post('/api/webhook', async (req, res) => {
   try {
     const response = await fetch(process.env.N8N_WEBHOOK_URL, {

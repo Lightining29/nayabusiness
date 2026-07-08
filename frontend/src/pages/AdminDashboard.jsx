@@ -326,6 +326,9 @@ export default function AdminDashboard() {
         <button onClick={handleLogout} className="btn btn-secondary" style={{ gap: '0.4rem', fontSize: '0.85rem', padding: '0.5rem 1rem' }}>
           <LogOut size={16} /> Sign Out
         </button>
+        <a href="/admin/assessments" style={{ display:'inline-flex', alignItems:'center', gap:'0.4rem', padding:'0.5rem 1rem', borderRadius:'8px', background:'linear-gradient(135deg,#0ea5e9,#0369a1)', color:'white', fontWeight:700, fontSize:'0.85rem', textDecoration:'none' }}>
+          🧪 Assessments
+        </a>
       </div>
 
       {/* Stats Cards */}

@@ -1,198 +1,141 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
-import { AlertCircle, CheckCircle, Cpu, Menu, X, ChevronDown, LogIn, UserPlus, UserRound, ShieldCheck, Mail, Lock, Phone, MapPin } from 'lucide-react';
-import { Moon, Sun } from "lucide-react";
+import {
+  Menu, X, ChevronDown, LogIn, UserRound, LogOut,
+  Moon, Sun, Bell, Briefcase, Code, Radio, AlertCircle,
+  CheckCircle, Lock, Mail
+} from 'lucide-react';
 import { getGoogleClientId } from '../utils/googleAuth';
 import NotificationBell from './NotificationBell';
 
+/* ── data ─────────────────────────────────────────────────────── */
+const telecomLinks = [
+  { name: 'LOS Survey',             path: '/telecom/los'       },
+  { name: 'RF Survey',               path: '/telecom/rf'        },
+  { name: 'EMF Survey',              path: '/telecom/emf'       },
+  { name: 'BTS Installation',        path: '/telecom/bts'       },
+  { name: 'Router Installation',     path: '/telecom/router'    },
+  { name: 'Network Testing',         path: '/telecom/network'   },
+  { name: 'Microwave Installation',  path: '/telecom/microwave' },
+  { name: 'SCFT Testing',            path: '/telecom/scft'      },
+];
 
+const softwareLinks = [
+  { name: 'Software Development',   path: '/services/software-company' },
+  { name: 'Custom Software',        path: '/services/custom-software'  },
+  { name: 'Web Development',        path: '/services/web-development'  },
+  { name: 'MERN Stack',             path: '/services/mern-stack'       },
+  { name: 'Java Development',       path: '/services/java-development' },
+  { name: 'Mobile App',             path: '/services/mobile-app'       },
+  { name: 'ERP Software',           path: '/services/erp-software'     },
+  { name: 'HRMS Software',          path: '/services/hrms-software'    },
+  { name: 'E-commerce',             path: '/services/ecommerce'        },
+  { name: 'SaaS Development',       path: '/services/saas-development' },
+  { name: 'Cloud Solutions',        path: '/services/cloud-solutions'  },
+  { name: 'UI/UX Design',           path: '/services/ui-ux-design'     },
+];
 
+/* ── Dropdown ─────────────────────────────────────────────────── */
+function Dropdown({ label, icon, links, mobileOpen, onMobileToggle, onClose }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) onClose(); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [onClose]);
 
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button
+        onClick={onMobileToggle}
+        style={{
+          display: 'flex', alignItems: 'center', gap: '5px', background: 'none',
+          border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600,
+          fontSize: '0.9rem', color: 'var(--nav-text, #475569)', padding: '0.5rem 0',
+          transition: 'color 0.2s'
+        }}
+        onMouseEnter={e => e.currentTarget.style.color = 'var(--primary)'}
+        onMouseLeave={e => e.currentTarget.style.color = 'var(--nav-text, #475569)'}
+        aria-expanded={mobileOpen}
+      >
+        {icon}{label}
+        <ChevronDown size={14} style={{ transition: 'transform 0.2s', transform: mobileOpen ? 'rotate(180deg)' : 'rotate(0)' }} />
+      </button>
 
+      {/* Desktop hover dropdown */}
+      <div className="hdr-dropdown-panel">
+        <div style={{ display: 'grid', gridTemplateColumns: links.length > 6 ? '1fr 1fr' : '1fr', gap: '2px', padding: '0.5rem' }}>
+          {links.map(l => (
+            <Link key={l.path} to={l.path} onClick={onClose}
+              style={{ display: 'block', padding: '0.5rem 0.85rem', borderRadius: '7px', fontSize: '0.85rem', fontWeight: 500, color: '#334155', transition: 'all 0.15s', whiteSpace: 'nowrap' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(14,165,233,0.08)'; e.currentTarget.style.color = 'var(--primary)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#334155'; }}>
+              {l.name}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Mobile accordion */}
+      {mobileOpen && (
+        <div style={{ paddingLeft: '1rem', paddingTop: '0.25rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          {links.map(l => (
+            <Link key={l.path} to={l.path} onClick={onClose}
+              style={{ padding: '0.45rem 0.75rem', borderRadius: '7px', fontSize: '0.85rem', fontWeight: 500, color: '#475569', display: 'block' }}>
+              {l.name}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Main Header ──────────────────────────────────────────────── */
 export default function Header() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [telecomOpen, setTelecomOpen] = useState(false);
+  const navigate   = useNavigate();
+  const location   = useLocation();
+  const [mobileOpen,   setMobileOpen]   = useState(false);
+  const [telecomOpen,  setTelecomOpen]  = useState(false);
   const [softwareOpen, setSoftwareOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(() => {
-    return localStorage.getItem("theme") === "dark";
-  });
-  const [isAuth, setIsAuth] = useState(false);
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
-  const [loginForm, setLoginForm] = useState({
-    email: '',
-    password: ''
-  });
+  const [darkMode,     setDarkMode]     = useState(() => localStorage.getItem('theme') === 'dark');
+  const [isAuth,       setIsAuth]       = useState(false);
+  const [scrolled,     setScrolled]     = useState(false);
+
+  /* login modal */
+  const [loginOpen,    setLoginOpen]    = useState(false);
+  const [loginEmail,   setLoginEmail]   = useState('');
+  const [loginPass,    setLoginPass]    = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
+  const [loginError,   setLoginError]   = useState('');
   const [loginSuccess, setLoginSuccess] = useState('');
-  const [loginError, setLoginError] = useState('');
 
-  // Header Google Login states
-  const [showHeaderGoogleRegisterModal, setShowHeaderGoogleRegisterModal] = useState(false);
-  const [headerGoogleRegisterData, setHeaderGoogleRegisterData] = useState({
-    credential: '',
-    email: '',
-    name: '',
-    password: '',
-    phone: '',
-    city: ''
-  });
-
-  const processHeaderGoogleLogin = async (credential) => {
-    setLoginLoading(true);
-    setLoginError('');
-    setLoginSuccess('');
-    try {
-      const res = await fetch('/api/auth/google', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ credential })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Google login failed');
-
-      if (data.registerRequired) {
-        setHeaderGoogleRegisterData({
-          credential,
-          email: data.email,
-          name: data.name,
-          password: '',
-          phone: '',
-          city: ''
-        });
-        setLoginModalOpen(false); // Close login modal to show registration modal
-        setShowHeaderGoogleRegisterModal(true);
-      } else {
-        localStorage.setItem('token', data.token);
-        window.dispatchEvent(new Event('auth-change'));
-        setIsAuth(true);
-        setLoginSuccess('Logged in with Google successfully!');
-        setTimeout(() => {
-          setLoginModalOpen(false);
-          navigate('/profile');
-        }, 500);
-      }
-    } catch (err) {
-      setLoginError(err.message);
-    } finally {
-      setLoginLoading(false);
-    }
-  };
-
-  const handleHeaderGoogleRegisterSubmit = async (e) => {
-    e.preventDefault();
-    const { credential, password, phone, city } = headerGoogleRegisterData;
-    if (!password) {
-      setLoginError('Password is required for registration.');
-      return;
-    }
-
-    setLoginLoading(true);
-    setLoginError('');
-    setLoginSuccess('');
-    try {
-      const res = await fetch('/api/auth/google/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ credential, password, phone, city })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Google registration failed');
-
-      setShowHeaderGoogleRegisterModal(false);
-      localStorage.setItem('token', data.token);
-      window.dispatchEvent(new Event('auth-change'));
-      setIsAuth(true);
-      setLoginSuccess('Google account registered and logged in successfully!');
-      setTimeout(() => navigate('/profile'), 1000);
-    } catch (err) {
-      setLoginError(err.message);
-    } finally {
-      setLoginLoading(false);
-    }
-  };
-
+  /* dark mode */
   useEffect(() => {
-    let cancelled = false;
-    if (loginModalOpen && window.google) {
-      const initGoogleHeader = async () => {
-        try {
-          const clientId = await getGoogleClientId();
-          if (cancelled) return;
-          if (!clientId) {
-            console.warn('Google Client ID is not configured.');
-            return;
-          }
-          window.google.accounts.id.initialize({
-            client_id: clientId,
-            callback: (response) => {
-              if (!cancelled) processHeaderGoogleLogin(response.credential);
-            }
-          });
-          const btnEl = document.getElementById("google-header-signin-btn");
-          if (btnEl) {
-            window.google.accounts.id.renderButton(btnEl, {
-              theme: "outline",
-              size: "large",
-              width: 280
-            });
-          }
-        } catch (error) {
-          console.error('Failed to initialize Google login in header:', error);
-        }
-      };
-      setTimeout(initGoogleHeader, 200);
-    }
-    return () => {
-      cancelled = true;
-      const btnEl = document.getElementById("google-header-signin-btn");
-      if (btnEl) btnEl.innerHTML = '';
-    };
-  }, [loginModalOpen]);
-
-  const [registerModalOpen, setRegisterModalOpen] = useState(false);
-  const [registerForm, setRegisterForm] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    resume: null,
-    password: '',
-    skills: ''
-  });
-  const [registerLoading, setRegisterLoading] = useState(false);
-  const [registerSuccess, setRegisterSuccess] = useState('');
-  const [registerError, setRegisterError] = useState('');
-
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    setIsAuth(!!localStorage.getItem('token'));
-  }, [location.pathname]);
-
-  useEffect(() => {
-    const syncAuthState = () => {
-      setIsAuth(!!localStorage.getItem('token'));
-    };
-
-    window.addEventListener('storage', syncAuthState);
-    window.addEventListener('auth-change', syncAuthState);
-
-    return () => {
-      window.removeEventListener('storage', syncAuthState);
-      window.removeEventListener('auth-change', syncAuthState);
-    };
-  }, []);
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
+    document.documentElement.classList.toggle('dark', darkMode);
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
   }, [darkMode]);
-  const toggleMenu = () => setIsOpen(!isOpen);
+
+  /* auth sync */
+  useEffect(() => { setIsAuth(!!localStorage.getItem('token')); }, [location.pathname]);
+  useEffect(() => {
+    const sync = () => setIsAuth(!!localStorage.getItem('token'));
+    window.addEventListener('auth-change', sync);
+    window.addEventListener('storage', sync);
+    return () => { window.removeEventListener('auth-change', sync); window.removeEventListener('storage', sync); };
+  }, []);
+
+  /* scroll shadow */
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  /* close mobile on route change */
+  useEffect(() => { setMobileOpen(false); setTelecomOpen(false); setSoftwareOpen(false); }, [location.pathname]);
+
+  const closeAll = () => { setTelecomOpen(false); setSoftwareOpen(false); };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -201,705 +144,446 @@ export default function Header() {
     navigate('/');
   };
 
-
-  const openLoginModal = () => {
-    setLoginError('');
-    setLoginSuccess('');
-    setLoginModalOpen(true);
-    setIsOpen(false);
-  };
-
-  const closeLoginModal = () => {
-    if (loginLoading) return;
-    setLoginModalOpen(false);
-  };
-
-  const updateLoginForm = (field, value) => {
-    setLoginForm((current) => ({ ...current, [field]: value }));
-  };
-
-
-  const handleLoginSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    const { email, password } = loginForm;
-
-    if (!email || !password) {
-      setLoginError('Please fill in all fields.');
-      return;
-    }
-
-    setLoginLoading(true);
-    setLoginError('');
-    setLoginSuccess('');
-
+    setLoginLoading(true); setLoginError(''); setLoginSuccess('');
     try {
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Login failed.');
-      }
-
-      localStorage.setItem('token', data.token);
+      const r = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: loginEmail, password: loginPass }) });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error);
+      localStorage.setItem('token', d.token);
       window.dispatchEvent(new Event('auth-change'));
-      setIsAuth(true);
-      setLoginSuccess('Login successful!');
-      setLoginForm({ email: '', password: '' });
-      setTimeout(() => {
-        setLoginModalOpen(false);
-        navigate('/profile');
-      }, 500);
-    } catch (err) {
-      setLoginError(err.message || 'Server connection error. Please try again.');
-    } finally {
-      setLoginLoading(false);
+      setIsAuth(true); setLoginSuccess('Welcome back!');
+      setTimeout(() => { setLoginOpen(false); setLoginEmail(''); setLoginPass(''); setLoginSuccess(''); navigate('/profile'); }, 700);
+    } catch (err) { setLoginError(err.message); }
+    finally { setLoginLoading(false); }
+  };
+
+  /* Google sign-in button in modal */
+  useEffect(() => {
+    if (!loginOpen) return;
+    let cancelled = false;
+    setTimeout(async () => {
+      if (cancelled) return;
+      try {
+        const clientId = await getGoogleClientId();
+        if (!clientId || !window.google?.accounts?.id) return;
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: async (response) => {
+            if (cancelled) return;
+            setLoginLoading(true);
+            try {
+              const r = await fetch('/api/auth/google', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ credential: response.credential }) });
+              const d = await r.json();
+              if (!r.ok) throw new Error(d.error);
+              if (d.token) {
+                localStorage.setItem('token', d.token);
+                window.dispatchEvent(new Event('auth-change'));
+                setLoginSuccess('Signed in with Google!');
+                setTimeout(() => { setLoginOpen(false); navigate('/profile'); }, 700);
+              }
+            } catch (err) { setLoginError(err.message); }
+            finally { setLoginLoading(false); }
+          }
+        });
+        const el = document.getElementById('hdr-google-btn');
+        if (el) window.google.accounts.id.renderButton(el, { theme: 'outline', size: 'large', width: 300, shape: 'rectangular' });
+      } catch {}
+    }, 200);
+    return () => { cancelled = true; };
+  }, [loginOpen]);
+
+  /* ── CSS ── */
+  const CSS = `
+    .hdr-root {
+      position: sticky; top: 0; z-index: 200; width: 100%;
+      background: rgba(255,255,255,0.97);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(14,165,233,0.12);
+      transition: box-shadow 0.25s ease;
     }
-  };
+    .hdr-root.scrolled { box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+    .dark .hdr-root { background: rgba(2,6,23,0.97); border-bottom-color: rgba(56,189,248,0.1); }
 
-  const openRegisterModal = () => {
-    setRegisterError('');
-    setRegisterSuccess('');
-    setRegisterModalOpen(true);
-    setIsOpen(false);
-  };
-
-  const closeRegisterModal = () => {
-    if (registerLoading) return;
-    setRegisterModalOpen(false);
-  };
-
-  const updateRegisterForm = (field, value) => {
-    setRegisterForm((current) => ({ ...current, [field]: value }));
-  };
-
-  const resetRegisterForm = () => {
-    setRegisterForm({
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      resume: null,
-      password: '',
-      skills: ''
-    });
-  };
-
-  const validateRegisterForm = () => {
-    const { firstName, lastName, email, phone, resume, password, skills } = registerForm;
-
-    if (!firstName || !lastName || !email || !phone || !resume || !password || !skills) {
-      return 'Please fill in all fields.';
-    }
-    return '';
-  };
-
-  const requestRegisterOtp = async () => {
-    const { firstName, lastName, email, phone, resume, password, skills } = registerForm;
-    const res = await fetch('/api/register/request-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        first_name: firstName,
-        last_name: lastName,
-        email,
-        mobno: phone
-      })
-    });
-
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || 'Failed to send email OTP.');
+    .hdr-inner {
+      max-width: 1280px; margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex; align-items: center; gap: 0.5rem; height: 64px;
     }
 
-    // Close the register modal
-    setRegisterModalOpen(false);
-
-    // Redirect to the OTP verification page with the registration details
-    navigate('/verify-otp', {
-      state: {
-        first_name: firstName,
-        last_name: lastName,
-        email,
-        mobno: phone,
-        qualification: '',
-        city: '',
-        resume,
-        password,
-        skills: skills || '',
-        job_title: 'General Application'
-      }
-    });
-  };
-
-  const handleRegisterSubmit = async (e) => {
-    e.preventDefault();
-    const validationError = validateRegisterForm();
-
-    if (validationError) {
-      setRegisterError(validationError);
-      return;
+    /* logo */
+    .hdr-logo {
+      display: flex; align-items: center; gap: 0.6rem;
+      text-decoration: none; flex-shrink: 0; margin-right: 0.5rem;
     }
-
-    setRegisterLoading(true);
-    setRegisterError('');
-    setRegisterSuccess('');
-
-    try {
-      await requestRegisterOtp();
-    } catch (err) {
-      setRegisterError(err.message || 'Server connection error. Please try again.');
-    } finally {
-      setRegisterLoading(false);
+    .hdr-logo-img {
+      width: 38px; height: 38px; border-radius: 50%; object-fit: cover;
+      border: 2px solid rgba(14,165,233,0.25); flex-shrink: 0;
     }
-  };
+    .hdr-logo-text { display: flex; flex-direction: column; line-height: 1.1; }
+    .hdr-logo-main { font-size: 1rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; }
+    .dark .hdr-logo-main { color: #f8fafc; }
+    .hdr-logo-sub { font-size: 0.58rem; font-weight: 500; color: #6b7280; letter-spacing: 0.04em; }
+    .dark .hdr-logo-sub { color: #94a3b8; }
 
-  const telecomServices = [
-    { name: 'LOS Survey', path: '/telecom/los' },
-    { name: 'RF Survey', path: '/telecom/rf' },
-    { name: 'EMF Survey', path: '/telecom/emf' },
-    { name: 'BTS Installation', path: '/telecom/bts' },
-    { name: 'Router Installation', path: '/telecom/router' },
-    { name: 'Network Testing', path: '/telecom/network' },
-    { name: 'Microwave Link Installation', path: '/telecom/microwave' },
-    { name: 'SCFT Testing', path: '/telecom/scft' },
-    { name: 'Cluster Testing', path: '/telecom/cluster' },
-    { name: 'UBR Installation', path: '/telecom/ubr' },
-    { name: 'ODSE Installation', path: '/telecom/odse' }
-  ];
+    /* nav links */
+    .hdr-nav { display: flex; align-items: center; gap: 0.15rem; flex: 1; }
+    .hdr-link {
+      padding: 0.45rem 0.75rem; border-radius: 8px; font-size: 0.88rem; font-weight: 600;
+      color: #475569; text-decoration: none; transition: all 0.18s; white-space: nowrap;
+    }
+    .hdr-link:hover, .hdr-link.active { color: var(--primary); background: rgba(14,165,233,0.08); }
+    .dark .hdr-link { color: #94a3b8; }
+    .dark .hdr-link:hover, .dark .hdr-link.active { color: #38bdf8; background: rgba(56,189,248,0.1); }
 
-  const softwareServices = [
-    { name: 'Software Development Company', path: '/services/software-company' },
-    { name: 'Custom Software Development',  path: '/services/custom-software' },
-    { name: 'Web Development Company',       path: '/services/web-development' },
-    { name: 'MERN Stack Development',        path: '/services/mern-stack' },
-    { name: 'Java Development Services',     path: '/services/java-development' },
-    { name: 'React.js Development',          path: '/services/reactjs-development' },
-    { name: 'Node.js Development',           path: '/services/nodejs-development' },
-    { name: 'Mobile App Development',        path: '/services/mobile-app' },
-    { name: 'E-commerce Development',        path: '/services/ecommerce' },
-    { name: 'ERP Software Development',      path: '/services/erp-software' },
-    { name: 'HRMS Software Development',     path: '/services/hrms-software' },
-    { name: 'CRM Software Development',      path: '/services/crm-software' },
-    { name: 'School Management Software',    path: '/services/school-software' },
-    { name: 'Hospital Management Software',  path: '/services/hospital-software' },
-    { name: 'SaaS Application Development',  path: '/services/saas-development' },
-    { name: 'Cloud Solutions',               path: '/services/cloud-solutions' },
-    { name: 'UI/UX Design',                  path: '/services/ui-ux-design' },
-    { name: 'DevOps Services',               path: '/services/devops' },
-    { name: 'QA & Software Testing',         path: '/services/qa-testing' },
-    { name: 'Software Maintenance',          path: '/services/software-maintenance' },
-  ];
+    /* apply CTA link */
+    .hdr-apply {
+      padding: 0.4rem 0.9rem; border-radius: 8px; font-size: 0.85rem; font-weight: 700;
+      color: #059669; background: rgba(5,150,105,0.08); border: 1.5px solid rgba(5,150,105,0.2);
+      text-decoration: none; transition: all 0.18s; white-space: nowrap;
+    }
+    .hdr-apply:hover { background: rgba(5,150,105,0.14); border-color: rgba(5,150,105,0.4); }
 
+    /* dropdown */
+    .hdr-dropdown-wrap { position: relative; }
+    .hdr-dropdown-trigger {
+      display: flex; align-items: center; gap: 4px; cursor: pointer;
+      font-size: 0.88rem; font-weight: 600; color: #475569; background: none; border: none;
+      padding: 0.45rem 0.75rem; border-radius: 8px; font-family: inherit; transition: all 0.18s;
+      white-space: nowrap;
+    }
+    .hdr-dropdown-trigger:hover { color: var(--primary); background: rgba(14,165,233,0.08); }
+    .dark .hdr-dropdown-trigger { color: #94a3b8; }
+    .dark .hdr-dropdown-trigger:hover { color: #38bdf8; background: rgba(56,189,248,0.1); }
+    .hdr-dropdown-wrap:hover .hdr-dropdown-panel { opacity: 1; visibility: visible; transform: translateY(0); }
+
+    .hdr-dropdown-panel {
+      position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%) translateY(8px);
+      background: white; border: 1px solid rgba(14,165,233,0.18); border-radius: 14px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.12); min-width: 220px; max-width: 420px;
+      opacity: 0; visibility: hidden; transition: all 0.2s ease;
+      max-height: 70vh; overflow-y: auto; z-index: 300;
+    }
+    .dark .hdr-dropdown-panel { background: #1e293b; border-color: rgba(56,189,248,0.15); }
+    .hdr-dropdown-panel a { color: #334155 !important; }
+    .dark .hdr-dropdown-panel a { color: #cbd5e1 !important; }
+
+    /* right side icons */
+    .hdr-actions { display: flex; align-items: center; gap: 0.35rem; margin-left: auto; flex-shrink: 0; }
+    .hdr-icon-btn {
+      width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(14,165,233,0.06); color: #475569; transition: all 0.18s;
+    }
+    .hdr-icon-btn:hover { background: rgba(14,165,233,0.14); color: var(--primary); }
+    .dark .hdr-icon-btn { background: rgba(56,189,248,0.08); color: #94a3b8; }
+    .dark .hdr-icon-btn:hover { color: #38bdf8; }
+
+    /* auth buttons */
+    .hdr-login-btn {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.45rem 1.1rem; border-radius: 8px; font-size: 0.88rem; font-weight: 700;
+      border: 1.5px solid rgba(14,165,233,0.35); color: var(--primary); background: rgba(14,165,233,0.06);
+      cursor: pointer; font-family: inherit; transition: all 0.18s; white-space: nowrap;
+    }
+    .hdr-login-btn:hover { background: rgba(14,165,233,0.12); border-color: var(--primary); }
+    .hdr-profile-btn {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.4rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 700;
+      background: linear-gradient(135deg,#0ea5e9,#0284c7); color: white; border: none;
+      cursor: pointer; font-family: inherit; text-decoration: none; transition: all 0.18s;
+      box-shadow: 0 2px 10px rgba(14,165,233,0.3);
+    }
+    .hdr-profile-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(14,165,233,0.4); }
+    .hdr-logout-btn {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.4rem 0.85rem; border-radius: 8px; font-size: 0.82rem; font-weight: 700;
+      background: rgba(239,68,68,0.08); color: #dc2626; border: 1.5px solid rgba(239,68,68,0.2);
+      cursor: pointer; font-family: inherit; transition: all 0.18s;
+    }
+    .hdr-logout-btn:hover { background: rgba(239,68,68,0.14); border-color: rgba(239,68,68,0.4); }
+
+    /* hamburger */
+    .hdr-hamburger {
+      display: none; width: 40px; height: 40px; border-radius: 10px; border: none;
+      background: rgba(14,165,233,0.07); color: #334155; cursor: pointer;
+      align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.18s;
+    }
+    .dark .hdr-hamburger { background: rgba(56,189,248,0.08); color: #cbd5e1; }
+    .hdr-hamburger:hover { background: rgba(14,165,233,0.14); }
+
+    /* mobile drawer */
+    .hdr-mobile {
+      display: none; flex-direction: column; padding: 1rem 1.25rem 1.25rem;
+      border-top: 1px solid rgba(14,165,233,0.1); gap: 2px;
+      max-height: calc(100vh - 64px); overflow-y: auto;
+    }
+    .dark .hdr-mobile { border-top-color: rgba(56,189,248,0.1); }
+    .hdr-mobile.open { display: flex; }
+    .hdr-mobile-link {
+      display: block; padding: 0.6rem 0.85rem; border-radius: 9px; font-size: 0.9rem; font-weight: 600;
+      color: #334155; text-decoration: none; transition: all 0.15s;
+    }
+    .hdr-mobile-link:hover, .hdr-mobile-link.active { color: var(--primary); background: rgba(14,165,233,0.08); }
+    .dark .hdr-mobile-link { color: #cbd5e1; }
+    .dark .hdr-mobile-link:hover { color: #38bdf8; background: rgba(56,189,248,0.1); }
+    .hdr-mobile-divider { height: 1px; background: rgba(14,165,233,0.1); margin: 0.5rem 0; }
+    .hdr-mobile-section { font-size: 0.68rem; font-weight: 800; color: #94a3b8; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.5rem 0.85rem 0.25rem; }
+    .hdr-mobile-auth { display: flex; gap: 0.5rem; padding: 0.5rem 0.25rem 0; flex-wrap: wrap; }
+
+    /* modal backdrop */
+    .hdr-modal-bg {
+      position: fixed; inset: 0; background: rgba(15,23,42,0.6);
+      backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center;
+      z-index: 500; padding: 1rem;
+    }
+    .hdr-modal {
+      background: white; border-radius: 20px; padding: 2rem 2rem 1.75rem;
+      width: 100%; max-width: 400px; box-shadow: 0 24px 64px rgba(0,0,0,0.18);
+      position: relative; animation: fadeInUp 0.22s ease;
+    }
+    .dark .hdr-modal { background: #1e293b; }
+    @keyframes fadeInUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+    .hdr-modal-close {
+      position: absolute; top: 1rem; right: 1rem; width: 30px; height: 30px; border-radius: 8px;
+      border: none; background: #f1f5f9; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .dark .hdr-modal-close { background: #334155; color: #94a3b8; }
+    .hdr-modal-input {
+      width: 100%; box-sizing: border-box; padding: 0.75rem 1rem;
+      border: 1.5px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 0.92rem;
+      outline: none; background: #f8fafc; color: #0f172a; transition: border-color 0.18s; margin-bottom: 0.75rem;
+    }
+    .dark .hdr-modal-input { background: #0f172a; border-color: #334155; color: white; }
+    .hdr-modal-input:focus { border-color: #0ea5e9; background: white; }
+    .dark .hdr-modal-input:focus { background: #1e293b; }
+    .hdr-modal-btn {
+      width: 100%; padding: 0.85rem; border: none; border-radius: 12px; cursor: pointer;
+      background: linear-gradient(135deg,#0ea5e9,#0369a1); color: white; font-size: 0.95rem;
+      font-weight: 800; font-family: inherit; transition: all 0.2s;
+      box-shadow: 0 4px 16px rgba(14,165,233,0.35);
+    }
+    .hdr-modal-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(14,165,233,0.45); }
+    .hdr-modal-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+    .hdr-divider { display: flex; align-items: center; gap: 0.75rem; margin: 1rem 0; }
+    .hdr-divider-line { flex:1; height:1px; background:#e2e8f0; }
+    .dark .hdr-divider-line { background:#334155; }
+    .hdr-divider-text { font-size: 0.78rem; color: #94a3b8; font-weight: 600; }
+
+    @media (max-width: 1100px) {
+      .hdr-nav { display: none; }
+      .hdr-hamburger { display: flex; }
+      .hdr-actions .hdr-login-btn span, .hdr-actions .hdr-logout-btn span { display: none; }
+    }
+    @media (max-width: 480px) {
+      .hdr-inner { padding: 0 1rem; }
+      .hdr-logo-sub { display: none; }
+    }
+  `;
+
+  /* ── Render ── */
   return (
     <>
-      <header className="glass-nav">
-        <div className="header-container">
-          <Link to="/" className="logo-container" onClick={() => setIsOpen(false)} style={{ gap: '0.6rem', alignItems: 'center' }}>
-            {/* Appletree Infotech logo */}
-            <img
-              src="/rancom.png"
-              alt="Rancom Technologies"
-              style={{ height: '36px', width: '36px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '1.5px solid rgba(14,165,233,0.25)' }}
-            />
-            <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
-              <span style={{ fontSize: '1.1rem', fontWeight: 800, letterSpacing: '-0.02em', color: '#000' }}>
-                RANCOM <span className="gradient-text-blue" style={{ marginLeft: "2px" }}>TECHNOLOGIES</span>
+      <style>{CSS}</style>
+
+      <header className={`hdr-root${scrolled ? ' scrolled' : ''}`}>
+        <div className="hdr-inner">
+
+          {/* Logo */}
+          <Link to="/" className="hdr-logo">
+            
+            <img src="/rancom.png" alt="Rancom Technologies" className="hdr-logo-img"
+              style={{ marginLeft:'-6px', border:'2px solid rgba(14,165,233,0.3)' }}
+              onError={e => { e.target.style.display='none'; }} />
+            <div className="hdr-logo-text">
+              <span className="hdr-logo-main">
+                RANCOM <span style={{ background:'linear-gradient(135deg,#0ea5e9,#06b6d4)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>TECH</span>
               </span>
-              <span style={{ fontSize: '0.76rem', fontWeight: 500, color: '#6b7280', letterSpacing: '0.04em' ,marginTop: '2px',display: 'inline-block'}}>
-               Group of <span style={{ color: '#e53e3e', fontWeight: 900 }}>Apple</span><span style={{ color: '#1d460591', fontWeight: 700 }}>tree</span> infotech
+              <span className="hdr-logo-sub">
+                Pvt. Ltd · <span style={{ color:'#e53e3e' }}>apple</span><span style={{ color:'#38a169' }}>tree</span> infotech
               </span>
             </div>
           </Link>
 
-          {/* Mobile Menu Button */}
-          <button className="menu-btn"  style={{ marginLeft: "10px" }} onClick={toggleMenu} aria-label="Toggle menu">
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          {/* Desktop nav */}
+          <nav className="hdr-nav" aria-label="Main navigation">
+            <NavLink to="/" className={({isActive}) => `hdr-link${isActive?' active':''}`} end>Home</NavLink>
+            <NavLink to="/about" className={({isActive}) => `hdr-link${isActive?' active':''}`}>About</NavLink>
 
-          {/* Navigation Links */}
-          <nav>
-            <ul className={`nav-links ${isOpen ? 'mobile-open' : ''}`}>
-              <li>
-                <NavLink
-                  to="/"
-                  className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-                  onClick={() => setIsOpen(false)}
-                  end
-                >
-                  Home
-                </NavLink>
-              </li>
-              <li>
-                <NavLink
-                  to="/about"
-                  className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  About Us
-                </NavLink>
-              </li>
-
-              {/* Telecom Dropdown */}
-              <li className="dropdown-container">
-                <span
-                  className="nav-link"
-                  style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
-                  onClick={() => setTelecomOpen(!telecomOpen)}
-                >
-                  Telecom Services <ChevronDown size={14} />
-                </span>
-                <div className={`dropdown-menu ${telecomOpen ? 'mobile-show' : ''}`}>
-                  {telecomServices.map((service, index) => (
-                    <Link
-                      key={index}
-                      to={service.path}
-                      className="dropdown-item"
-                      onClick={() => { setIsOpen(false); setTelecomOpen(false); }}
-                    >
-                      {service.name}
+            {/* Telecom dropdown */}
+            <div className="hdr-dropdown-wrap">
+              <button className="hdr-dropdown-trigger" aria-haspopup="true">
+                <Radio size={14} />Telecom <ChevronDown size={13} />
+              </button>
+              <div className="hdr-dropdown-panel">
+                <div style={{ padding:'0.5rem', display:'flex', flexDirection:'column' }}>
+                  {telecomLinks.map(l => (
+                    <Link key={l.path} to={l.path}
+                      style={{ padding:'0.5rem 0.85rem', borderRadius:'7px', fontSize:'0.85rem', fontWeight:500, display:'block' }}
+                      onMouseEnter={e => { e.currentTarget.style.background='rgba(14,165,233,0.08)'; e.currentTarget.style.color='var(--primary)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.background=''; e.currentTarget.style.color=''; }}>
+                      {l.name}
                     </Link>
                   ))}
                 </div>
-              </li>
+              </div>
+            </div>
 
-              {/* Software Dropdown */}
-              <li className="dropdown-container">
-                <span
-                  className="nav-link"
-                  style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
-                  onClick={() => setSoftwareOpen(!softwareOpen)}
-                >
-                  Software Services <ChevronDown size={14} />
-                </span>
-                <div className={`dropdown-menu ${softwareOpen ? 'mobile-show' : ''}`}>
-                  {softwareServices.map((service, index) => (
-                    <Link
-                      key={index}
-                      to={service.path}
-                      className="dropdown-item"
-                      onClick={() => { setIsOpen(false); setSoftwareOpen(false); }}
-                    >
-                      {service.name}
+            {/* Software dropdown */}
+            <div className="hdr-dropdown-wrap">
+              <button className="hdr-dropdown-trigger" aria-haspopup="true">
+                <Code size={14} />Services <ChevronDown size={13} />
+              </button>
+              <div className="hdr-dropdown-panel">
+                <div style={{ padding:'0.5rem', display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1px' }}>
+                  {softwareLinks.map(l => (
+                    <Link key={l.path} to={l.path}
+                      style={{ padding:'0.5rem 0.85rem', borderRadius:'7px', fontSize:'0.82rem', fontWeight:500, display:'block', whiteSpace:'nowrap' }}
+                      onMouseEnter={e => { e.currentTarget.style.background='rgba(14,165,233,0.08)'; e.currentTarget.style.color='var(--primary)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.background=''; e.currentTarget.style.color=''; }}>
+                      {l.name}
                     </Link>
                   ))}
                 </div>
-              </li>
+              </div>
+            </div>
 
-              <li>
-                <NavLink
-                  to="/blog"
-                  className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  Blog
-                </NavLink>
-              </li>
-
-              <li>
-                <NavLink
-                  to="/jobs"
-                  className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  Jobs
-                </NavLink>
-              </li>
-
-              {/* Notification Bell */}
-              <li style={{ display: 'flex', alignItems: 'center' }}>
-                <NotificationBell />
-              </li>
-
-              {/* Auth Buttons */}
-              <li className="nav-auth">
-                {!isAuth ? (
-                  <button
-                    type="button"
-                    className="auth-btn login-btn"
-                    style={{
-                      background: 'linear-gradient(to right, #1E40AF, #1D4ED8)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '8px',
-                      padding: '0.5rem 1rem',
-                      fontWeight: '600',
-                      transition: 'all 0.3s ease',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      cursor: 'pointer'
-                    }}
-                    onClick={openLoginModal}
-                  >
-                    <LogIn size={16} className="icon" style={{ marginRight: '0.5rem' }} /> Login
-                  </button>
-                ) : (
-                  <>
-                    <NavLink
-                      to="/profile"
-                      className="auth-btn profile-btn"
-                      onClick={() => setIsOpen(false)}
-                      style={{
-                        background: 'linear-gradient(to right, #0ea5e9, #0284c7)',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '8px',
-                        padding: '0.5rem 1rem',
-                        fontWeight: '600',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        cursor: 'pointer',
-                        marginRight: '0.5rem'
-                      }}
-                    >
-                      <UserRound size={16} /> Profile
-                    </NavLink>
-                    <button
-                      onClick={handleLogout}
-                      className="auth-btn logout-btn"
-                      style={{
-                        background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 50%, #B91C1C 100%)',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '12px',
-                        padding: '0.65rem 1.3rem',
-                        fontWeight: '700',
-                        fontSize: '0.95rem',
-                        letterSpacing: '0.3px',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                        boxShadow: '0 8px 20px rgba(239,68,68,0.35)',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translateY(-3px)';
-                        e.currentTarget.style.boxShadow =
-                          '0 15px 30px rgba(239,68,68,0.5)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow =
-                          '0 8px 20px rgba(239,68,68,0.35)';
-                      }}
-                    >
-                       Logout
-                    </button>
-                  </>
-                )}
-              </li>
-            </ul>
+            <NavLink to="/blog" className={({isActive}) => `hdr-link${isActive?' active':''}`}>Blog</NavLink>
+            <NavLink to="/jobs" className={({isActive}) => `hdr-link${isActive?' active':''}`}>Jobs</NavLink>
+            <NavLink to="/apply" className="hdr-apply">Apply Now</NavLink>
           </nav>
+
+          {/* Right actions */}
+          <div className="hdr-actions">
+            {/* Dark mode */}
+         
+
+            {/* Notification bell */}
+            <NotificationBell />
+
+            {/* Auth */}
+            {isAuth ? (
+              <>
+                <Link to="/profile" className="hdr-profile-btn">
+                  <UserRound size={15} /><span>Profile</span>
+                </Link>
+                <button className="hdr-logout-btn" onClick={handleLogout} title="Sign out">
+                  <LogOut size={14} /><span>Logout</span>
+                </button>
+              </>
+            ) : (
+              <button className="hdr-login-btn" onClick={() => { setLoginOpen(true); setLoginError(''); setLoginSuccess(''); }}>
+                <LogIn size={15} /><span>Login</span>
+              </button>
+            )}
+
+            {/* Hamburger */}
+            <button className="hdr-hamburger" onClick={() => setMobileOpen(o => !o)} aria-label="Menu">
+              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile drawer */}
+        <div className={`hdr-mobile${mobileOpen ? ' open' : ''}`}>
+          <NavLink to="/" className={({isActive}) => `hdr-mobile-link${isActive?' active':''}`} end>Home</NavLink>
+          <NavLink to="/about" className={({isActive}) => `hdr-mobile-link${isActive?' active':''}`}>About</NavLink>
+
+          <div className="hdr-mobile-divider" />
+          <div className="hdr-mobile-section">🗼 Telecom Services</div>
+          {telecomLinks.map(l => (
+            <NavLink key={l.path} to={l.path} className={({isActive}) => `hdr-mobile-link${isActive?' active':''}`}
+              style={{ paddingLeft:'1.25rem', fontSize:'0.85rem' }}>{l.name}</NavLink>
+          ))}
+
+          <div className="hdr-mobile-divider" />
+          <div className="hdr-mobile-section">💻 Software Services</div>
+          {softwareLinks.map(l => (
+            <NavLink key={l.path} to={l.path} className={({isActive}) => `hdr-mobile-link${isActive?' active':''}`}
+              style={{ paddingLeft:'1.25rem', fontSize:'0.85rem' }}>{l.name}</NavLink>
+          ))}
+
+          <div className="hdr-mobile-divider" />
+          <NavLink to="/blog" className={({isActive}) => `hdr-mobile-link${isActive?' active':''}`}>Blog</NavLink>
+          <NavLink to="/jobs" className={({isActive}) => `hdr-mobile-link${isActive?' active':''}`}>Jobs</NavLink>
+          <NavLink to="/apply" className="hdr-mobile-link" style={{ color:'#059669', fontWeight:700 }}>🚀 Apply Now</NavLink>
+
+          <div className="hdr-mobile-auth">
+            {isAuth ? (
+              <>
+                <Link to="/profile" className="hdr-profile-btn" style={{ flex:1, justifyContent:'center', textDecoration:'none' }}>
+                  <UserRound size={15} /> Profile
+                </Link>
+                <button className="hdr-logout-btn" style={{ flex:1, justifyContent:'center' }} onClick={handleLogout}>
+                  <LogOut size={14} /> Logout
+                </button>
+              </>
+            ) : (
+              <button className="hdr-login-btn" style={{ flex:1, justifyContent:'center' }}
+                onClick={() => { setMobileOpen(false); setLoginOpen(true); }}>
+                <LogIn size={15} /> Login
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
-      {loginModalOpen && (
-        <div className="register-modal-backdrop" onClick={closeLoginModal}>
-          <style dangerouslySetInnerHTML={{
-            __html: `
-          .register-modal-backdrop {
-            position: fixed; inset: 0; z-index: 2000; background: rgba(15, 23, 42, 0.55);
-            display: flex; align-items: center; justify-content: center; padding: 1rem;
-          }
-          .register-modal {
-            width: min(640px, 100%); max-height: 92vh; overflow-y: auto; background: #ffffff;
-            border-radius: 14px; box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28); padding: 1.5rem;
-          }
-          .login-modal { width: min(440px, 100%); }
-          .register-modal-header {
-            display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem;
-          }
-          .register-modal-title {
-            color: #0f172a; font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;
-          }
-          .register-modal-close {
-            width: 38px; height: 38px; border: none; border-radius: 8px; background: #f1f5f9; color: #0f172a;
-            display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
-          }
-          .register-modal .form-group { margin-bottom: 1rem; }
-          .register-modal label { color: #0f172a; font-weight: 700; margin-bottom: 0.45rem; display: block; }
-          .register-modal-alert {
-            display: flex; align-items: center; gap: 0.5rem; padding: 0.9rem 1rem; border-radius: 8px;
-            margin-bottom: 1rem; font-weight: 600; font-size: 0.92rem;
-          }
-          .register-modal-alert.success { color: #047857; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.22); }
-          .register-modal-alert.error { color: #dc2626; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.22); }
-          @media (max-width: 640px) {
-            .register-modal { padding: 1.1rem; }
-            .register-modal-title { font-size: 1.15rem; }
-          }
-        `}} />
+      {/* ── Login Modal ── */}
+      {loginOpen && (
+        <div className="hdr-modal-bg" onClick={() => setLoginOpen(false)}>
+          <div className="hdr-modal" onClick={e => e.stopPropagation()}>
+            <button className="hdr-modal-close" onClick={() => setLoginOpen(false)}><X size={15} /></button>
 
-          <div className="register-modal login-modal" role="dialog" aria-modal="true" aria-labelledby="login-modal-title" onClick={(e) => e.stopPropagation()}>
-            <div className="register-modal-header">
-              <h2 id="login-modal-title" className="register-modal-title">
-                <LogIn size={22} /> Login
-              </h2>
-              <button type="button" className="register-modal-close" onClick={closeLoginModal} aria-label="Close login modal">
-                <X size={20} />
-              </button>
+            <div style={{ textAlign:'center', marginBottom:'1.5rem' }}>
+              <div style={{ width:'48px', height:'48px', borderRadius:'14px', background:'linear-gradient(135deg,#0ea5e9,#0369a1)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 0.75rem' }}>
+                <LogIn size={22} color="white" />
+              </div>
+              <h2 style={{ fontSize:'1.3rem', fontWeight:800, color:'#0f172a', margin:0 }}>Welcome back</h2>
+              <p style={{ color:'#64748b', fontSize:'0.85rem', margin:'0.25rem 0 0' }}>Sign in to your Rancom Technologies account</p>
             </div>
 
             {loginSuccess && (
-              <div className="register-modal-alert success">
-                <CheckCircle size={18} />
-                <span>{loginSuccess}</span>
+              <div style={{ display:'flex', gap:'0.5rem', alignItems:'center', padding:'0.75rem 1rem', background:'rgba(16,185,129,0.1)', border:'1px solid rgba(16,185,129,0.25)', borderRadius:'9px', marginBottom:'1rem', color:'#047857', fontSize:'0.88rem', fontWeight:600 }}>
+                <CheckCircle size={16} />{loginSuccess}
               </div>
             )}
-
             {loginError && (
-              <div className="register-modal-alert error">
-                <AlertCircle size={18} />
-                <span>{loginError}</span>
+              <div style={{ display:'flex', gap:'0.5rem', alignItems:'center', padding:'0.75rem 1rem', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)', borderRadius:'9px', marginBottom:'1rem', color:'#dc2626', fontSize:'0.88rem', fontWeight:600 }}>
+                <AlertCircle size={16} />{loginError}
               </div>
             )}
 
-            <form onSubmit={handleLoginSubmit}>
-              <div className="form-group">
-                <label>Email</label>
-                <input className="form-input" type="email" placeholder="Email address" value={loginForm.email} onChange={(e) => updateLoginForm('email', e.target.value)} required />
+            <form onSubmit={handleLogin}>
+              <div style={{ position:'relative', marginBottom:'0.75rem' }}>
+                <Mail size={15} style={{ position:'absolute', left:'0.85rem', top:'50%', transform:'translateY(-50%)', color:'#94a3b8' }} />
+                <input type="email" required placeholder="Email address" value={loginEmail}
+                  onChange={e => setLoginEmail(e.target.value)} className="hdr-modal-input"
+                  style={{ paddingLeft:'2.4rem', marginBottom:0 }} />
               </div>
-
-              <div className="form-group">
-                <label>Password</label>
-                <input className="form-input" type="password" placeholder="Password" value={loginForm.password} onChange={(e) => updateLoginForm('password', e.target.value)} required />
+              <div style={{ position:'relative', marginBottom:'1rem' }}>
+                <Lock size={15} style={{ position:'absolute', left:'0.85rem', top:'50%', transform:'translateY(-50%)', color:'#94a3b8' }} />
+                <input type="password" required placeholder="Password" value={loginPass}
+                  onChange={e => setLoginPass(e.target.value)} className="hdr-modal-input"
+                  style={{ paddingLeft:'2.4rem', marginBottom:0 }} />
               </div>
-
-              <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.85rem 1rem', fontSize: '1rem' }} disabled={loginLoading}>
-                {loginLoading ? 'Signing in...' : 'Login'}
+              <button type="submit" className="hdr-modal-btn" disabled={loginLoading}>
+                {loginLoading ? '⏳ Signing in…' : 'Sign In'}
               </button>
             </form>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', margin: '1.25rem 0' }}>
-              <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }}></div>
-              <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>or sign in with</span>
-              <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }}></div>
+            <div className="hdr-divider">
+              <div className="hdr-divider-line" />
+              <span className="hdr-divider-text">or continue with</span>
+              <div className="hdr-divider-line" />
             </div>
 
-            {/* Google sign-in container */}
-            <div id="google-header-signin-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}></div>
-          </div>
-        </div>
-      )}
+            <div id="hdr-google-btn" style={{ display:'flex', justifyContent:'center', minHeight:'40px' }} />
 
-      {registerModalOpen && (
-        <div className="register-modal-backdrop" onClick={closeRegisterModal}>
-          <style dangerouslySetInnerHTML={{
-            __html: `
-          .register-modal-backdrop {
-            position: fixed; inset: 0; z-index: 2000; background: rgba(15, 23, 42, 0.55);
-            display: flex; align-items: center; justify-content: center; padding: 1rem;
-          }
-          .register-modal {
-            width: min(640px, 100%); max-height: 92vh; overflow-y: auto; background: #ffffff;
-            border-radius: 14px; box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28); padding: 1.5rem;
-          }
-          .register-modal-header {
-            display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem;
-          }
-          .register-modal-title {
-            color: #0f172a; font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;
-          }
-          .register-modal-close {
-            width: 38px; height: 38px; border: none; border-radius: 8px; background: #f1f5f9; color: #0f172a;
-            display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
-          }
-          .register-modal-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
-          .register-modal .form-group { margin-bottom: 1rem; }
-          .register-modal .full-width { grid-column: 1 / -1; }
-          .register-modal label { color: #0f172a; font-weight: 700; margin-bottom: 0.45rem; display: block; }
-          .register-modal textarea { min-height: 96px; resize: vertical; }
-          .register-modal-alert {
-            display: flex; align-items: center; gap: 0.5rem; padding: 0.9rem 1rem; border-radius: 8px;
-            margin-bottom: 1rem; font-weight: 600; font-size: 0.92rem;
-          }
-          .register-modal-alert.success { color: #047857; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.22); }
-          .register-modal-alert.error { color: #dc2626; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.22); }
-          @media (max-width: 640px) {
-            .register-modal { padding: 1.1rem; }
-            .register-modal-grid { grid-template-columns: 1fr; }
-            .register-modal-title { font-size: 1.15rem; }
-          }
-        `}} />
-
-          <div className="register-modal" role="dialog" aria-modal="true" aria-labelledby="register-modal-title" onClick={(e) => e.stopPropagation()}>
-            <div className="register-modal-header">
-              <h2 id="register-modal-title" className="register-modal-title">
-                <UserPlus size={22} /> Register
-              </h2>
-              <button type="button" className="register-modal-close" onClick={closeRegisterModal} aria-label="Close register modal">
-                <X size={20} />
-              </button>
-            </div>
-
-            {registerSuccess && (
-              <div className="register-modal-alert success">
-                <CheckCircle size={18} />
-                <span>{registerSuccess}</span>
-              </div>
-            )}
-
-            {registerError && (
-              <div className="register-modal-alert error">
-                <AlertCircle size={18} />
-                <span>{registerError}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleRegisterSubmit}>
-              <div className="register-modal-grid">
-                <div className="form-group">
-                  <label>First Name</label>
-                  <input className="form-input" type="text" placeholder="First name" value={registerForm.firstName} onChange={(e) => updateRegisterForm('firstName', e.target.value)} disabled={registerLoading} required />
-                </div>
-
-                <div className="form-group">
-                  <label>Last Name</label>
-                  <input className="form-input" type="text" placeholder="Last name" value={registerForm.lastName} onChange={(e) => updateRegisterForm('lastName', e.target.value)} disabled={registerLoading} required />
-                </div>
-
-                <div className="form-group">
-                  <label>Email</label>
-                  <input className="form-input" type="email" placeholder="Email address" value={registerForm.email} onChange={(e) => updateRegisterForm('email', e.target.value)} disabled={registerLoading} required />
-                </div>
-
-                <div className="form-group">
-                  <label>Phone No</label>
-                  <input className="form-input" type="tel" placeholder="Phone number" value={registerForm.phone} onChange={(e) => updateRegisterForm('phone', e.target.value)} disabled={registerLoading} required />
-                </div>
-
-                <div className="form-group">
-                  <label>Password</label>
-                  <input className="form-input" type="password" placeholder="Password" value={registerForm.password} onChange={(e) => updateRegisterForm('password', e.target.value)} disabled={registerLoading} required />
-                </div>
-
-                <div className="form-group">
-                  <label>Resume</label>
-                  <input className="form-input" type="file" accept="application/pdf,.pdf" onChange={(e) => updateRegisterForm('resume', e.target.files[0] || null)} disabled={registerLoading} required />
-                </div>
-
-                <div className="form-group full-width">
-                  <label>Skills</label>
-                  <textarea className="form-input" placeholder="React, Node.js, RF survey, telecom tools..." value={registerForm.skills} onChange={(e) => updateRegisterForm('skills', e.target.value)} disabled={registerLoading} required />
-                </div>
-              </div>
-
-              <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.85rem 1rem', fontSize: '1rem' }} disabled={registerLoading}>
-                {registerLoading ? 'Sending OTP...' : 'Send Email OTP'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Google Registration Modal for First-time Sign-in */}
-      {showHeaderGoogleRegisterModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(15, 23, 42, 0.65)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 9999,
-          padding: '1rem'
-        }}>
-          <div className="form-card glass" style={{
-            background: 'white',
-            maxWidth: '440px',
-            width: '100%',
-            padding: '2.25rem',
-            borderRadius: '14px',
-            boxShadow: '0 20px 25px -5px rgba(0,0,0,0.15), 0 10px 10px -5px rgba(0,0,0,0.04)',
-            position: 'relative'
-          }}>
-            <button
-              onClick={() => setShowHeaderGoogleRegisterModal(false)}
-              style={{
-                position: 'absolute',
-                top: '1rem',
-                right: '1rem',
-                border: 'none',
-                background: 'transparent',
-                cursor: 'pointer',
-                color: '#9ca3af'
-              }}
-            >
-              <X size={20} />
-            </button>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', justifyContent: 'center', marginBottom: '1.25rem' }}>
-              <ShieldCheck size={28} style={{ color: 'var(--secondary)' }} />
-              <h2 style={{ color: '#000000', fontSize: '1.3rem', fontWeight: 800, margin: 0 }}>Complete Your Profile</h2>
-            </div>
-            
-            <p style={{ textAlign: 'center', color: '#4b5563', fontSize: '0.85rem', marginBottom: '1.25rem', lineHeight: '1.4' }}>
-              Welcome <strong>{headerGoogleRegisterData.name}</strong>! Since this is your first time signing in with Google, please set a password and phone number to secure your account.
+            <p style={{ textAlign:'center', fontSize:'0.82rem', color:'#64748b', marginTop:'1.25rem', marginBottom:0 }}>
+              Don't have an account?{' '}
+              <Link to="/apply" onClick={() => setLoginOpen(false)} style={{ color:'var(--primary)', fontWeight:700 }}>Apply now</Link>
             </p>
-
-            <form onSubmit={handleHeaderGoogleRegisterSubmit}>
-              <div className="form-group" style={{ marginBottom: '1rem' }}>
-                <label style={{ fontSize: '0.85rem', color: '#374151', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                  <Mail size={14} /> Email
-                </label>
-                <input type="text" className="form-input" value={headerGoogleRegisterData.email} disabled style={{ background: '#f3f4f6' }} />
-              </div>
-
-              <div className="form-group" style={{ marginBottom: '1rem' }}>
-                <label style={{ fontSize: '0.85rem', color: '#374151', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                  <Lock size={14} /> Create Password
-                </label>
-                <input
-                  type="password"
-                  className="form-input"
-                  placeholder="Enter a secure password"
-                  required
-                  value={headerGoogleRegisterData.password}
-                  onChange={e => setHeaderGoogleRegisterData({ ...headerGoogleRegisterData, password: e.target.value })}
-                />
-              </div>
-
-              <div className="form-group" style={{ marginBottom: '1rem' }}>
-                <label style={{ fontSize: '0.85rem', color: '#374151', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                  <Phone size={14} /> Phone Number
-                </label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Enter mobile number"
-                  required
-                  value={headerGoogleRegisterData.phone}
-                  onChange={e => setHeaderGoogleRegisterData({ ...headerGoogleRegisterData, phone: e.target.value })}
-                />
-              </div>
-
-              <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-                <label style={{ fontSize: '0.85rem', color: '#374151', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                  <MapPin size={14} /> City
-                </label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Enter your city"
-                  required
-                  value={headerGoogleRegisterData.city}
-                  onChange={e => setHeaderGoogleRegisterData({ ...headerGoogleRegisterData, city: e.target.value })}
-                />
-              </div>
-
-              <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.85rem' }} disabled={loginLoading}>
-                {loginLoading ? 'Saving Profile...' : 'Complete & Sign In'}
-              </button>
-            </form>
           </div>
         </div>
       )}

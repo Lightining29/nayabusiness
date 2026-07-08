@@ -12,9 +12,12 @@ import Register from './pages/Register';
 import VerifyOtp from './pages/VerifyOtp';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import AssessmentAdmin from './pages/AssessmentAdmin';
 import Jobs from './pages/Jobs';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
+import ApplyForm from './pages/ApplyForm';
+import TakeTest from './pages/TakeTest';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // ... existing imports remain
@@ -24,12 +27,13 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 function AppLayout() {
   const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith('/admin');
+  const isAdminRoute = location.pathname.startsWith('/admin') || location.pathname.startsWith('/assessment-admin');
+  const isTestRoute  = location.pathname.startsWith('/test/');
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      {/* Hide standard header/footer on admin pages */}
-      {!isAdminRoute && <Header />}
+      {/* Hide standard header/footer on admin, assessment-admin, and test pages */}
+      {!isAdminRoute && !isTestRoute && <Header />}
       
       <main style={{ flex: 1 }}>
         <Routes>
@@ -55,17 +59,22 @@ function AppLayout() {
           <Route path="/jobs" element={<Jobs />} />
           <Route path="/login" element={<Login />} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+
+          {/* Recruitment & Assessment */}
+          <Route path="/apply" element={<ApplyForm />} />
+          <Route path="/test/:id" element={<TakeTest />} />
           
           {/* Admin routes */}
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/assessments" element={<AssessmentAdmin />} />
           
           {/* Catch-all route redirecting to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
 
-      {!isAdminRoute && <Footer />}
+      {!isAdminRoute && !isTestRoute && <Footer />}
       
     </div>
   );

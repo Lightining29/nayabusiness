@@ -17,8 +17,7 @@ const EmailVerification = require('./models/EmailVerification');
 const ResumeData = require('./models/ResumeData');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { sendOtpEmail } = require('./utils/mailer');
-const { sendInterviewEmail } = require('./utils/mailer');
+const { sendOtpEmail, sendInterviewEmail, isMailerConfigured } = require('./utils/mailer');
 
 // Import route files
 const authRoutes = require('./routes/auth');
@@ -983,20 +982,50 @@ app.post('/api/admin/login', (req, res) => {
   return res.status(401).json({ error: 'Invalid credentials' });
 });
 
-// 5b. Send interview invitation email to a candidate
-app.post('/api/admin/send-interview', async (req, res) => {
+// 5b. Queue interview invitation email to a candidate
+app.post('/api/admin/send-interview', (req, res) => {
   const { to, name, position, interviewDate, interviewTime, mode, location, meetLink, interviewers, notes } = req.body;
   if (!to || !interviewDate || !interviewTime || !mode) {
     return res.status(400).json({ error: 'Email, date, time and mode are required.' });
   }
-  try {
-    const result = await sendInterviewEmail({ to, name, position, interviewDate, interviewTime, mode, location, meetLink, interviewers, notes });
-    console.log(`[Interview] Email sent to ${to}${result.devMode ? ' (dev mode - logged)' : ' ✓'}`);
-    return res.json({ message: `Interview invitation sent to ${to}.`, devMode: !!result.devMode });
-  } catch (err) {
-    console.error('[Interview Email] Error:', err);
-    return res.status(500).json({ error: 'Failed to send interview email: ' + err.message });
+
+  const normalizedTo = normalizeEmail(to);
+  const smtpReady = isMailerConfigured();
+
+  if (process.env.NODE_ENV === 'production' && !smtpReady) {
+    return res.status(503).json({
+      error: 'Email service is not configured. Set SMTP_HOST, SMTP_USER and SMTP_PASS in Render environment variables.'
+    });
   }
+
+  const payload = {
+    to: normalizedTo,
+    name,
+    position: position || 'the position',
+    interviewDate,
+    interviewTime,
+    mode,
+    location,
+    meetLink,
+    interviewers,
+    notes
+  };
+
+  setImmediate(() => {
+    sendInterviewEmail(payload)
+      .then((result) => {
+        console.log(`[Interview] Email sent to ${normalizedTo}${result.devMode ? ' (dev mode - logged)' : ' ✓'}`);
+      })
+      .catch((err) => {
+        console.error(`[Interview Email] Failed for ${normalizedTo}:`, err);
+      });
+  });
+
+  return res.status(202).json({
+    message: `Interview invitation is being sent to ${normalizedTo}.`,
+    queued: true,
+    devMode: !smtpReady
+  });
 });
 
 // 6. Get all job applications (registrations)

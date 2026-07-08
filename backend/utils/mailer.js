@@ -9,6 +9,38 @@ if (dns.setDefaultResultOrder) {
 
 let transporter = null; // reset on each server start
 
+function getSmtpConfig() {
+  const host = String(process.env.SMTP_HOST || '').trim();
+  const user = String(process.env.SMTP_USER || '').trim();
+  // Strip spaces from Gmail App Password (e.g. "yfdi eyxh hngp wfnw" → "yfdieyxhhngpwfnw")
+  const pass = String(process.env.SMTP_PASS || '').replace(/\s/g, '');
+  const from = String(process.env.SMTP_FROM || user).trim() || user;
+  const port = Number(process.env.SMTP_PORT || 587);
+  const secure = String(process.env.SMTP_SECURE || '').toLowerCase() === 'true' || port === 465;
+  const rejectUnauthorized = process.env.SMTP_TLS_REJECT_UNAUTHORIZED
+    ? process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false'
+    : process.env.NODE_ENV === 'production';
+
+  return {
+    host,
+    user,
+    pass,
+    from,
+    port,
+    secure,
+    rejectUnauthorized,
+    configured: Boolean(host && user && pass)
+  };
+}
+
+function isMailerConfigured() {
+  return getSmtpConfig().configured;
+}
+
+function getFromAddress() {
+  return getSmtpConfig().from;
+}
+
 function handleMissingMailer(logMessage) {
   if (process.env.NODE_ENV !== 'production') {
     console.log(logMessage);
@@ -19,23 +51,28 @@ function handleMissingMailer(logMessage) {
 }
 
 function getTransporter() {
-  const host = process.env.SMTP_HOST;
-  const user = process.env.SMTP_USER;
-  // Strip spaces from Gmail App Password (e.g. "yfdi eyxh hngp wfnw" → "yfdieyxhhngpwfnw")
-  const pass = (process.env.SMTP_PASS || '').replace(/\s/g, '');
+  const { host, user, pass, port, secure, rejectUnauthorized } = getSmtpConfig();
 
   if (!host || !user || !pass) {
     return null;
   }
 
   if (!transporter) {
-    const port = Number(process.env.SMTP_PORT || 587);
     transporter = nodemailer.createTransport({
+      pool: true,
       host,
       port,
-      secure: process.env.SMTP_SECURE === 'true' || port === 465,
+      secure,
+      requireTLS: !secure,
       auth: { user, pass },
-      tls: { rejectUnauthorized: false }  // allow self-signed on dev
+      family: 4,
+      maxConnections: Number(process.env.SMTP_POOL_CONNECTIONS || 2),
+      maxMessages: Number(process.env.SMTP_POOL_MAX_MESSAGES || 100),
+      connectionTimeout: Number(process.env.SMTP_CONNECTION_TIMEOUT_MS || 10000),
+      greetingTimeout: Number(process.env.SMTP_GREETING_TIMEOUT_MS || 10000),
+      socketTimeout: Number(process.env.SMTP_SOCKET_TIMEOUT_MS || 20000),
+      dnsTimeout: Number(process.env.SMTP_DNS_TIMEOUT_MS || 10000),
+      tls: { rejectUnauthorized }
     });
   }
 
@@ -52,7 +89,7 @@ async function sendOtpEmail({ to, otp, name }) {
   }
 
   await mailer.sendMail({
-    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    from: getFromAddress(),
     to,
     subject: `${otp} is your Rancom Technologies verification code`,
     text: `Hello${displayName},\n\nYour Rancom Technologies verification code is ${otp}. It expires in ${minutes} minutes.\n\nIf you did not request this code, please ignore this email.`,
@@ -123,7 +160,7 @@ async function sendOtpEmail({ to, otp, name }) {
   return { devMode: false };
 }
 
-module.exports = { sendOtpEmail, sendTestInviteEmail, sendInterviewEmail };
+module.exports = { sendOtpEmail, sendTestInviteEmail, sendInterviewEmail, isMailerConfigured };
 
 async function sendInterviewEmail({ to, name, position, interviewDate, interviewTime, mode, location, meetLink, interviewers, notes }) {
   const mailer = getTransporter();
@@ -136,7 +173,7 @@ async function sendInterviewEmail({ to, name, position, interviewDate, interview
   }
 
   await mailer.sendMail({
-    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    from: getFromAddress(),
     to,
     subject: `Interview Invitation — ${position} | Rancom Technologies`,
     text: `Hello ${displayName},\n\nYou are invited for an interview at Rancom Technologies.\n\nPosition: ${position}\nDate: ${dateStr}\nTime: ${interviewTime}\nMode: ${modeLabel}\n${location ? `Location: ${location}\n` : ''}${meetLink ? `Meeting Link: ${meetLink}\n` : ''}${interviewers ? `Interviewer(s): ${interviewers}\n` : ''}${notes ? `Notes: ${notes}\n` : ''}\nBest regards,\nHR Team — Rancom Technologies Pvt Ltd`,
@@ -251,7 +288,7 @@ async function sendTestInviteEmail({ to, name, assessmentTitle, accessCode, test
   }
 
   await mailer.sendMail({
-    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    from: getFromAddress(),
     to,
     subject: `You're invited to take the ${assessmentTitle} — Rancom Technologies`,
     text: `Hello ${displayName},\n\nYou have been invited to take the online assessment: ${assessmentTitle}.\n\nTest URL: ${testUrl}\nAccess Code: ${accessCode}\nDuration: ${duration} minutes\nExpiry: ${expiryStr}\n\nRancom Technologies Pvt Ltd`,

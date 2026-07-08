@@ -277,12 +277,13 @@ export default function AdminDashboard() {
       if (!res.ok) throw new Error(data.error || data.message || 'Failed to send interview invitation.');
       setInterviewModal(false);
       const isDevMode = Boolean(data.devMode);
+      const isQueued = Boolean(data.queued);
       Swal.fire({
         icon: isDevMode ? 'warning' : 'success',
-        title: isDevMode ? 'SMTP Not Configured' : '📧 Invitation Sent!',
+        title: isDevMode ? 'SMTP Not Configured' : (isQueued ? 'Invitation Sending' : 'Invitation Sent'),
         html: isDevMode
           ? `Interview invite was logged locally, but no email was sent to <strong>${interviewApp.email}</strong>. Configure SMTP settings to send real emails.`
-          : `Interview details sent to <strong>${interviewApp.email}</strong>`,
+          : `Interview details are being sent to <strong>${interviewApp.email}</strong>. Check Render logs if delivery fails.`,
         timer: 3000, showConfirmButton: false, timerProgressBar: true
       });
     } catch (err) {

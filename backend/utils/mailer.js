@@ -2,7 +2,6 @@
 
 const nodemailer = require('nodemailer');
 const dns = require('dns');
-const emailSender = require('./emailSender');
 const { sendViaBrevo, getBrevoConfig } = require('./brevoSender');
 
 // Force DNS lookups to prefer IPv4
@@ -17,7 +16,7 @@ if (dns.setDefaultResultOrder) {
 function getSmtpConfig() {
   const host = String(process.env.SMTP_HOST || '').trim();
   const user = String(process.env.SMTP_USER || '').trim();
-  // Strip spaces from Gmail App Passwords (e.g. "yfdi eyxh hngp wfnw" → "yfdieyxhhngpwfnw")
+  // Strip accidental spaces from pasted SMTP keys.
   const pass = String(process.env.SMTP_PASS || '').replace(/\s/g, '');
   const fromName = String(process.env.SMTP_FROM_NAME || 'Rancom Technologies').trim();
   const rawFrom = String(process.env.SMTP_FROM || '').trim();
@@ -86,21 +85,16 @@ function summarizeMailInfo(info = {}) {
 function getFromAddress()    { return getSmtpConfig().from; }
 function getReplyToAddress() { return getSmtpConfig().replyTo || undefined; }
 function isMailerConfigured() {
-  return getBrevoConfig().configured || emailSender.isConfigured() || getSmtpConfig().configured;
+  const cfg = getSmtpConfig();
+  return getBrevoConfig().configured || (cfg.configured && isBrevoSmtpHost(cfg.host));
 }
 
 function getMailerPublicConfig() {
   const cfg = getSmtpConfig();
   const brevo = getBrevoConfig();
-  const provider = brevo.configured
-    ? 'brevo'
-    : (cfg.configured && isBrevoSmtpHost(cfg.host)
-        ? 'brevo-smtp'
-        : (emailSender.resendConfigured()
-        ? 'resend'
-        : (emailSender.gmailConfigured()
-            ? 'gmail-api'
-            : (cfg.configured ? 'smtp' : null))));
+  const provider = cfg.configured && isBrevoSmtpHost(cfg.host)
+    ? 'brevo-smtp'
+    : (brevo.configured ? 'brevo' : null);
   return {
     configured: Boolean(provider),
     provider,
@@ -137,31 +131,23 @@ function getMailerErrorMessage(err) {
     return msg;
   }
 
-  if (msg.includes('Gmail OAuth: invalid_grant')) {
-    return 'Gmail refresh token is invalid or expired. Generate a new refresh token using the same GMAIL_CLIENT_ID and GMAIL_CLIENT_SECRET, or configure RESEND_API_KEY/BREVO_API_KEY.';
+  if (responseCode === 525 || msg.includes('Unauthorized IP address')) {
+    return 'Brevo blocked this server IP for SMTP. In Brevo, allow this sending IP under SMTP/API authorized IP settings, or use a Brevo API key instead of SMTP for cloud hosting.';
   }
-  if (msg.startsWith('Gmail OAuth:') || msg.startsWith('Gmail API:')) {
-    return `${msg}. Check the Gmail API is enabled and the Render Gmail environment variables match the same Google OAuth client.`;
-  }
-
   if (code === 'EAUTH' || responseCode === 535 || responseCode === 534) {
-    return 'SMTP login failed. Set SMTP_USER to your Gmail address and SMTP_PASS to a Gmail App Password.';
+    return 'Brevo SMTP login failed. Check SMTP_USER and SMTP_PASS from Brevo SMTP & API settings.';
   }
   if (code === 'ETIMEDOUT' || code === 'ESOCKET' || code === 'ECONNECTION' || msg.includes('408') || msg.includes('greeting')) {
-    return 'SMTP is blocked on Render. Fix: Set BREVO_API_KEY (xkeysib-...) in Render Environment Variables → app.brevo.com → Settings → API Keys.';
+    return 'Brevo SMTP connection failed. Check SMTP_HOST=smtp-relay.brevo.com, SMTP_PORT=587, and network access.';
   }
   if (responseCode === 550 || responseCode === 551 || responseCode === 553) {
-    return 'SMTP rejected the sender or recipient. Ensure the sender address is verified.';
+    return 'Brevo rejected the sender or recipient. Ensure SMTP_FROM uses a sender verified in Brevo.';
   }
   return msg || 'Email service failed to send the message.';
 }
 
-function handleMissingMailer(logMessage) {
-  if (process.env.NODE_ENV !== 'production') {
-    console.log(logMessage);
-    return { devMode: true };
-  }
-  throw new Error('Email service is not configured. Set BREVO_API_KEY (xkeysib-...) and BREVO_SENDER_EMAIL, or set SMTP_HOST, SMTP_USER, and SMTP_PASS.');
+function handleMissingMailer() {
+  throw new Error('Brevo email is not configured. Set SMTP_HOST=smtp-relay.brevo.com, SMTP_PORT=587, SMTP_SECURE=false, SMTP_USER, SMTP_PASS, and SMTP_FROM.');
 }
 
 // ---------------------------------------------------------------------------
@@ -191,14 +177,17 @@ function getTransporter() {
 
 async function verifyMailer() {
   const cfg = getSmtpConfig();
-  if (getBrevoConfig().configured || emailSender.isConfigured() && !(cfg.configured && isBrevoSmtpHost(cfg.host))) {
+  if (cfg.configured && isBrevoSmtpHost(cfg.host)) {
+    const mailer = getTransporter();
+    await mailer.verify();
     return { ok: true, config: getMailerPublicConfig() };
   }
 
-  const mailer = getTransporter();
-  if (!mailer) return handleMissingMailer('Email service is not configured.');
-  await mailer.verify();
-  return { ok: true, config: getMailerPublicConfig() };
+  if (getBrevoConfig().configured) {
+    return { ok: true, config: getMailerPublicConfig() };
+  }
+
+  return handleMissingMailer();
 }
 
 async function sendViaSmtp({ to, subject, html, text }) {
@@ -206,6 +195,10 @@ async function sendViaSmtp({ to, subject, html, text }) {
   if (!mailer) return null;
 
   const cfg  = getSmtpConfig();
+  if (!isBrevoSmtpHost(cfg.host)) {
+    throw new Error('Only Brevo SMTP is allowed. Set SMTP_HOST=smtp-relay.brevo.com.');
+  }
+
   const info = await mailer.sendMail({
     from: cfg.from, replyTo: cfg.replyTo || undefined,
     to, subject, html, text: text || ''
@@ -222,47 +215,22 @@ async function sendViaSmtp({ to, subject, html, text }) {
 }
 
 // ---------------------------------------------------------------------------
-// Core send helper — Brevo REST API first (HTTPS, works on Render),
-// SMTP fallback only for local dev
+// Core send helper — Brevo only: SMTP first, REST API second.
 // ---------------------------------------------------------------------------
 
 async function sendEmail({ to, subject, html, text }) {
+  const smtpCfg = getSmtpConfig();
+  if (smtpCfg.configured && isBrevoSmtpHost(smtpCfg.host)) {
+    return sendViaSmtp({ to, subject, html, text });
+  }
+
   const brevo = getBrevoConfig();
   if (brevo.configured || brevo.apiKey || brevo.senderEmail) {
     const brevoResult = await sendViaBrevo({ to, subject, html, text });
     if (brevoResult) return brevoResult;
   }
 
-  const smtpCfg = getSmtpConfig();
-  if (smtpCfg.configured && isBrevoSmtpHost(smtpCfg.host)) {
-    return sendViaSmtp({ to, subject, html, text });
-  }
-
-  // Resend or Gmail REST API — works on Render over HTTPS
-  if (emailSender.isConfigured()) {
-    try {
-      return await emailSender.sendEmail({ to, subject, html, text });
-    } catch (err) {
-      if (process.env.NODE_ENV === 'production') {
-        throw err;
-      }
-      console.warn(`[Email] HTTPS provider failed (${err.message}); trying local SMTP fallback.`);
-    }
-  }
-
-  // Local dev fallback: SMTP (port 465, works locally)
-  const smtpResult = await sendViaSmtp({ to, subject, html, text });
-  if (!smtpResult) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`[EMAIL DEV] To: ${to} | Subject: ${subject}`);
-      return { devMode: true };
-    }
-    throw new Error(
-      'Email service not configured. Set GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, ' +
-      'GMAIL_REFRESH_TOKEN, GMAIL_USER in Render Environment Variables.'
-    );
-  }
-  return smtpResult;
+  return handleMissingMailer();
 }
 
 // ---------------------------------------------------------------------------

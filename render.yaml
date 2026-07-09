@@ -22,32 +22,9 @@ services:
         value: rancom@2026
       - key: PRODUCTION_DOMAIN
         value: www.rancomtechnologies.com
-      # Email — Brevo REST API over HTTPS
-      # Get key: app.brevo.com → SMTP & API → API Keys. Use xkeysib-..., not SMTP password.
-      - key: BREVO_API_KEY
-        sync: false
-      - key: BREVO_SENDER_EMAIL
-        sync: false
-      - key: BREVO_SENDER_NAME
-        value: Rancom Technologies
+      # Email — Brevo SMTP only
       - key: EMAIL_SEND_TIMEOUT_MS
         value: "15000"
-      # Email fallbacks — optional
-      - key: RESEND_API_KEY
-        sync: false
-      - key: RESEND_FROM
-        sync: false
-      # Brevo SMTP fallback. If set, smtp-relay.brevo.com is used before Gmail.
-      - key: GMAIL_CLIENT_ID
-        sync: false
-      - key: GMAIL_CLIENT_SECRET
-        sync: false
-      - key: GMAIL_USER
-        sync: false
-      - key: GMAIL_FROM_NAME
-        value: Rancom Technologies
-      - key: GMAIL_REFRESH_TOKEN
-        sync: false
       - key: SMTP_HOST
         value: smtp-relay.brevo.com
       - key: SMTP_PORT

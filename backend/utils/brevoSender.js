@@ -13,14 +13,16 @@ const fetch = (...args) => import('node-fetch').then(({ default: f }) => f(...ar
 const BREVO_API = 'https://api.brevo.com/v3/smtp/email';
 
 function getBrevoConfig() {
-  const apiKey = process.env.BREVO_API_KEY || '';
+  const apiKey = String(process.env.BREVO_API_KEY || '').trim();
+  const senderEmail = String(process.env.BREVO_SENDER_EMAIL || process.env.SMTP_USER || '').trim();
+  const senderName = String(process.env.BREVO_SENDER_NAME || 'Rancom Technologies').trim();
   // Only valid if it's a REST API key (xkeysib-...), not SMTP key (xsmtpsib-)
   const isRestKey = apiKey.startsWith('xkeysib-');
   return {
     apiKey,
-    senderEmail: process.env.BREVO_SENDER_EMAIL || process.env.SMTP_USER || '',
-    senderName:  process.env.BREVO_SENDER_NAME  || 'Rancom Technologies',
-    configured:  isRestKey && apiKey.length > 20
+    senderEmail,
+    senderName,
+    configured: isRestKey && apiKey.length > 20 && Boolean(senderEmail)
   };
 }
 
@@ -37,7 +39,7 @@ async function sendViaBrevo({ to, subject, html, text }) {
       console.log(msg);
       return { devMode: true };
     }
-    throw new Error('Brevo REST API key not configured. Set BREVO_API_KEY (xkeysib-...) in environment variables.');
+    throw new Error('Brevo email is not configured. Set BREVO_API_KEY (xkeysib-...) and BREVO_SENDER_EMAIL in environment variables.');
   }
 
   const payload = {

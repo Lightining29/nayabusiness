@@ -280,10 +280,10 @@ export default function AdminDashboard() {
       const isQueued = Boolean(data.queued);
       Swal.fire({
         icon: isDevMode ? 'warning' : 'success',
-        title: isDevMode ? 'SMTP Not Configured' : (isQueued ? 'Invitation Sending' : 'Invitation Sent'),
+        title: isDevMode ? 'Email Provider Not Configured' : (isQueued ? 'Invitation Sending' : 'Invitation Sent'),
         html: isDevMode
-          ? `Interview invite was logged locally, but no email was sent to <strong>${interviewApp.email}</strong>. Configure SMTP settings to send real emails.`
-          : `Interview details were sent to <strong>${interviewApp.email}</strong>. If delivery fails, check Render logs for SMTP errors.`,
+          ? `Interview invite was logged locally, but no email was sent to <strong>${interviewApp.email}</strong>. Configure Brevo or SMTP settings to send real emails.`
+          : `Interview details were sent to <strong>${interviewApp.email}</strong>. If delivery fails, check Render logs for email provider errors.`,
         timer: 3000, showConfirmButton: false, timerProgressBar: true
       });
     } catch (err) {

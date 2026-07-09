@@ -80,12 +80,30 @@ function summarizeMailInfo(info = {}) {
 
 function getFromAddress()    { return getSmtpConfig().from; }
 function getReplyToAddress() { return getSmtpConfig().replyTo || undefined; }
-function isMailerConfigured() { return getSmtpConfig().configured; }
+function isMailerConfigured() {
+  return getBrevoConfig().configured || getSmtpConfig().configured;
+}
 
 function getMailerPublicConfig() {
   const cfg = getSmtpConfig();
+  const brevo = getBrevoConfig();
   return {
-    configured: cfg.configured,
+    configured: brevo.configured || cfg.configured,
+    provider:   brevo.configured ? 'brevo' : (cfg.configured ? 'smtp' : null),
+    brevo: {
+      configured: brevo.configured,
+      senderEmail: maskEmail(brevo.senderEmail),
+      senderName:  brevo.senderName || null
+    },
+    smtp: {
+      configured: cfg.configured,
+      host:       cfg.host || null,
+      port:       cfg.port,
+      secure:     cfg.secure,
+      user:       maskEmail(cfg.user),
+      from:       cfg.from || null,
+      replyTo:    cfg.replyTo || null
+    },
     host:       cfg.host || null,
     port:       cfg.port,
     secure:     cfg.secure,
@@ -116,7 +134,7 @@ function handleMissingMailer(logMessage) {
     console.log(logMessage);
     return { devMode: true };
   }
-  throw new Error('Email service is not configured. Set SMTP_HOST, SMTP_USER, and SMTP_PASS.');
+  throw new Error('Email service is not configured. Set BREVO_API_KEY (xkeysib-...) and BREVO_SENDER_EMAIL, or set SMTP_HOST, SMTP_USER, and SMTP_PASS.');
 }
 
 // ---------------------------------------------------------------------------

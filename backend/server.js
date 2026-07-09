@@ -990,11 +990,11 @@ app.post('/api/admin/send-interview', async (req, res) => {
   }
 
   const normalizedTo = normalizeEmail(to);
-  const smtpReady = isMailerConfigured();
+  const mailReady = isMailerConfigured();
 
-  if (process.env.NODE_ENV === 'production' && !smtpReady) {
+  if (process.env.NODE_ENV === 'production' && !mailReady) {
     return res.status(503).json({
-      error: 'Email service is not configured. Set SMTP_HOST, SMTP_USER and SMTP_PASS in Render environment variables.'
+      error: 'Email service is not configured. Set BREVO_API_KEY and BREVO_SENDER_EMAIL, or set SMTP_HOST, SMTP_USER and SMTP_PASS in Render environment variables.'
     });
   }
 

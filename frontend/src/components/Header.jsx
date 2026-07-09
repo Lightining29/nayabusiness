@@ -489,9 +489,14 @@ export default function Header() {
                 </button>
               </>
             ) : (
-              <button className="hdr-login-btn" onClick={() => { setLoginOpen(true); setLoginError(''); setLoginSuccess(''); }}>
-                <LogIn size={15} /><span>Login</span>
-              </button>
+              <>
+                <Link to="/signup" style={{ display:'inline-flex', alignItems:'center', gap:'0.35rem', padding:'0.4rem 1rem', borderRadius:'8px', fontSize:'0.85rem', fontWeight:700, background:'linear-gradient(135deg,#10b981,#059669)', color:'white', textDecoration:'none', boxShadow:'0 2px 8px rgba(16,185,129,0.3)', transition:'all 0.18s' }}>
+                  Sign Up
+                </Link>
+                <button className="hdr-login-btn" onClick={() => { setLoginOpen(true); setLoginError(''); setLoginSuccess(''); }}>
+                  <LogIn size={15} /><span>Login</span>
+                </button>
+              </>
             )}
 
             {/* Hamburger */}

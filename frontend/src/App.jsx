@@ -18,6 +18,7 @@ import Login from './pages/Login';
 import Profile from './pages/Profile';
 import ApplyForm from './pages/ApplyForm';
 import TakeTest from './pages/TakeTest';
+import Signup from './pages/Signup';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // ... existing imports remain
@@ -62,6 +63,7 @@ function AppLayout() {
 
           {/* Recruitment & Assessment */}
           <Route path="/apply" element={<ApplyForm />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="/test/:id" element={<TakeTest />} />
           
           {/* Admin routes */}

@@ -263,10 +263,13 @@ export default function AdminDashboard() {
   const handleSendInterview = async (e) => {
     e.preventDefault();
     setInterviewLoading(true);
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 30000);
     try {
       const res = await fetch('/api/admin/send-interview', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           to:   interviewApp.email,
           name: `${interviewApp.first_name} ${interviewApp.last_name}`.trim(),
@@ -287,8 +290,14 @@ export default function AdminDashboard() {
         timer: 3000, showConfirmButton: false, timerProgressBar: true
       });
     } catch (err) {
-      Swal.fire({ icon: 'error', title: 'Failed', text: err.message, confirmButtonColor: '#ef4444' });
-    } finally { setInterviewLoading(false); }
+      const message = err.name === 'AbortError'
+        ? 'The mail request timed out. Check the email provider settings and Render logs, then try again.'
+        : err.message;
+      Swal.fire({ icon: 'error', title: 'Failed', text: message, confirmButtonColor: '#ef4444' });
+    } finally {
+      window.clearTimeout(timeout);
+      setInterviewLoading(false);
+    }
   };
 
   const handleLogout = () => {

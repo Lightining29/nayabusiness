@@ -1,6 +1,6 @@
 /**
  * gmailSender.js
- * Sends email via Gmail using OAuth2 — no SMTP port needed.
+ * Sends email via Gmail REST API using OAuth2 — no SMTP port needed.
  * Works on Render, Railway, Heroku — any cloud platform.
  *
  * Setup (one-time):
@@ -15,7 +15,7 @@
  *    GMAIL_REFRESH_TOKEN = refresh token from step 4
  *    GMAIL_USER          = your gmail address (brayw433@gmail.com)
  */
-const nodemailer = require('nodemailer');
+const { sendViaGmail: sendViaGmailRest } = require('./emailSender');
 
 function getGmailConfig() {
   return {
@@ -31,27 +31,7 @@ async function sendViaGmail({ to, subject, html, text }) {
   const cfg = getGmailConfig();
   if (!cfg.configured) return null; // not configured, skip
 
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      type:         'OAuth2',
-      user:         cfg.user,
-      clientId:     cfg.clientId,
-      clientSecret: cfg.clientSecret,
-      refreshToken: cfg.refreshToken
-    }
-  });
-
-  const info = await transporter.sendMail({
-    from:    `"Rancom Technologies" <${cfg.user}>`,
-    to,
-    subject,
-    html,
-    text: text || ''
-  });
-
-  console.log(`[Gmail OAuth2] ✅ Email sent to ${to} — messageId: ${info.messageId}`);
-  return { devMode: false, messageId: info.messageId, delivery: { accepted: [to], rejected: [] } };
+  return sendViaGmailRest({ to, subject, html, text });
 }
 
 module.exports = { sendViaGmail, getGmailConfig };

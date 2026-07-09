@@ -12,17 +12,20 @@ const fetch = (...args) => import('node-fetch').then(({ default: f }) => f(...ar
 
 const BREVO_API = 'https://api.brevo.com/v3/smtp/email';
 
+function getTimeoutMs() {
+  const timeout = Number(process.env.EMAIL_SEND_TIMEOUT_MS || 15000);
+  return Number.isFinite(timeout) && timeout > 0 ? timeout : 15000;
+}
+
 function getBrevoConfig() {
   const apiKey = String(process.env.BREVO_API_KEY || '').trim();
-  const senderEmail = String(process.env.BREVO_SENDER_EMAIL || process.env.SMTP_USER || '').trim();
+  const senderEmail = String(process.env.BREVO_SENDER_EMAIL || '').trim();
   const senderName = String(process.env.BREVO_SENDER_NAME || 'Rancom Technologies').trim();
-  // Accept both REST key (xkeysib-) AND SMTP key (xsmtpsib-) — Brevo API accepts both
-  const isValidKey = (apiKey.startsWith('xkeysib-') || apiKey.startsWith('xsmtpsib-')) && apiKey.length > 20;
   return {
     apiKey,
     senderEmail,
     senderName,
-    configured: isValidKey && Boolean(senderEmail)
+    configured: Boolean(apiKey && senderEmail)
   };
 }
 
@@ -34,6 +37,13 @@ async function sendViaBrevo({ to, subject, html, text }) {
   const cfg = getBrevoConfig();
 
   if (!cfg.configured) {
+    if (cfg.apiKey || cfg.senderEmail) {
+      const missing = [
+        cfg.apiKey ? null : 'BREVO_API_KEY',
+        cfg.senderEmail ? null : 'BREVO_SENDER_EMAIL'
+      ].filter(Boolean).join(' and ');
+      throw new Error(`${missing} must be set to send through Brevo.`);
+    }
     console.warn('[Brevo] Not configured — skipping');
     return null; // let caller try next provider
   }
@@ -46,30 +56,43 @@ async function sendViaBrevo({ to, subject, html, text }) {
     textContent: text || '',
   };
 
-  const res = await fetch(BREVO_API, {
-    method:  'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'api-key':       cfg.apiKey,
-      'Accept':        'application/json'
-    },
-    body: JSON.stringify(payload)
-  });
+  const controller = new AbortController();
+  const timeoutMs = getTimeoutMs();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  let res;
+  try {
+    res = await fetch(BREVO_API, {
+      method:  'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key':       cfg.apiKey,
+        'Accept':        'application/json'
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    });
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error(`Brevo API timed out after ${Math.round(timeoutMs / 1000)} seconds.`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeout);
+  }
 
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
     const msg = data?.message || data?.error || `Brevo API error ${res.status}`;
-    // On auth failure — return null so caller falls through to Gmail
     if (res.status === 401 || res.status === 403) {
-      console.warn(`[Brevo] Auth failed (${msg}) — trying next provider`);
-      return null;
+      throw new Error(`Brevo API authentication failed: ${msg}. Check BREVO_API_KEY and verify BREVO_SENDER_EMAIL in Brevo.`);
     }
     throw new Error(`Brevo API: ${msg}`);
   }
 
   console.log(`[Brevo] ✅ Email sent to ${to} — messageId: ${data.messageId || 'n/a'}`);
-  return { devMode: false, messageId: data.messageId, delivery: { accepted: [to], rejected: [] } };
+  return { devMode: false, messageId: data.messageId, delivery: { accepted: [to], rejected: [], provider: 'brevo' } };
 }
 
 module.exports = { sendViaBrevo, getBrevoConfig };

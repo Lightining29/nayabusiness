@@ -6,6 +6,8 @@ require('dotenv').config({ path: 'backend/.env' });
 const { sendViaGmail, getGmailConfig } = require('./backend/utils/gmailSender');
 
 const cfg = getGmailConfig();
+const mask = (value) => value ? `${String(value).slice(0, 6)}...configured` : '(not set)';
+
 console.log('Gmail OAuth2 configured:', cfg.configured);
 console.log('Gmail user:', cfg.user);
 console.log('Has refresh token:', cfg.refreshToken.length > 0);
@@ -25,11 +27,11 @@ sendViaGmail({
 .then(r => {
   console.log('\n✅ Email sent successfully!');
   console.log('   Message ID:', r.messageId);
-  console.log('\nNow add these to Render Dashboard → Environment:');
-  console.log('   GMAIL_CLIENT_ID    =', cfg.clientId);
+  console.log('\nRender environment check:');
+  console.log('   GMAIL_CLIENT_ID    =', mask(cfg.clientId));
   console.log('   GMAIL_CLIENT_SECRET= (already set)');
   console.log('   GMAIL_USER         =', cfg.user);
-  console.log('   GMAIL_REFRESH_TOKEN= (copy from your .env)');
+  console.log('   GMAIL_REFRESH_TOKEN=', mask(cfg.refreshToken));
 })
 .catch(e => {
   console.error('\n❌ Failed:', e.message);

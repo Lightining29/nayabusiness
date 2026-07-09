@@ -17,7 +17,7 @@ const EmailVerification = require('./models/EmailVerification');
 const ResumeData = require('./models/ResumeData');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { sendOtpEmail, sendInterviewEmail, isMailerConfigured } = require('./utils/mailer');
+const { sendOtpEmail, sendInterviewEmail, getMailerPublicConfig } = require('./utils/mailer');
 
 // Import route files
 const authRoutes = require('./routes/auth');
@@ -985,16 +985,7 @@ app.post('/api/admin/login', (req, res) => {
 // Debug: check SMTP config (dev only)
 app.get('/api/admin/email-config', (req, res) => {
   if (process.env.NODE_ENV === 'production') return res.status(404).end();
-  const pass = (process.env.SMTP_PASS || '').replace(/\s/g, '');
-  res.json({
-    SMTP_HOST:    process.env.SMTP_HOST    || '(not set)',
-    SMTP_PORT:    process.env.SMTP_PORT    || '(not set)',
-    SMTP_SECURE:  process.env.SMTP_SECURE  || '(not set)',
-    SMTP_USER:    process.env.SMTP_USER    || '(not set)',
-    SMTP_PASS_LEN: pass.length,
-    SMTP_FROM:    process.env.SMTP_FROM    || '(not set)',
-    configured:   !!(process.env.SMTP_HOST && process.env.SMTP_USER && pass)
-  });
+  res.json(getMailerPublicConfig());
 });
 
 // 5b. Send interview invitation email to a candidate

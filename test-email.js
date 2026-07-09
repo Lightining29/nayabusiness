@@ -1,6 +1,8 @@
 require('dotenv').config({ path: 'backend/.env' });
 const { sendEmail, isConfigured } = require('./backend/utils/emailSender');
 
+const mask = (value) => value ? `${String(value).slice(0, 6)}...configured` : '(not set)';
+
 console.log('Gmail OAuth2 configured:', isConfigured());
 
 if (!isConfigured()) {
@@ -20,11 +22,11 @@ sendEmail({
 })
 .then(r => {
   console.log('\n✅ Email sent!', r.messageId);
-  console.log('\nNow add these to Render → Environment:');
-  console.log('  GMAIL_CLIENT_ID    =', process.env.GMAIL_CLIENT_ID);
-  console.log('  GMAIL_CLIENT_SECRET=', process.env.GMAIL_CLIENT_SECRET);
-  console.log('  GMAIL_USER         =', process.env.GMAIL_USER);
-  console.log('  GMAIL_FROM_NAME    = Rancom Technologies');
-  console.log('  GMAIL_REFRESH_TOKEN=', process.env.GMAIL_REFRESH_TOKEN);
+  console.log('\nRender environment check:');
+  console.log('  GMAIL_CLIENT_ID    =', mask(process.env.GMAIL_CLIENT_ID));
+  console.log('  GMAIL_CLIENT_SECRET=', mask(process.env.GMAIL_CLIENT_SECRET));
+  console.log('  GMAIL_USER         =', process.env.GMAIL_USER || '(not set)');
+  console.log('  GMAIL_FROM_NAME    =', process.env.GMAIL_FROM_NAME || 'Rancom Technologies');
+  console.log('  GMAIL_REFRESH_TOKEN=', mask(process.env.GMAIL_REFRESH_TOKEN));
 })
 .catch(e => console.error('\n❌ Failed:', e.message));

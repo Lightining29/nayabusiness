@@ -312,13 +312,12 @@ export default function Login() {
 
               <div className="form-group" style={{ marginBottom: '1rem' }}>
                 <label style={{ fontSize: '0.85rem', color: '#374151', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                  <Phone size={14} /> Phone Number
+                  <Phone size={14} /> Phone Number <span style={{ color:'#94a3b8', fontWeight:400, fontSize:'0.78rem' }}>(optional)</span>
                 </label>
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="Enter mobile number"
-                  required
+                  placeholder="Enter mobile number (optional)"
                   value={googleRegisterData.phone}
                   onChange={e => setGoogleRegisterData({ ...googleRegisterData, phone: e.target.value })}
                 />

@@ -146,8 +146,8 @@ export default function Register() {
   const handleGoogleRegisterSubmit = async (e) => {
     e.preventDefault();
     const { credential, firstName, lastName, password, phone, city, qualification, skills, job_title } = googleRegisterData;
-    if (!password || !phone || !city) {
-      setError('Password, phone and city are required.');
+    if (!password || !city) {
+      setError('Password and city are required.');
       return;
     }
     setLoading(true);
@@ -554,8 +554,8 @@ export default function Register() {
               {/* Phone + City row */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.85rem' }}>
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label style={{ fontSize: '0.83rem', color: '#374151', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Phone size={13} /> Phone</label>
-                  <input type="text" className="form-input" placeholder="Mobile number" required
+                  <label style={{ fontSize: '0.83rem', color: '#374151', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Phone size={13} /> Phone <span style={{ color:'#94a3b8', fontWeight:400 }}>(optional)</span></label>
+                  <input type="text" className="form-input" placeholder="Mobile number (optional)"
                     value={googleRegisterData.phone}
                     onChange={e => setGoogleRegisterData({ ...googleRegisterData, phone: e.target.value })} />
                 </div>

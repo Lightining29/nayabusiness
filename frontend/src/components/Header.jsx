@@ -430,7 +430,7 @@ export default function Header() {
                 RANCOM <span style={{ background: 'linear-gradient(135deg,#0ea5e9,#06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>TECHNOLOGIES</span>
               </span>
               <span className="hdr-logo-sub">
-                Pvt. Ltd  <span style={{ color: '#e53e3e' }}>apple</span><span style={{ color: '#38a169' }}>tree</span> infotech
+                Pvt. Ltd  <span style={{ color: '#e53e3e' }}>Apple</span><span style={{ color: '#38a169' }}>Tree</span> Infotech
               </span>
             </div>
           </Link>
@@ -503,7 +503,7 @@ export default function Header() {
               </>
             ) : (
               <>
-                <Link to="/signup" style={{ display:'inline-flex', alignItems:'center', gap:'0.35rem', padding:'0.4rem 1rem', borderRadius:'8px', fontSize:'0.85rem', fontWeight:700, background:'linear-gradient(135deg,#10b981,#059669)', color:'white', textDecoration:'none', boxShadow:'0 2px 8px rgba(16,185,129,0.3)', transition:'all 0.18s' }}>
+                <Link to="/signup" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.4rem 1rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, background: 'linear-gradient(135deg,#10b981,#059669)', color: 'white', textDecoration: 'none', boxShadow: '0 2px 8px rgba(16,185,129,0.3)', transition: 'all 0.18s' }}>
                   Sign Up
                 </Link>
                 <button className="hdr-login-btn" onClick={() => { setLoginOpen(true); setLoginError(''); setLoginSuccess(''); }}>

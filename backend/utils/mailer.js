@@ -2,8 +2,6 @@
 
 const nodemailer = require('nodemailer');
 const dns = require('dns');
-const { sendViaBrevo, getBrevoConfig } = require('./brevoSender');
-const { sendViaGmail, getGmailConfig } = require('./gmailSender');
 
 // Force DNS lookups to prefer IPv4 — prevents hangs on dual-stack hosts.
 if (dns.setDefaultResultOrder) {
@@ -182,36 +180,23 @@ async function verifyMailer() {
 // ---------------------------------------------------------------------------
 
 async function sendEmail({ to, subject, html, text }) {
-  const brevo  = getBrevoConfig();
-  const gmail  = getGmailConfig();
-
-  // 1. Brevo REST API (HTTPS port 443) — best for Render
-  if (brevo.configured) {
-    const result = await sendViaBrevo({ to, subject, html, text });
-    if (result !== null) return result; // success or dev mode
-    // null = auth failed, fall through to Gmail
-  }
-
-  // 2. Gmail OAuth2 (no port needed) — second best
-  if (gmail.configured) {
-    const result = await sendViaGmail({ to, subject, html, text });
-    if (result !== null) return result;
-  }
-
-  // 3. SMTP fallback — only works locally (Render blocks all SMTP ports)
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error(
-      'Email not sent: No working email provider configured.\n' +
-      'Fix Option A — Brevo: Go to app.brevo.com → Settings → API Keys → Generate new key (xkeysib-...) → set BREVO_API_KEY in Render\n' +
-      'Fix Option B — Gmail: Set GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN, GMAIL_USER in Render. Get refresh token from developers.google.com/oauthplayground'
-    );
-  }
-
-  // Local dev SMTP
+  // Direct SMTP — Gmail port 465 (SSL) works on Render
   const mailer = getTransporter();
-  if (!mailer) return handleMissingMailer(`[EMAIL DEV] To: ${to} | Subject: ${subject}`);
+  if (!mailer) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[EMAIL DEV] To: ${to} | Subject: ${subject}`);
+      return { devMode: true };
+    }
+    throw new Error('Email service not configured. Set SMTP_HOST, SMTP_USER and SMTP_PASS.');
+  }
   const cfg  = getSmtpConfig();
-  const info = await mailer.sendMail({ from: cfg.from, replyTo: cfg.replyTo || undefined, to, subject, html, text: text || '' });
+  const info = await mailer.sendMail({
+    from:    cfg.from,
+    replyTo: cfg.replyTo || undefined,
+    to, subject, html,
+    text: text || ''
+  });
+  console.log(`[SMTP] ✅ Email sent to ${to} — ${info.messageId}`);
   return { devMode: false, delivery: summarizeMailInfo(info) };
 }
 

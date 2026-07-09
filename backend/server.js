@@ -982,6 +982,21 @@ app.post('/api/admin/login', (req, res) => {
   return res.status(401).json({ error: 'Invalid credentials' });
 });
 
+// Debug: check SMTP config (dev only)
+app.get('/api/admin/email-config', (req, res) => {
+  if (process.env.NODE_ENV === 'production') return res.status(404).end();
+  const pass = (process.env.SMTP_PASS || '').replace(/\s/g, '');
+  res.json({
+    SMTP_HOST:    process.env.SMTP_HOST    || '(not set)',
+    SMTP_PORT:    process.env.SMTP_PORT    || '(not set)',
+    SMTP_SECURE:  process.env.SMTP_SECURE  || '(not set)',
+    SMTP_USER:    process.env.SMTP_USER    || '(not set)',
+    SMTP_PASS_LEN: pass.length,
+    SMTP_FROM:    process.env.SMTP_FROM    || '(not set)',
+    configured:   !!(process.env.SMTP_HOST && process.env.SMTP_USER && pass)
+  });
+});
+
 // 5b. Send interview invitation email to a candidate
 app.post('/api/admin/send-interview', async (req, res) => {
   const { to, name, position, interviewDate, interviewTime, mode, location, meetLink, interviewers, notes } = req.body;
@@ -990,13 +1005,6 @@ app.post('/api/admin/send-interview', async (req, res) => {
   }
 
   const normalizedTo = normalizeEmail(to);
-  const mailReady = isMailerConfigured();
-
-  if (process.env.NODE_ENV === 'production' && !mailReady) {
-    return res.status(503).json({
-      error: 'Email service is not configured. Set BREVO_API_KEY and BREVO_SENDER_EMAIL, or set SMTP_HOST, SMTP_USER and SMTP_PASS in Render environment variables.'
-    });
-  }
 
   const payload = {
     to: normalizedTo,
@@ -1013,18 +1021,18 @@ app.post('/api/admin/send-interview', async (req, res) => {
 
   try {
     const result = await sendInterviewEmail(payload);
-    console.log(`[Interview] Email sent to ${normalizedTo}${result.devMode ? ' (dev mode - logged)' : ' ✓'}`);
+    console.log(`[Interview] Email sent to ${normalizedTo}${result.devMode ? ' (dev mode)' : ' ✓'}`);
     return res.status(200).json({
-      message: `Interview invitation was sent to ${normalizedTo}.`,
-      queued: false,
+      message: `Interview invitation sent to ${normalizedTo}.`,
       devMode: Boolean(result.devMode),
       delivery: result.delivery || null
     });
   } catch (err) {
-    console.error(`[Interview Email] Failed for ${normalizedTo}:`, err);
+    console.error(`[Interview Email] FAILED for ${normalizedTo}:`, err.message);
+    // Return the actual error detail so admin can see exactly what went wrong
     return res.status(502).json({
       error: 'Failed to send interview invitation.',
-      details: err.message || 'Unknown mailer error.'
+      details: err.message || 'Unknown error'
     });
   }
 });

@@ -2,12 +2,10 @@
 
 const nodemailer = require('nodemailer');
 const dns = require('dns');
-const { sendViaBrevo, getBrevoConfig } = require('./brevoSender');
+const emailSender = require('./emailSender');
 
 // Force DNS lookups to prefer IPv4
-if (dns.setDefaultResultOrder) {
-  dns.setDefaultResultOrder('ipv4first');
-}
+if (dns.setDefaultResultOrder) dns.setDefaultResultOrder('ipv4first');
 
 // ---------------------------------------------------------------------------
 // SMTP config helpers
@@ -215,22 +213,11 @@ async function sendViaSmtp({ to, subject, html, text }) {
 }
 
 // ---------------------------------------------------------------------------
-// Core send helper — Brevo only: SMTP first, REST API second.
+// Core send helper — Brevo REST API via emailSender.js
 // ---------------------------------------------------------------------------
 
 async function sendEmail({ to, subject, html, text }) {
-  const smtpCfg = getSmtpConfig();
-  if (smtpCfg.configured && isBrevoSmtpHost(smtpCfg.host)) {
-    return sendViaSmtp({ to, subject, html, text });
-  }
-
-  const brevo = getBrevoConfig();
-  if (brevo.configured || brevo.apiKey || brevo.senderEmail) {
-    const brevoResult = await sendViaBrevo({ to, subject, html, text });
-    if (brevoResult) return brevoResult;
-  }
-
-  return handleMissingMailer();
+  return emailSender.sendEmail({ to, subject, html, text });
 }
 
 // ---------------------------------------------------------------------------

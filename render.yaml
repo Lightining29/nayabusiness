@@ -2,14 +2,12 @@ services:
   - type: web
     name: rancom-technologies
     runtime: docker
-    repo: https://github.com/Lightining29/ransom-2.git
+    repo: https://github.com/Lightining29/nayabusiness.git
     branch: main
     dockerfilePath: ./Dockerfile
     envVars:
       - key: MONGODB_URI
         sync: false
-      - key: MONGODB_DNS_SERVERS
-        value: 1.1.1.1,8.8.8.8
       - key: NODE_ENV
         value: production
       - key: PORT
@@ -22,21 +20,20 @@ services:
         value: rancom@2026
       - key: PRODUCTION_DOMAIN
         value: www.rancomtechnologies.com
-      # Email — Brevo SMTP only
-      - key: EMAIL_SEND_TIMEOUT_MS
-        value: "15000"
-      - key: SMTP_HOST
-        value: smtp-relay.brevo.com
-      - key: SMTP_PORT
-        value: "587"
-      - key: SMTP_SECURE
-        value: "false"
-      - key: SMTP_USER
+      # Brevo REST API — HTTPS port 443, works on Render (no SMTP port blocking)
+      # Set BREVO_API_KEY in Render Dashboard: xkeysib-...
+      - key: BREVO_API_KEY
         sync: false
-      - key: SMTP_PASS
+      - key: BREVO_SENDER_EMAIL
+        value: brayw433@gmail.com
+      - key: BREVO_SENDER_NAME
+        value: Rancom Technologies
+      # Google OAuth
+      - key: GOOGLE_CLIENT_ID
         sync: false
-      - key: SMTP_FROM
+      - key: GOOGLE_CLIENT_SECRET
         sync: false
+      # Firebase
       - key: FIREBASE_PROJECT_ID
         value: rancom-technologies
       - key: FIREBASE_CLIENT_EMAIL

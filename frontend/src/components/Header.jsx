@@ -394,12 +394,10 @@ export default function Header() {
     }
     @media (max-width: 600px) {
       .hdr-inner { padding: 0 0.75rem; gap: 0.3rem; height: 56px; }
-      .hdr-logo { gap: 0.4rem; margin-right: 0; }
-      .hdr-logo-img { width: 28px; height: 28px; }
-      .hdr-logo-main { font-size: 0.78rem; }
+      .hdr-logo { gap: 0.35rem; margin-right: 0; }
+      .hdr-logo-img { width: 26px; height: 26px; }
+      .hdr-logo-main { font-size: 0.72rem; letter-spacing: -0.01em; }
       .hdr-logo-sub { display: none; }
-      .hdr-logo-full { display: none; }
-      .hdr-logo-short { display: inline !important; }
       .hdr-actions { gap: 0.2rem; }
       .hdr-icon-btn { width: 30px; height: 30px; }
       .hdr-hamburger { width: 34px; height: 34px; }
@@ -408,8 +406,8 @@ export default function Header() {
       .hdr-logout-btn { padding: 0.3rem 0.55rem; font-size: 0.75rem; }
     }
     @media (max-width: 380px) {
-      .hdr-logo-main { font-size: 0.72rem; }
-      .hdr-logo-img { width: 24px; height: 24px; }
+      .hdr-logo-main { font-size: 0.65rem; }
+      .hdr-logo-img { width: 22px; height: 22px; }
     }
   `;
 
@@ -429,8 +427,7 @@ export default function Header() {
               onError={e => { e.target.style.display = 'none'; }} />
             <div className="hdr-logo-text">
               <span className="hdr-logo-main">
-                <span className="hdr-logo-full">RANCOM <span style={{ background: 'linear-gradient(135deg,#0ea5e9,#06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>TECHNOLOGIES</span></span>
-                <span className="hdr-logo-short" style={{ display: 'none' }}>RANCOM <span style={{ background: 'linear-gradient(135deg,#0ea5e9,#06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>TECH</span></span>
+                RANCOM <span style={{ background: 'linear-gradient(135deg,#0ea5e9,#06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>TECHNOLOGIES</span>
               </span>
               <span className="hdr-logo-sub">
                 Pvt. Ltd  <span style={{ color: '#e53e3e' }}>apple</span><span style={{ color: '#38a169' }}>tree</span> infotech

@@ -2,8 +2,9 @@
 
 const nodemailer = require('nodemailer');
 const dns = require('dns');
+const emailSender = require('./emailSender');
 
-// Force DNS lookups to prefer IPv4 — prevents hangs on dual-stack hosts.
+// Force DNS lookups to prefer IPv4
 if (dns.setDefaultResultOrder) {
   dns.setDefaultResultOrder('ipv4first');
 }
@@ -180,21 +181,27 @@ async function verifyMailer() {
 // ---------------------------------------------------------------------------
 
 async function sendEmail({ to, subject, html, text }) {
-  // Direct SMTP — Gmail port 465 (SSL) works on Render
+  // Gmail OAuth2 — works on Render (pure HTTPS, no SMTP port)
+  if (emailSender.isConfigured()) {
+    return emailSender.sendEmail({ to, subject, html, text });
+  }
+
+  // Local dev fallback: SMTP (port 465, works locally)
   const mailer = getTransporter();
   if (!mailer) {
     if (process.env.NODE_ENV !== 'production') {
       console.log(`[EMAIL DEV] To: ${to} | Subject: ${subject}`);
       return { devMode: true };
     }
-    throw new Error('Email service not configured. Set SMTP_HOST, SMTP_USER and SMTP_PASS.');
+    throw new Error(
+      'Email service not configured. Set GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, ' +
+      'GMAIL_REFRESH_TOKEN, GMAIL_USER in Render Environment Variables.'
+    );
   }
   const cfg  = getSmtpConfig();
   const info = await mailer.sendMail({
-    from:    cfg.from,
-    replyTo: cfg.replyTo || undefined,
-    to, subject, html,
-    text: text || ''
+    from: cfg.from, replyTo: cfg.replyTo || undefined,
+    to, subject, html, text: text || ''
   });
   console.log(`[SMTP] ✅ Email sent to ${to} — ${info.messageId}`);
   return { devMode: false, delivery: summarizeMailInfo(info) };

@@ -22,17 +22,22 @@ services:
         value: rancom@2026
       - key: PRODUCTION_DOMAIN
         value: www.rancomtechnologies.com
-      - key: SMTP_HOST
-        value: smtp.gmail.com
-      - key: SMTP_PORT
-        value: "465"
-      - key: SMTP_SECURE
-        value: "true"
-      - key: SMTP_USER
-        value: brayw433@gmail.com
-      - key: SMTP_FROM
-        value: "Digital Innovation <brayw433@gmail.com>"
-      - key: SMTP_PASS
+      # Email — Resend API (free 3000/month, pure HTTPS, works on Render)
+      # Get key: resend.com → Sign Up → API Keys
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM
+        sync: false
+      # Gmail OAuth2 fallback — set these manually in Render Dashboard
+      - key: GMAIL_CLIENT_ID
+        sync: false
+      - key: GMAIL_CLIENT_SECRET
+        sync: false
+      - key: GMAIL_USER
+        sync: false
+      - key: GMAIL_FROM_NAME
+        value: Rancom Technologies
+      - key: GMAIL_REFRESH_TOKEN
         sync: false
       - key: SMTP_HOST
         value: smtp.gmail.com

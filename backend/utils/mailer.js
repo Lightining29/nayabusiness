@@ -116,17 +116,23 @@ function getMailerPublicConfig() {
 function getMailerErrorMessage(err) {
   const code         = err?.code || '';
   const responseCode = Number(err?.responseCode || 0);
+  const msg          = err?.message || '';
+
+  // Brevo REST API key missing or wrong
+  if (msg.includes('xkeysib') || msg.includes('BREVO_API_KEY')) {
+    return msg;
+  }
 
   if (code === 'EAUTH' || responseCode === 535 || responseCode === 534) {
     return 'SMTP login failed. Set SMTP_USER to your Gmail address and SMTP_PASS to a Gmail App Password.';
   }
-  if (code === 'ETIMEDOUT' || code === 'ESOCKET' || code === 'ECONNECTION') {
-    return 'SMTP connection failed or timed out. Check SMTP_HOST, SMTP_PORT, and SMTP_SECURE.';
+  if (code === 'ETIMEDOUT' || code === 'ESOCKET' || code === 'ECONNECTION' || msg.includes('408') || msg.includes('greeting')) {
+    return 'SMTP is blocked on Render. Fix: Set BREVO_API_KEY (xkeysib-...) in Render Environment Variables → app.brevo.com → Settings → API Keys.';
   }
   if (responseCode === 550 || responseCode === 551 || responseCode === 553) {
     return 'SMTP rejected the sender or recipient. Ensure the sender address is verified.';
   }
-  return err?.message || 'Email service failed to send the message.';
+  return msg || 'Email service failed to send the message.';
 }
 
 function handleMissingMailer(logMessage) {
@@ -170,18 +176,29 @@ async function verifyMailer() {
 }
 
 // ---------------------------------------------------------------------------
-// Core send helper — Brevo first, SMTP fallback
+// Core send helper — Brevo REST API first (HTTPS, works on Render),
+// SMTP fallback only for local dev
 // ---------------------------------------------------------------------------
 
 async function sendEmail({ to, subject, html, text }) {
   const brevo = getBrevoConfig();
 
+  // Always use Brevo REST API if configured (works on Render, no port issues)
   if (brevo.configured) {
     return sendViaBrevo({ to, subject, html, text });
   }
 
+  // On production (Render) without Brevo key → fail clearly
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'Email not sent: Set BREVO_API_KEY (xkeysib-...) in Render Environment Variables. ' +
+      'Get it from: app.brevo.com → Settings → API Keys → Generate new key.'
+    );
+  }
+
+  // Local dev fallback: SMTP
   const mailer = getTransporter();
-  if (!mailer) return handleMissingMailer(`[EMAIL] To: ${to} | Subject: ${subject}`);
+  if (!mailer) return handleMissingMailer(`[EMAIL DEV] To: ${to} | Subject: ${subject}`);
 
   const cfg = getSmtpConfig();
   const info = await mailer.sendMail({

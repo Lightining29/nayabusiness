@@ -187,20 +187,23 @@ async function sendEmail({ to, subject, html, text }) {
 
   // 1. Brevo REST API (HTTPS port 443) — best for Render
   if (brevo.configured) {
-    return sendViaBrevo({ to, subject, html, text });
+    const result = await sendViaBrevo({ to, subject, html, text });
+    if (result !== null) return result; // success or dev mode
+    // null = auth failed, fall through to Gmail
   }
 
   // 2. Gmail OAuth2 (no port needed) — second best
   if (gmail.configured) {
-    return sendViaGmail({ to, subject, html, text });
+    const result = await sendViaGmail({ to, subject, html, text });
+    if (result !== null) return result;
   }
 
   // 3. SMTP fallback — only works locally (Render blocks all SMTP ports)
   if (process.env.NODE_ENV === 'production') {
     throw new Error(
-      'Email not sent: No email provider configured for production.\n' +
-      'Option A (Recommended): Set BREVO_API_KEY=xkeysib-... in Render → get it from app.brevo.com → Settings → API Keys\n' +
-      'Option B: Set GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN, GMAIL_USER in Render'
+      'Email not sent: No working email provider configured.\n' +
+      'Fix Option A — Brevo: Go to app.brevo.com → Settings → API Keys → Generate new key (xkeysib-...) → set BREVO_API_KEY in Render\n' +
+      'Fix Option B — Gmail: Set GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN, GMAIL_USER in Render. Get refresh token from developers.google.com/oauthplayground'
     );
   }
 

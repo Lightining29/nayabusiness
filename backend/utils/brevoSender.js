@@ -34,12 +34,8 @@ async function sendViaBrevo({ to, subject, html, text }) {
   const cfg = getBrevoConfig();
 
   if (!cfg.configured) {
-    const msg = `[BREVO] Not configured — need xkeysib-... REST API key. Email to ${to}: ${subject}`;
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(msg);
-      return { devMode: true };
-    }
-    throw new Error('Brevo email is not configured. Set BREVO_API_KEY (xkeysib-...) and BREVO_SENDER_EMAIL in environment variables.');
+    console.warn('[Brevo] Not configured — skipping');
+    return null; // let caller try next provider
   }
 
   const payload = {
@@ -64,6 +60,11 @@ async function sendViaBrevo({ to, subject, html, text }) {
 
   if (!res.ok) {
     const msg = data?.message || data?.error || `Brevo API error ${res.status}`;
+    // On auth failure — return null so caller falls through to Gmail
+    if (res.status === 401 || res.status === 403) {
+      console.warn(`[Brevo] Auth failed (${msg}) — trying next provider`);
+      return null;
+    }
     throw new Error(`Brevo API: ${msg}`);
   }
 

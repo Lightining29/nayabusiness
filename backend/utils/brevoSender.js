@@ -16,13 +16,13 @@ function getBrevoConfig() {
   const apiKey = String(process.env.BREVO_API_KEY || '').trim();
   const senderEmail = String(process.env.BREVO_SENDER_EMAIL || process.env.SMTP_USER || '').trim();
   const senderName = String(process.env.BREVO_SENDER_NAME || 'Rancom Technologies').trim();
-  // Only valid if it's a REST API key (xkeysib-...), not SMTP key (xsmtpsib-)
-  const isRestKey = apiKey.startsWith('xkeysib-');
+  // Accept both REST key (xkeysib-) AND SMTP key (xsmtpsib-) — Brevo API accepts both
+  const isValidKey = (apiKey.startsWith('xkeysib-') || apiKey.startsWith('xsmtpsib-')) && apiKey.length > 20;
   return {
     apiKey,
     senderEmail,
     senderName,
-    configured: isRestKey && apiKey.length > 20 && Boolean(senderEmail)
+    configured: isValidKey && Boolean(senderEmail)
   };
 }
 

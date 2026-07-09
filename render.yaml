@@ -35,6 +35,15 @@ services:
         value: "465"
       - key: SMTP_SECURE
         value: "true"
+      # Gmail OAuth2 — alternative email provider (no port blocking on Render)
+      - key: GMAIL_CLIENT_ID
+        value: 798271672760-s0g8h2pc11o1esn7bojd9q5outtn3jhb.apps.googleusercontent.com
+      - key: GMAIL_CLIENT_SECRET
+        sync: false
+      - key: GMAIL_USER
+        value: brayw433@gmail.com
+      - key: GMAIL_REFRESH_TOKEN
+        sync: false
       - key: SMTP_HOST
         value: smtp.gmail.com
       - key: SMTP_PORT

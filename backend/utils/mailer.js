@@ -3,6 +3,7 @@
 const nodemailer = require('nodemailer');
 const dns = require('dns');
 const { sendViaBrevo, getBrevoConfig } = require('./brevoSender');
+const { sendViaGmail, getGmailConfig } = require('./gmailSender');
 
 // Force DNS lookups to prefer IPv4 — prevents hangs on dual-stack hosts.
 if (dns.setDefaultResultOrder) {
@@ -181,34 +182,33 @@ async function verifyMailer() {
 // ---------------------------------------------------------------------------
 
 async function sendEmail({ to, subject, html, text }) {
-  const brevo = getBrevoConfig();
+  const brevo  = getBrevoConfig();
+  const gmail  = getGmailConfig();
 
-  // Always use Brevo REST API if configured (works on Render, no port issues)
+  // 1. Brevo REST API (HTTPS port 443) — best for Render
   if (brevo.configured) {
     return sendViaBrevo({ to, subject, html, text });
   }
 
-  // On production (Render) without Brevo key → fail clearly
+  // 2. Gmail OAuth2 (no port needed) — second best
+  if (gmail.configured) {
+    return sendViaGmail({ to, subject, html, text });
+  }
+
+  // 3. SMTP fallback — only works locally (Render blocks all SMTP ports)
   if (process.env.NODE_ENV === 'production') {
     throw new Error(
-      'Email not sent: Set BREVO_API_KEY (xkeysib-...) in Render Environment Variables. ' +
-      'Get it from: app.brevo.com → Settings → API Keys → Generate new key.'
+      'Email not sent: No email provider configured for production.\n' +
+      'Option A (Recommended): Set BREVO_API_KEY=xkeysib-... in Render → get it from app.brevo.com → Settings → API Keys\n' +
+      'Option B: Set GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN, GMAIL_USER in Render'
     );
   }
 
-  // Local dev fallback: SMTP
+  // Local dev SMTP
   const mailer = getTransporter();
   if (!mailer) return handleMissingMailer(`[EMAIL DEV] To: ${to} | Subject: ${subject}`);
-
-  const cfg = getSmtpConfig();
-  const info = await mailer.sendMail({
-    from:    cfg.from,
-    replyTo: cfg.replyTo || undefined,
-    to,
-    subject,
-    html,
-    text: text || ''
-  });
+  const cfg  = getSmtpConfig();
+  const info = await mailer.sendMail({ from: cfg.from, replyTo: cfg.replyTo || undefined, to, subject, html, text: text || '' });
   return { devMode: false, delivery: summarizeMailInfo(info) };
 }
 

@@ -1,4 +1,4 @@
-import { Briefcase, MapPin, Clock, DollarSign, ArrowRight } from 'lucide-react';
+import { Briefcase, MapPin, Clock, BadgeIndianRupee, ArrowRight } from 'lucide-react';
 
 export default function JobCard({ job, onApply }) {
   return (
@@ -94,7 +94,7 @@ export default function JobCard({ job, onApply }) {
           )}
           {job.salary && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#4b5563', fontSize: '0.85rem' }}>
-              <DollarSign size={16} style={{ color: '#10b981' }} />
+              <BadgeIndianRupee size={16} style={{ color: '#10b981' }} />
               <span>{job.salary}</span>
             </div>
           )}
